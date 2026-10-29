@@ -107,6 +107,32 @@ def para_busca(t: str) -> str:
     return ''.join(c for c in unicodedata.normalize('NFD', t) if unicodedata.category(c) != 'Mn')
 
 
+_PADROES: dict[str, dict] = {}
+
+
+def ids_do_motion(m: dict) -> set[str]:
+    """As mídias do banco que um motion põe na tela: a dele (`banco`), as que os campos citam pelo id e, nos campos que
+    ficaram vazios, as do padrão do preset (`<script id="campos">`: um motion ligado sem valores mostra as padrão)."""
+    ids = {m['banco']} if m.get('banco') else set()
+    valores = m.get('valores') or {}
+    ids |= set(re.findall(r'\b[0-9a-f]{10}\b', json.dumps(valores)))
+    if m.get('preset'):
+        if m['preset'] not in _PADROES:
+            html = BIBLIOTECA / 'motions' / 'presets' / f"{m['preset']}.html"
+            campos = {}
+            if html.exists():
+                g = re.search(r'<script type="application/json" id="campos">(.*?)</script>', html.read_text(encoding='utf-8'), re.S)
+                try:
+                    campos = json.loads(g.group(1)) if g else {}
+                except ValueError:
+                    campos = {}
+            _PADROES[m['preset']] = campos
+        for k, c in _PADROES[m['preset']].items():
+            if not str(valores.get(k) or '').strip():
+                ids |= set(re.findall(r'\b[0-9a-f]{10}\b', str((c or {}).get('padrao') or '')))
+    return {b for b in ids if existe(b)}
+
+
 def usos() -> dict[str, list[str]]:
     """Onde cada mídia está ligada: `projeto/plano` (lendo os edicao.json)."""
     out: dict[str, list[str]] = {}
@@ -119,8 +145,8 @@ def usos() -> dict[str, list[str]]:
             for m in x.get('midias') or []:
                 out.setdefault(m.get('banco'), []).append(f'{arq.parent.name}/{x.get("plano") or x.get("id")}')
         for plano, m in (e.get('motions') or {}).items():
-            if m.get('banco'):
-                out.setdefault(m['banco'], []).append(f'{arq.parent.name}/{plano} (motion)')
+            for b in sorted(ids_do_motion(m)):
+                out.setdefault(b, []).append(f'{arq.parent.name}/{plano} (motion)')
     return out
 
 
@@ -157,9 +183,8 @@ def usos_aprovados() -> tuple[dict[str, list[dict]], dict[str, list[dict]], set[
         for plano, m in (e.get('motions') or {}).items():
             # a mídia do motion e as que os campos dele citam pelo id (as capas dos cursos da trilha-formacao, a imagem
             # do referencia-site…): sem estas, viravam "recusadas" com o vídeo aprovado
-            citadas = {m['banco']} if m.get('banco') else set()
-            citadas |= {b for b in re.findall(r'\b[0-9a-f]{10}\b', json.dumps(m.get('valores') or {})) if existe(b)}
-            for b in sorted(citadas):
+            # (e as padrão do preset, quando o campo ficou vazio)
+            for b in sorted(ids_do_motion(m)):
                 midias.setdefault(b, []).append(uso(plano))
             if m.get('preset'):
                 motions.setdefault(m['preset'], []).append(uso(plano))
