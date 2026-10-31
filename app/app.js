@@ -1,12 +1,14 @@
 // O app de revisão: roteamento pelo endereço e o início (os projetos). As páginas: #/ (projetos), #/p/<slug>[/vN] (a
 // revisão de uma versão), #/calibragem[/<id>], #/referencias, #/heuristica, #/aprendizados[/<área>] e as da biblioteca
-// (#/presets, #/transicoes[/<de>><para>], #/banco (os inserts), #/motions, #/trilhas).
+// (#/presets, #/transicoes[/<de>><para>], #/banco (os inserts), #/motions, #/trilhas); os carrosséis: #/carrosseis e
+// #/c/<slug>[/vN] (carrosseis.js).
 import { $, $$, ICONE, abasAbertas, abrirAba, aviso, preferencia, chipCodigo, codigos, confirmar, copiar, enviar, esc, fecharAba, json, mmss } from './comum.js'
 import { abrirRevisao } from './revisao.js'
 import { abrirBiblioteca, PAGINAS_BIBLIOTECA, preCarregarBanco } from './biblioteca.js'
 import { abrirCalibragem, abrirRevisaoReferencia } from './calibragem.js'
 import { abrirAprendizados, abrirHeuristica, abrirReferencias } from './referencias.js'
 import { abrirLixeira } from './lixeira.js'
+import { abrirCarrossel, abrirCarrosseis } from './carrosseis.js'
 import { barraDeTags, datalistTags, htmlTagsCard, ligarTags, tagEscolhida, temTag } from './tags.js'
 import { CATEGORIA_PADRAO, botaoCategorias, carregarCategorias, categoriaCta, editarCategorias, pilulasCategoria, seletorCategoria } from './categorias.js'
 
@@ -101,7 +103,7 @@ async function inicio(tela, ctas = false) {
     </a><div class="centro-mini"><button class="tocar-card" data-tocar-card title="Tocar com som (clique de novo para pausar)" aria-label="Tocar ${esc(p.nome)}">${ICONE.tocar}</button></div>
     <div class="sobre-mini">${nSaidas(p) ? `<span class="chip-saidas">${nSaidas(p)} ${nSaidas(p) === 1 ? 'saída' : 'saídas'}${p.saidas_novas?.length
       ? `<span class="dica-saidas">${p.saidas_novas.map((x) => `<span>${esc(x.destino)}${x.aprovado ? ' ✓' : ''}</span>`).join('')}</span>` : ''}</span>` : ''}${seletorCategoria(cats, p.formato || CATEGORIA_PADRAO)}${p.duracao ? `<span class="duracao-mini">${mmss(p.duracao)}</span>` : ''}</div>
-    <div class="pe-projeto">${htmlTagsCard(p.tags)}${chipCodigo(cods.projeto?.[p.slug], p.nome)}</div></div>`
+    <div class="pe-projeto">${htmlTagsCard(p.tags)}${p.carrosseis?.length ? `<a class="chip-carrossel" href="#/c/${encodeURIComponent(p.carrosseis[0].slug)}" title="Carrosséis deste vídeo: ${esc(p.carrosseis.map((x) => x.nome).join(', '))}">${ICONE.carrossel}${p.carrosseis.length}</a>` : ''}${chipCodigo(cods.projeto?.[p.slug], p.nome)}</div></div>`
   }
   // as tags (como no Banco): a barra à esquerda conta os projetos da categoria escolhida e filtra a lista
   const daCategoria = () => projetos.filter((p) => !filtro || (p.formato || CATEGORIA_PADRAO) === filtro)
@@ -335,7 +337,7 @@ let sair = null
 let vez = 0
 // a rolagem de cada página (fora das revisões): voltar à aba volta ao mesmo ponto
 let rotaAtual = null
-const comRolagem = (r) => r && !/^#\/(p|calibragem)\/./.test(r)
+const comRolagem = (r) => r && !/^#\/(p|calibragem|c)\/./.test(r)
 async function rotear() {
   const minha = ++vez
   if (comRolagem(rotaAtual)) preferencia(`rolagem.${rotaAtual}`, 0, Math.round(scrollY))
@@ -351,7 +353,7 @@ async function rotear() {
   $('#barra-versao').innerHTML = ''
   desenharAbas()
   // os projetos abrem pela marca; num projeto, acende a aba dele; o endereço antigo dos motions (#/banco/motions) acende Motions
-  const aba = !partes[0] ? 'projetos' : partes[0] === 'banco' && partes[1] === 'motions' ? 'motions' : partes[0] === 'transicoes' ? 'presets' : partes[0] // as transições moram na aba Presets
+  const aba = !partes[0] ? 'projetos' : partes[0] === 'banco' && partes[1] === 'motions' ? 'motions' : partes[0] === 'transicoes' ? 'presets' : partes[0] === 'c' ? 'carrosseis' : partes[0] // as transições moram na aba Presets
   for (const a of $$('.abas a, .abas-casa a')) a.classList.toggle('ativa', a.dataset.aba === aba)
   document.body.classList.toggle('em-revisao', (partes[0] === 'p' || partes[0] === 'calibragem') && !!partes[1])
   let s
@@ -366,6 +368,8 @@ async function rotear() {
   else if (partes[0] === 'heuristica') s = await abrirHeuristica(tela)
   else if (partes[0] === 'aprendizados') s = await abrirAprendizados(tela, partes[1])
   else if (partes[0] === 'lixeira') s = await abrirLixeira(tela)
+  else if (partes[0] === 'carrosseis') s = await abrirCarrosseis(tela)
+  else if (partes[0] === 'c' && partes[1]) s = await abrirCarrossel(tela, partes[1], partes[2] ? parseInt(partes[2].replace(/^v/, ''), 10) : null)
   else if (PAGINAS_BIBLIOTECA.includes(partes[0])) s = await abrirBiblioteca(tela, partes[0], partes.slice(1))
   else s = await inicio(tela, partes[0] === 'ctas')
   if (minha !== vez) s?.() // já mudou de tela enquanto carregava

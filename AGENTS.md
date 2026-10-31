@@ -2,7 +2,8 @@
 
 O Claude Code é o editor: recebe um vídeo bruto (e, se houver, um briefing) e entrega a edição completa — cortes, 9:16,
 look, direção visual, inserts, presets, motions, elementos, transições, áudio e legenda —, com revisão num app local
-estilo frame.io. Tudo pela skill `.claude/skills/editor/` (comece pelo `SKILL.md`).
+estilo frame.io; e carrosséis 4:5 (cru ou derivado de um vídeo), com o preset escolhido no app. Tudo pela skill
+`.claude/skills/editor/` (comece pelo `SKILL.md`).
 
 Responda em PT-BR, direto. Separe o que existe do que é plano.
 
@@ -20,6 +21,8 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
   e `imagens/`), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
   `lixeira/` (o que se apaga no app: `base.para_lixeira`; restaurar ou apagar de vez pela página Lixeira).
 - `projetos/<slug>/` (fora do git): um vídeo por pasta.
+- `carrosseis/<slug>/` (fora do git): um carrossel por pasta (4:5; `ferramentas/carrossel.py`, os slides em
+  `render/carrossel.html` e os 10 presets em `render/carrossel.css`).
 
 Referência: `../18-harness-video-editor` (o app web anterior). Só leitura: copie ideias e código, nunca mexa lá.
 

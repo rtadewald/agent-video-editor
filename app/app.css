@@ -1491,3 +1491,64 @@ button.tag:hover { background: rgba(185, 166, 242, 0.26); }
 
 /* a ref de cada corte nos roteiros de exemplo (Heurística): o plano que a direção cita para modelar */
 .ref-corte { margin-left: 6px; padding: 0 7px; border: 1px solid var(--color-line-dark); border-radius: var(--radius-full); font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; color: var(--color-fog); white-space: nowrap; }
+
+/* ---- os carrosséis (carrosseis.js): os slides são a página render/carrossel.html (1080×1350) num iframe encolhido */
+.slide-quadro { --s: 0.2; position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #fff; }
+.slide-quadro iframe { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; border: 0; transform: scale(var(--s)); transform-origin: 0 0; pointer-events: none; }
+.mini-45 { aspect-ratio: 4 / 5; }
+.mini-45 > .slide-quadro { position: absolute; inset: 0; }
+.mini-vazio { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; background: var(--color-deeper); color: var(--color-fog); font-size: 11px; }
+.mini-vazio svg { width: 22px; height: 22px; }
+.pagina-carrosseis .grade-projetos { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 16px; }
+.pagina-carrosseis .card-projeto .mini::after { display: none; }
+.janela-novo-carrossel { width: min(520px, calc(100vw - 32px)); }
+.form-carrossel [hidden] { display: none; }
+.form-carrossel .filtro-categorias { display: flex; gap: 6px; }
+.chip-carrossel { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 2px 8px; border-radius: var(--radius-full); background: var(--color-cream-10); color: var(--color-cream); font-size: 10.5px; font-weight: 600; text-decoration: none; }
+.chip-carrossel svg { width: 12px; height: 12px; }
+.chip-carrossel:hover { background: var(--color-coral); }
+.carrossel-esperando { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; max-width: 640px; }
+.pagina-carrossel { padding: 20px 28px 32px; }
+.cabeca-carrossel { flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.cabeca-carrossel .espaco { flex: 1; }
+.cabeca-carrossel > .botao { margin-left: 0; }
+.nome-carrossel { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+.versao-carrossel { height: 28px; padding: 0 10px; border: 1px solid var(--color-coral); border-radius: var(--radius-full); background: var(--color-deep); color: var(--color-cream); font: 12px var(--font-sans); }
+.presets-carrossel { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.amostra-preset { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.35); }
+.amostra-notas { background: linear-gradient(135deg, #fffefb 50%, #ffe066 50%); }
+.amostra-papel { background: linear-gradient(135deg, #f3eee4 50%, #b4472a 50%); }
+.amostra-post { background: linear-gradient(135deg, #fff 50%, #1d9bf0 50%); }
+.amostra-grafite { background: linear-gradient(135deg, #111 50%, #f57757 50%); }
+.amostra-caderno { background: linear-gradient(135deg, #fbfaf6 50%, #c6f1d3 50%); }
+.amostra-editorial { background: linear-gradient(135deg, #fafaf7 50%, #111 50%); }
+.amostra-codigo { background: linear-gradient(135deg, #f6f8fa 50%, #6234d5 50%); }
+.amostra-pastel { background: linear-gradient(135deg, #ffd5c2, #e0d9ff); }
+.amostra-etiqueta { background: linear-gradient(135deg, #ececea 50%, #0a0a0a 50%); }
+.amostra-aura { background: linear-gradient(135deg, #0b1030 50%, #9ad9ff 50%); }
+.corpo-carrossel { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+.palco-carrossel { display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 0; }
+.slide-grande { position: relative; width: min(100%, calc((100vh - 290px) * 0.8)); min-width: 280px; cursor: crosshair; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35); }
+.slide-grande .slide-quadro { border-radius: 4px; }
+.pinos { position: absolute; inset: 0; pointer-events: none; }
+.pino { position: absolute; display: grid; place-items: center; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--color-coral); color: var(--color-cream); font-size: 11px; font-weight: 700; box-shadow: 0 0 0 2px #fff; }
+.pino.novo { background: var(--color-yellow); color: var(--color-ink); }
+.fita-carrossel { display: flex; gap: 10px; max-width: 100%; padding: 4px 2px 8px; overflow-x: auto; }
+.slide-mini { position: relative; flex: none; width: 92px; padding: 0; border: 2px solid transparent; border-radius: 4px; background: none; cursor: pointer; }
+.slide-mini.ativo { border-color: var(--color-coral); }
+.slide-mini .slide-quadro { border-radius: 2px; }
+.n-slide, .n-coment { position: absolute; z-index: 2; padding: 0 6px; border-radius: var(--radius-full); font-size: 10px; font-weight: 700; line-height: 16px; }
+.n-slide { left: 4px; bottom: 4px; background: var(--color-ink-85); color: var(--color-cream); }
+.n-coment { right: 4px; top: 4px; background: var(--color-coral); color: var(--color-cream); }
+.lado-carrossel { display: flex; flex-direction: column; gap: 10px; position: sticky; top: calc(var(--alto-barra) + 16px); max-height: calc(100vh - var(--alto-barra) - 40px); overflow-y: auto; padding-right: 4px; }
+.lado-carrossel .eyebrow:not(:first-child) { margin-top: 12px; }
+.comentarios-carrossel { display: flex; flex-direction: column; gap: 8px; padding: 0; list-style: none; }
+.comentarios-carrossel .vazio { padding: 0; }
+.comentario-carrossel { position: relative; padding: 10px 34px 10px 12px; border: 1px solid var(--color-line-dark); border-radius: var(--radius-xl); background: var(--color-deeper); font-size: 13px; color: var(--color-cream); }
+.comentario-carrossel p { white-space: pre-wrap; }
+.comentario-carrossel [data-tirar] { position: absolute; top: 6px; right: 6px; opacity: 0; }
+.comentario-carrossel:hover [data-tirar] { opacity: 1; }
+.pino-n { float: left; margin-right: 6px; color: var(--color-coral); }
+.resposta-claude { margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--color-sage); color: var(--color-fog); }
+.novo-comentario .acoes-linha { justify-content: flex-end; align-items: center; }
+.legenda-carrossel { font-size: 13px; color: var(--color-fog); white-space: pre-wrap; }

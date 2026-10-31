@@ -1,6 +1,6 @@
 ---
 name: editor
-description: Edita Reels (9:16) de ponta a ponta a partir de um vídeo bruto — transcrição, cortes, enquadramento, look, direção visual, inserts (banco, captura de site, web), presets, motions, elementos, transições, áudio e legenda — e entrega um proxy para revisão no app local; depois aplica as revisões coladas pelo criador e exporta o final. Use quando o usuário mandar um vídeo para editar ("edita esse vídeo", "/editor <caminho>"), avisar que comentou no app ("comentei no <vídeo>", ou uma revisão colada "Revisão · <slug> · vN"), aprovar ("Aprovado · <slug> · vN") ou pedir para ver/organizar a biblioteca (banco de inserts, presets, transições, motions, trilhas).
+description: Edita Reels (9:16) de ponta a ponta a partir de um vídeo bruto — transcrição, cortes, enquadramento, look, direção visual, inserts (banco, captura de site, web), presets, motions, elementos, transições, áudio e legenda — e entrega um proxy para revisão no app local; depois aplica as revisões coladas pelo criador e exporta o final. Use quando o usuário mandar um vídeo para editar ("edita esse vídeo", "/editor <caminho>"), avisar que comentou no app ("comentei no <vídeo>", ou uma revisão colada "Revisão · <slug> · vN"), aprovar ("Aprovado · <slug> · vN"), pedir um carrossel ("Carrossel novo · <slug>", "Revisão carrossel · <slug> · vN") ou pedir para ver/organizar a biblioteca (banco de inserts, presets, transições, motions, trilhas).
 ---
 
 # Editor de Reels
@@ -66,6 +66,12 @@ favoritas por situação; `presets.py listar`), `transicoes/` (+ `ordem.json`, f
 `motions/presets/*.html`, `trilhas/catalogo.json`, `sons/catalogo.json`, `luts/`. Mudar um preset ou uma transição vale
 para os próximos renders de todos os vídeos que os usam. Nada é aprovado sem o criador dizer. Preset novo a partir de
 um trecho de referência: `etapas/13-presets-novos.md`.
+
+## Fluxo 5 — Carrossel ("Carrossel novo · <slug>", "Revisão carrossel · <slug> · vN")
+
+Leia `etapas/15-carrossel.md`. Slides 4:5 (cru, a partir de um pedido, ou derivado de um vídeo: o mesmo conteúdo
+reescrito para ler); você escreve e busca a mídia, o criador escolhe o preset no app e comenta por slide
+(`carrossel.py`). Aprovar no app exporta os slides e a legenda.
 
 ## Sempre
 

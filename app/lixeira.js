@@ -1,8 +1,8 @@
-// A Lixeira: tudo o que se apaga no app (projetos, mídias do banco, referências) num lugar só, em biblioteca/lixeira/.
+// A Lixeira: tudo o que se apaga no app (projetos, carrosséis, mídias do banco, referências) num lugar só, em biblioteca/lixeira/.
 // Daqui, restaurar (volta para onde estava) ou apagar de vez (um item, um tipo ou tudo).
 import { ICONE, ajuda, aviso, confirmar, dataHora, enviar, esc, json, preferencia } from './comum.js'
 
-const TIPOS = { projeto: 'Projetos', banco: 'Banco', referencia: 'Referências' }
+const TIPOS = { projeto: 'Projetos', carrossel: 'Carrosséis', banco: 'Banco', referencia: 'Referências' }
 const tamanho = (b) => (b >= 1e9 ? `${(b / 1e9).toFixed(1).replace('.', ',')} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`)
 
 export async function abrirLixeira(tela) {

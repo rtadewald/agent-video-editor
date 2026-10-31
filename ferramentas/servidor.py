@@ -23,6 +23,10 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
   roteiros de exemplo dela, com os tempos dos planos. · GET|PUT /api/categorias {categorias} (as categorias de vídeo:
   Reels, Ad…; uma em uso não sai) · PUT /api/referencias/<id>/categoria {categoria} · PUT /api/projetos/<slug>/categoria
   {categoria} · o POST /api/referencias aceita a categoria no cabeçalho X-Categoria.
+- Carrosséis (ferramentas/carrossel.py): GET|POST /api/carrosseis {nome, tipo, origem, pedido} · GET /api/carrosseis/<slug>
+  (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset}
+  (num aprovado, exporta de novo) · PUT …/<slug>/nome {nome} · PUT …/<slug>/revisao/v<N> (aprovar exporta, em segundo
+  plano) · POST …/<slug>/abrir-final · DELETE /api/carrosseis/<slug> (vai para a lixeira).
 - POST /api/projetos/<slug>/abrir-final: abre no Finder a pasta dos exports (final/: as saídas, cada uma com o .md).
 - GET /api/aprendizados (as áreas, com os bullets "Do criador", do geral e das categorias) · GET|PUT
   /api/aprendizados/<área>[?categoria=…] {texto} (o aprendizados/<área>.md, ou o exemplos/<categoria>/aprendizados/<área>.md)
@@ -67,10 +71,10 @@ from base import (APRENDIZADOS, BIBLIOTECA, CATEGORIA_PADRAO, EXEMPLOS, PROJETOS
                   para_lixeira, preparar_biblioteca, renders_rodando, tamanho, renomear_tags, restaurar_da_lixeira, tag_limpa, tags_limpas)
 
 PORTA = 8719
-PUBLICOS = ('app', 'render', 'projetos', 'biblioteca')
+PUBLICOS = ('app', 'render', 'projetos', 'biblioteca', 'carrosseis')
 FONTES_DO_MAC = {'pro': 'SFNS.ttf', 'rounded': 'SFNSRounded.ttf', 'mono': 'SFNSMono.ttf'}  # não vão para o git
 AREAS = {'direcao': 'Direção', 'cortes': 'Cortes', 'inserts': 'Inserts', 'enriquecimento': 'Enriquecimento', 'motions': 'Motions', 'elementos': 'Elementos',
-         'transicoes': 'Transições', 'audio': 'Áudio', 'legenda': 'Legenda', 'render': 'Render'}
+         'transicoes': 'Transições', 'audio': 'Áudio', 'legenda': 'Legenda', 'render': 'Render', 'carrossel': 'Carrossel'}
 IMAGEM = re.compile(r'^[\w.-]+\.(png|jpe?g|webp|gif)$', re.I)
 REFERENCIAS = BIBLIOTECA / 'referencias'
 ID = r'([\w.-]+)'
@@ -125,6 +129,7 @@ def assinatura_revisao(rev: dict) -> str:
 def projetos() -> list[dict]:
     """Os projetos com ao menos uma versão, do mais recente para o mais antigo, com o estado da revisão da última."""
     lista = []
+    carros = carrossel().de_projetos()  # os carrosséis derivados de cada projeto (o chip no card)
     for p in PROJETOS.iterdir() if PROJETOS.is_dir() else []:
         if p.name.startswith(('_', '.')):  # o que não é projeto (pastas internas)
             continue
@@ -145,7 +150,7 @@ def projetos() -> list[dict]:
                       'conclusao': (100 if estado == 'aprovado' else round(100 * sum(1 for b in blocos if b.get('aprovado')) / len(blocos))) if blocos else None,
                       'saidas': len([x for x in ed.get('saidas') or [] if isinstance(x, dict) and not x.get('final')]),
                       'saidas_novas': resumo_saidas(ed), 'usos_cta': usos_cta(ed), 'tem_final': any((p / 'final').rglob('*.mp4')) if (p / 'final').is_dir() else False,
-                      'atualizado': ultima_edicao(p, vs)})
+                      'carrosseis': carros.get(p.name, []), 'atualizado': ultima_edicao(p, vs)})
     return sorted(lista, key=lambda x: -x['atualizado'])
 
 
@@ -1426,6 +1431,152 @@ def _recusar_motion(h, q, id_):
     return {'ok': True, 'usos': usos_motion(id_)}
 
 
+# ---- os carrosséis (ferramentas/carrossel.py: carrosseis/<slug>/)
+
+def carrossel():
+    import carrossel as c
+    return c
+
+
+def _pasta_carrossel(slug: str) -> Path:
+    try:
+        return carrossel().pasta(slug)
+    except SystemExit as e:
+        raise Erro(str(e), 404) from e
+
+
+def _exportar_carrossel(slug: str) -> None:
+    """Exporta em segundo plano (carrossel.py exportar): ao aprovar e, num aprovado, ao trocar o preset."""
+    p = _pasta_carrossel(slug)
+    log = open(p / 'exportar.log', 'w')
+    pr = subprocess.Popen(['uv', 'run', str(RAIZ / 'ferramentas' / 'carrossel.py'), 'exportar', slug], cwd=RAIZ, stdout=log,
+                          stderr=subprocess.STDOUT, start_new_session=True)
+    gravar_json(p / 'exportando.json', {'pid': pr.pid, 'desde': agora_iso()})
+
+
+def _exportando(p: Path) -> bool:
+    pid = (ler_json(p / 'exportando.json', {}) or {}).get('pid')
+    if not pid:
+        return False
+    try:
+        os.kill(pid, 0)
+        return os.waitpid(pid, os.WNOHANG) == (0, 0)  # filho deste servidor: um zumbi já terminou
+    except ChildProcessError:
+        return True  # de outro processo (vivo, pelo kill acima)
+    except OSError:
+        return False
+
+
+@rota('GET', '/api/carrosseis')
+def _carrosseis(h, q):
+    return {'carrosseis': carrossel().listar(), 'presets': carrossel().PRESETS}
+
+
+@rota('POST', '/api/carrosseis')
+def _novo_carrossel(h, q):
+    c = h.corpo()
+    slug = carrossel().novo(str(c.get('nome') or ''), c.get('tipo') or 'cru', c.get('origem'), str(c.get('pedido') or ''), c.get('preset'))
+    return {'slug': slug}
+
+
+@rota('GET', r'/api/carrosseis/([\w-]+)')
+def _ver_carrossel(h, q, slug):
+    c = carrossel()
+    p = _pasta_carrossel(slug)
+    vs = c.versoes(p)
+    return {**c.resumo(p), 'pedido': (ler_json(p / 'carrossel.json', {}) or {}).get('pedido') or '',
+            'entrada': sorted(a.name for a in (p / 'entrada').iterdir()) if (p / 'entrada').is_dir() else [],
+            'revisoes': {v: c.revisao(p, v) for v in vs}, 'exportando': _exportando(p), 'presets': c.PRESETS}
+
+
+@rota('POST', r'/api/carrosseis/([\w-]+)/entrada')
+def _entrada_carrossel(h, q, slug):
+    """Um arquivo da criação de um cru (imagem, vídeo ou texto), cru no corpo, nome em X-Nome: carrosseis/<slug>/entrada/."""
+    p = _pasta_carrossel(slug)
+    nome = re.sub(r'[^\w. -]+', '_', unquote(h.headers.get('X-Nome') or 'arquivo')).strip() or 'arquivo'
+    resta = int(h.headers.get('Content-Length') or 0)
+    if not 0 < resta <= 2 << 30:
+        raise Erro('O arquivo está vazio ou passou de 2 GB.', 422)
+    (p / 'entrada').mkdir(exist_ok=True)
+    destino = p / 'entrada' / nome
+    with open(destino, 'wb') as f:
+        while resta > 0:
+            bloco = h.rfile.read(min(1 << 20, resta))
+            if not bloco:
+                break
+            f.write(bloco)
+            resta -= len(bloco)
+    if resta:
+        destino.unlink(missing_ok=True)
+        raise Erro('O envio parou no meio.')
+    return {'arquivo': nome}
+
+
+@rota('PUT', r'/api/carrosseis/([\w-]+)/preset')
+def _preset_carrossel(h, q, slug):
+    c = carrossel()
+    p = _pasta_carrossel(slug)
+    preset = h.corpo().get('preset')
+    if preset not in c.ids_presets():
+        raise Erro(f'Preset desconhecido: {preset}', 422)
+    meta = ler_json(p / 'carrossel.json', {})
+    meta['preset'] = preset
+    gravar_json(p / 'carrossel.json', meta)
+    vs = c.versoes(p)
+    reexporta = bool(vs and c.revisao(p, vs[-1]).get('aprovado') and (meta.get('exportado') or {}).get('preset') != preset)
+    if reexporta:
+        _exportar_carrossel(slug)
+    return {'ok': True, 'exportando': reexporta}
+
+
+@rota('PUT', r'/api/carrosseis/([\w-]+)/nome')
+def _nome_carrossel(h, q, slug):
+    p = _pasta_carrossel(slug)
+    nome = str(h.corpo().get('nome') or '').strip()[:120]
+    if not nome:
+        raise Erro('O nome não pode ficar vazio.', 422)
+    meta = ler_json(p / 'carrossel.json', {})
+    meta['nome'] = nome
+    gravar_json(p / 'carrossel.json', meta)
+    return {'ok': True}
+
+
+@rota('PUT', r'/api/carrosseis/([\w-]+)/revisao/v(\d+)')
+def _revisao_carrossel(h, q, slug, v):
+    """A revisão inteira da vN (comentários por slide, aprovado); as respostas do Claude no arquivo ficam. Aprovar exporta."""
+    p = _pasta_carrossel(slug)
+    if not (p / 'versoes' / f'v{v}.json').is_file():
+        raise Erro('Versão não encontrada', 404)
+    destino = p / 'revisoes' / f'v{v}.json'
+    antes = ler_json(destino, {}) or {}
+    rev = juntar_respostas(h.corpo(), antes)
+    assina = lambda r: json.dumps([r.get('comentarios') or [], bool(r.get('aprovado'))], sort_keys=True, ensure_ascii=False)  # noqa: E731
+    rev['mexido_em'] = agora_iso() if assina(rev) != assina(antes) else antes.get('mexido_em')
+    if not rev['mexido_em']:
+        rev.pop('mexido_em')
+    gravar_json(destino, rev)
+    exporta = bool(rev.get('aprovado') and not antes.get('aprovado') and int(v) == carrossel().versoes(p)[-1])
+    if exporta:
+        _exportar_carrossel(slug)
+    return {'ok': True, 'exportando': exporta}
+
+
+@rota('POST', r'/api/carrosseis/([\w-]+)/abrir-final')
+def _abrir_final_carrossel(h, q, slug):
+    final = _pasta_carrossel(slug) / 'final'
+    if not final.is_dir():
+        raise Erro('Ainda não há export (aprove o carrossel).', 404)
+    subprocess.run(['open', str(final)], check=False)
+    return {'ok': True}
+
+
+@rota('DELETE', r'/api/carrosseis/([\w-]+)')
+def _apagar_carrossel(h, q, slug):
+    p = _pasta_carrossel(slug)
+    nome = (ler_json(p / 'carrossel.json', {}) or {}).get('nome') or slug
+    return {'ok': True, 'lixeira': para_lixeira([p], 'carrossel', slug, nome)['entrada']}
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **k):
         super().__init__(*a, directory=str(RAIZ), **k)
@@ -1434,7 +1585,10 @@ class Handler(SimpleHTTPRequestHandler):
         pass
 
     def end_headers(self):
-        self.send_header('Cache-Control', 'no-store')
+        # as fontes não mudam e são grandes (a SF Pro tem 8 MB): ficam no cache do navegador (cada slide de carrossel é
+        # um iframe que as pede); o resto, nunca
+        fonte = self.path.startswith(('/api/motions/fonte/', '/render/motion/fonts/', '/app/fontes/'))
+        self.send_header('Cache-Control', 'public, max-age=604800, immutable' if fonte else 'no-store')
         self.send_header('Accept-Ranges', 'bytes')
         super().end_headers()
 

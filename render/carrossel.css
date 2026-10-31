@@ -1,0 +1,197 @@
+/* Os slides de carrossel (1080×1350) e os 10 presets. A base arruma as peças (topo, conteúdo, mídia, pé) por tipo de
+   slide; cada preset ([data-preset] no <html>) dá as cores, as fontes, as peças que aparecem e o destaque (mark.d, o
+   **palavra** do texto). Os nomes e a descrição de cada um ficam em ferramentas/carrossel.py (PRESETS). */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1350px; overflow: hidden; background: transparent; }
+
+.slide {
+  --margem: 96px;
+  --k: 1;
+  position: relative; width: 1080px; height: 1350px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 44px; padding: var(--margem);
+  background-color: var(--fundo, #fff); color: var(--tinta, #111); font-family: var(--fonte-texto, Inter, sans-serif);
+  -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
+}
+.topo, .pe { display: none; flex: none; align-items: center; gap: 22px; position: relative; z-index: 2; }
+.topo > *, .pe > * { flex: none; }
+.conteudo { --e: 1; position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: calc(40px * var(--e)); }
+.titulo {
+  font-family: var(--fonte-titulo, var(--fonte-texto)); font-weight: var(--peso-titulo, 700);
+  font-size: calc(var(--tam-titulo, 80px) * var(--k) * var(--e)); line-height: 1.06; letter-spacing: var(--letra-titulo, -0.025em);
+  color: var(--tinta-titulo, var(--tinta)); text-wrap: balance;
+}
+.texto {
+  font-size: calc(var(--tam-texto, 44px) * var(--e)); line-height: 1.36; font-weight: var(--peso-texto, 400); letter-spacing: -0.01em;
+  color: var(--tinta-texto, var(--tinta)); text-wrap: pretty;
+}
+.texto p + p { margin-top: 0.75em; }
+mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.acao span {
+  display: inline-flex; padding: 0.5em 1.1em; border-radius: 999px; background: var(--tinta); color: var(--fundo);
+  font-size: calc(40px * var(--e)); font-weight: 600; letter-spacing: -0.01em;
+}
+.midia {
+  position: relative; flex: 1 1 auto; min-height: 44%; overflow: hidden;
+  border-radius: var(--raio-midia, 28px); background: var(--fundo-midia, rgba(0, 0, 0, 0.05)); box-shadow: var(--sombra-midia, none);
+}
+.midia img, .midia video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.midia.conter img, .midia.conter video { object-fit: contain; }
+.exportar .midia video { visibility: hidden; }
+/* a foto da frente (o texto por cima do vídeo na mídia cheia): só o texto, o resto transparente */
+.so-frente .slide { background: transparent !important; }
+.so-frente .slide::before, .so-frente .midia { display: none !important; }
+
+/* os tipos de slide: capa (gancho grande), texto, texto + imagem/vídeo (texto em cima, mídia embaixo), mídia cheia e cta */
+.t-capa { --k: 1.4; }
+.t-capa.com-midia { --k: 1.1; }
+.t-cta { --k: 1.15; }
+.t-texto .texto, .t-cta .texto { font-size: calc(var(--tam-texto, 44px) * 1.14 * var(--e)); }
+.com-midia:not(.t-capa) { --k: 0.82; }
+.t-capa .conteudo, .t-texto .conteudo, .t-cta .conteudo { justify-content: center; }
+.t-midia { padding: 0; }
+.t-midia .topo, .t-midia .pe { display: none !important; }
+.t-midia .midia { position: absolute; inset: 0; min-height: 0; border-radius: 0; box-shadow: none; z-index: 0; }
+.t-midia .sobre {
+  position: absolute; inset: auto 0 0 0; flex: none; justify-content: flex-end; padding: 280px var(--margem) var(--margem);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.74), rgba(0, 0, 0, 0)); --tinta-titulo: #fff; --tinta-texto: rgba(255, 255, 255, 0.92);
+}
+.t-midia .sobre:empty { display: none; }
+.arrasta::after { content: ' →'; }
+.slide:not(.primeiro) .arrasta, .slide.ultimo .arrasta { display: none; }
+.avatar { display: grid; place-items: center; width: 112px; height: 112px; border-radius: 50%; font-weight: 600; font-size: 38px; letter-spacing: 0.02em; }
+.autor { display: flex; flex-direction: column; gap: 4px; line-height: 1.15; }
+.autor b { font-weight: 700; }
+.autor i { font-style: normal; }
+/* os presets de "cartão" (post, pastel, aura): nos slides sem mídia o bloco todo fica no meio */
+:is([data-preset="post"], [data-preset="pastel"], [data-preset="aura"]) :is(.t-capa, .t-texto, .t-cta) { justify-content: center; }
+:is([data-preset="post"], [data-preset="pastel"], [data-preset="aura"]) :is(.t-capa, .t-texto, .t-cta) .conteudo { flex: 0 1 auto; }
+
+
+/* 1 · Notas: a nota do iPhone (SF Pro, o amarelo das Notas, a data no alto, o marca-texto amarelo) */
+[data-preset="notas"] .slide {
+  --fundo: #fffefb; --tinta: #1d1d1f; --tinta-texto: #2c2c2e; --fonte-texto: 'SF Pro', Inter, sans-serif;
+  --tam-titulo: 76px; --tam-texto: 46px; --raio-midia: 22px; --fundo-midia: #f2f2f7;
+  padding-top: 60px; gap: 30px;
+}
+[data-preset="notas"] .topo { display: flex; justify-content: space-between; height: 64px; font: 400 44px 'SF Pro'; color: #dfa400; }
+[data-preset="notas"] .topo > * { display: none; }
+[data-preset="notas"] .topo::before { content: '‹  Notas'; letter-spacing: -0.01em; }
+[data-preset="notas"] .topo::after { content: '⋯'; display: grid; place-items: center; width: 64px; height: 64px; border: 3px solid #dfa400; border-radius: 50%; font-size: 34px; }
+[data-preset="notas"] .conteudo { justify-content: flex-start; }
+[data-preset="notas"] .conteudo::before { content: attr(data-data); display: block; margin-bottom: 4px; text-align: center; font: 400 28px 'SF Pro'; color: #8e8e93; }
+[data-preset="notas"] mark.d { background: linear-gradient(transparent 56%, #ffe066 56%, #ffe066 94%, transparent 94%); padding: 0 0.06em; font-weight: 600; }
+[data-preset="notas"] .acao span { background: #ffcc00; color: #1d1d1f; }
+[data-preset="notas"] .sobre::before { display: none; }
+[data-preset="notas"] .sobre mark.d { background: #ffe066; color: #1d1d1f; border-radius: 0.14em; padding: 0 0.14em; }
+
+/* 2 · Papel: creme, título em serifa grande, o destaque em itálico terracota, o pé com régua */
+[data-preset="papel"] .slide {
+  --fundo: #f3eee4; --tinta: #26211c; --tinta-texto: #4d453c; --fonte-titulo: 'Instrument Serif', serif; --fonte-texto: Inter, sans-serif;
+  --peso-titulo: 400; --tam-titulo: 104px; --letra-titulo: -0.015em; --tam-texto: 40px; --raio-midia: 6px; --fundo-midia: #e6dfd0;
+  background-image: radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 62%);
+}
+[data-preset="papel"] .titulo { line-height: 1; }
+[data-preset="papel"] mark.d { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: #b4472a; }
+[data-preset="papel"] .texto mark.d { font-size: 1.2em; line-height: 1; }
+[data-preset="papel"] .pe { display: flex; justify-content: space-between; padding-top: 24px; border-top: 2px solid #26211c; font: 500 22px Inter; letter-spacing: 0.16em; text-transform: uppercase; color: #8a7f72; }
+[data-preset="papel"] .acao span { background: #26211c; color: #f3eee4; font-family: Inter; }
+
+/* 3 · Post: o print de um post (foto, nome e @, texto grande), o destaque em negrito azul */
+[data-preset="post"] .slide {
+  --fundo: #fff; --tinta: #0f1419; --fonte-texto: 'SF Pro', Inter, sans-serif; --tam-titulo: 64px; --tam-texto: 48px;
+  --raio-midia: 32px; --fundo-midia: #eff3f4; --sombra-midia: 0 0 0 2px #e1e8ed; gap: 40px;
+}
+[data-preset="post"] .topo { display: flex; gap: 26px; }
+[data-preset="post"] .avatar { background: #0f1419; color: #fff; }
+[data-preset="post"] .autor b { font-size: 40px; }
+[data-preset="post"] .autor i { font-size: 34px; color: #536471; }
+[data-preset="post"] .conteudo { justify-content: flex-start; }
+[data-preset="post"] mark.d { color: #1d9bf0; }
+[data-preset="post"] .acao span { background: #1d9bf0; color: #fff; }
+
+/* 4 · Grafite: escuro e calmo, título branco, texto cinza, o destaque em coral */
+[data-preset="grafite"] .slide {
+  --fundo: #111; --tinta: #f5f5f4; --tinta-texto: #a8a29e; --fonte-texto: 'SF Pro', Inter, sans-serif;
+  --tam-titulo: 86px; --tam-texto: 46px; --raio-midia: 24px; --fundo-midia: #1c1c1c; --sombra-midia: 0 0 0 2px #262626;
+}
+[data-preset="grafite"] mark.d { color: #f57757; }
+[data-preset="grafite"] .pe { display: flex; justify-content: space-between; font: 500 24px 'SF Mono', monospace; color: #57534e; }
+[data-preset="grafite"] .acao span { background: #f57757; color: #111; }
+
+/* 5 · Caderno: papel quadriculado, letra arredondada, o destaque em marca-texto verde e a mídia como foto colada */
+[data-preset="caderno"] .slide {
+  --fundo: #fbfaf6; --tinta: #1f2937; --tinta-texto: #374151; --fonte-texto: 'SF Pro Rounded', 'SF Pro', sans-serif;
+  --tam-titulo: 82px; --tam-texto: 44px; --raio-midia: 14px; --fundo-midia: #fff;
+  --sombra-midia: 0 0 0 12px #fff, 0 22px 48px rgba(31, 41, 55, 0.16);
+  background-image: linear-gradient(#e2e8f2 2px, transparent 2px), linear-gradient(90deg, #e2e8f2 2px, transparent 2px);
+  background-size: 54px 54px; background-position: -1px -1px;
+}
+[data-preset="caderno"] .midia { margin: 12px; }
+[data-preset="caderno"] mark.d { background: #c6f1d3; color: #14532d; border-radius: 0.24em; padding: 0 0.16em; }
+[data-preset="caderno"] .acao span { background: #16a34a; color: #fff; }
+
+/* 6 · Editorial: revista (serifa enorme, réguas finas, o nome e o número da página), o destaque em itálico */
+[data-preset="editorial"] .slide {
+  --fundo: #fafaf7; --tinta: #111; --tinta-texto: #44443f; --fonte-titulo: 'Instrument Serif', serif; --fonte-texto: Inter, sans-serif;
+  --peso-titulo: 400; --tam-titulo: 118px; --letra-titulo: -0.02em; --tam-texto: 40px; --raio-midia: 0; --fundo-midia: #ececE6;
+}
+[data-preset="editorial"] .titulo { line-height: 0.98; }
+[data-preset="editorial"] .topo, [data-preset="editorial"] .pe {
+  display: flex; justify-content: space-between; font: 600 22px Inter; letter-spacing: 0.2em; text-transform: uppercase; color: #111;
+}
+[data-preset="editorial"] .topo { padding-bottom: 22px; border-bottom: 2px solid #111; }
+[data-preset="editorial"] .pe { padding-top: 22px; border-top: 2px solid #111; }
+[data-preset="editorial"] .topo .avatar, [data-preset="editorial"] .topo i { display: none; }
+[data-preset="editorial"] .topo::after { content: 'Notas de IA'; }
+[data-preset="editorial"] mark.d { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: #111; }
+[data-preset="editorial"] .texto mark.d { font-size: 1.22em; line-height: 1; }
+[data-preset="editorial"] .sobre mark.d { color: #fff; }
+[data-preset="editorial"] .acao span { border-radius: 0; background: #111; color: #fafaf7; font-family: Inter; }
+
+/* 7 · Código: a janela de um editor claro (os três pontos e o arquivo), o destaque como código */
+[data-preset="codigo"] .slide {
+  --fundo: #f6f8fa; --tinta: #1f2328; --tinta-texto: #59636e; --fonte-texto: 'SF Pro', Inter, sans-serif;
+  --tam-titulo: 76px; --tam-texto: 46px; --raio-midia: 16px; --fundo-midia: #fff; --sombra-midia: 0 0 0 2px #d1d9e0;
+}
+[data-preset="codigo"] .topo { display: flex; height: 40px; }
+[data-preset="codigo"] .topo > * { display: none; }
+[data-preset="codigo"] .topo::before { content: ''; width: 26px; height: 26px; border-radius: 50%; background: #ff5f57; box-shadow: 40px 0 #febc2e, 80px 0 #28c840; }
+[data-preset="codigo"] .topo::after { content: 'carrossel.md'; margin-left: 90px; font: 500 26px 'SF Mono', monospace; color: #59636e; }
+[data-preset="codigo"] mark.d { font-family: 'SF Mono', monospace; font-weight: 500; font-size: 0.88em; background: #ebe5ff; color: #6234d5; border-radius: 0.3em; padding: 0.04em 0.26em; }
+[data-preset="codigo"] .pe { display: flex; justify-content: space-between; font: 500 24px 'SF Mono', monospace; color: #8c959f; }
+[data-preset="codigo"] .acao span { font-family: 'SF Mono', monospace; background: #1f2328; color: #f6f8fa; border-radius: 12px; }
+
+/* 8 · Pastel: degradê pêssego e lilás com o texto num cartão branco, o destaque em degradê */
+[data-preset="pastel"] .slide {
+  --fundo: #fde9df; --tinta: #2a2340; --tinta-texto: #4b4466; --fonte-texto: 'SF Pro Rounded', 'SF Pro', sans-serif;
+  --tam-titulo: 74px; --tam-texto: 42px; --raio-midia: 30px; --fundo-midia: #fff; --margem: 72px;
+  background-image: radial-gradient(90% 70% at 12% 8%, #ffd5c2 0%, transparent 62%), radial-gradient(80% 70% at 92% 92%, #e0d9ff 0%, transparent 62%);
+}
+[data-preset="pastel"] .conteudo { padding: 72px 64px; border-radius: 52px; background: rgba(255, 255, 255, 0.8); box-shadow: 0 30px 80px rgba(80, 60, 140, 0.14); }
+[data-preset="pastel"] mark.d { background: linear-gradient(90deg, #ff6a3d, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; }
+[data-preset="pastel"] .t-midia .sobre { inset: auto 48px 48px; padding: 52px 56px; border-radius: 44px; background: rgba(255, 255, 255, 0.88); --tinta-titulo: #2a2340; --tinta-texto: #4b4466; }
+[data-preset="pastel"] .acao span { background: linear-gradient(90deg, #ff6a3d, #8b5cf6); color: #fff; }
+
+/* 9 · Etiqueta: cinza claro, título pesado e apertado, o destaque como etiqueta preta, o "Arrasta" em pílula */
+[data-preset="etiqueta"] .slide {
+  --fundo: #ececea; --tinta: #0a0a0a; --tinta-texto: #3a3a38; --fonte-texto: 'SF Pro', Inter, sans-serif;
+  --peso-titulo: 800; --tam-titulo: 94px; --letra-titulo: -0.045em; --tam-texto: 44px; --raio-midia: 36px; --fundo-midia: #dcdcd9;
+}
+[data-preset="etiqueta"] mark.d { background: #0a0a0a; color: #f2f2f0; border-radius: 0.2em; padding: 0 0.2em; font-weight: inherit; }
+[data-preset="etiqueta"] .pe { display: flex; justify-content: flex-end; }
+[data-preset="etiqueta"] .contador { display: none; }
+[data-preset="etiqueta"] .arrasta { padding: 18px 34px; border-radius: 999px; background: #0a0a0a; color: #f2f2f0; font: 600 30px 'SF Pro'; }
+[data-preset="etiqueta"] .t-midia .sobre mark.d { background: #fff; color: #0a0a0a; }
+
+/* 10 · Aura: a paisagem noturna da Aura desfocada atrás de um vidro fosco, o destaque em azul que brilha */
+[data-preset="aura"] .slide {
+  --fundo: #0b1030; --tinta: #fff; --tinta-texto: rgba(255, 255, 255, 0.8); --fonte-texto: 'SF Pro', Inter, sans-serif;
+  --tam-titulo: 80px; --tam-texto: 46px; --raio-midia: 30px; --fundo-midia: rgba(255, 255, 255, 0.08); --sombra-midia: 0 0 0 2px rgba(255, 255, 255, 0.14);
+}
+[data-preset="aura"] .slide::before { content: ''; position: absolute; inset: -40px; z-index: 0; background: url('fundos/aura/landscape-1280.webp') 38% 60% / cover; filter: blur(5px) saturate(1.1); }
+[data-preset="aura"] .conteudo { padding: 64px; border-radius: 46px; border: 2px solid rgba(255, 255, 255, 0.16); background: rgba(14, 18, 52, 0.42); -webkit-backdrop-filter: blur(30px) saturate(1.2); backdrop-filter: blur(30px) saturate(1.2); }
+[data-preset="aura"] .com-midia:not(.t-midia) .conteudo { padding: 56px; }
+[data-preset="aura"] mark.d { color: #9ad9ff; font-weight: 600; text-shadow: 0 0 26px rgba(120, 200, 255, 0.6); }
+[data-preset="aura"] .t-midia .sobre { padding: 280px var(--margem) var(--margem); border: 0; border-radius: 0; background: linear-gradient(to top, rgba(5, 8, 30, 0.82), transparent); -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-preset="aura"] .acao span { background: #fff; color: #0b1030; }

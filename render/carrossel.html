@@ -1,0 +1,15 @@
+<!doctype html>
+<!--
+  Um slide de carrossel (1080×1350, 4:5): o que o app mostra ao vivo e o que a exportação fotografa.
+    ?c=<slug>&v=<N>&s=<índice, de 0>&preset=<id>[&exportar=1]
+  O conteúdo vem de carrosseis/<slug>/versoes/v<N>.json (contrato: .claude/skills/editor/etapas/15-carrossel.md); o
+  visual, do preset (render/carrossel.css). O app troca o preset sem recarregar: postMessage({preset}).
+  Na exportação (&exportar=1) o vídeo some (o ffmpeg o põe no lugar) e window.__carrossel diz onde ele fica.
+-->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="motion/fonts.css">
+<link rel="stylesheet" href="carrossel.css">
+</head>
+<body><main class="slide"></main>
+<script src="carrossel.js"></script>
+</body></html>
