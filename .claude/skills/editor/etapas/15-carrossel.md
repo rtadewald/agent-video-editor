@@ -23,6 +23,11 @@ uv run ferramentas/carrossel.py ver <slug>     # o pedido, a origem, os arquivos
 - **Cru**: o pedido (briefing, copy, nota do Obsidian) e os arquivos de `entrada/`. Quando o pedido vier de uma skill de
   copy de carrossel, siga a copy dela. A mídia que faltar, busque como num insert (`etapas/04-inserts.md`: banco,
   captura do site, fontes oficiais), nunca inventada.
+- **De uma referência da Calibragem** (um Reels antigo, sem projeto): é um cru com o pedido apontando a referência
+  (`biblioteca/referencias/<id>/`). O roteiro está em `palavras.json`; o que cada plano mostra está em `analise.json`
+  e `quadros/`. Dela só existe o vídeo editado (720p, legenda queimada): capture de novo o site, o GitHub e o print
+  (`etapas/04-inserts.md`), e recorte o `proxy.mp4` acima da legenda só quando não houver outro jeito. Números do vídeo
+  (estrelas, preços) podem ter mudado: confira e diga quando mudou.
 
 ## Escrever
 
