@@ -17,7 +17,9 @@ uv run ferramentas/carrossel.py ver <slug>     # o pedido, a origem, os arquivos
 - **Derivado** (veio de um vídeo, `origem`): é **o mesmo conteúdo, reescrito para ler** — não a transcrição da fala.
   Leia o projeto de origem: o `briefing.md` (o roteiro), a direção e os inserts do `edicao.json` e o `apoio/`. A mídia
   sai de lá: os materiais do `apoio/`, as mídias do banco que o vídeo usou (`banco.py`), trechos do bruto. Evite trecho
-  do vídeo editado (`final/`): ele tem a legenda queimada.
+  do vídeo editado (`final/`): ele tem a legenda queimada. Os motions do vídeo não têm arquivo próprio: fotografe a
+  página deles (`/render/motion.html?preset=<id>&formato=…&valores=…`, com os valores do `edicao.json`) num instante,
+  como o render faz, e ponha a foto com `midia`. Um vídeo que chegou já editado (bruto com legenda): recorte acima dela.
 - **Cru**: o pedido (briefing, copy, nota do Obsidian) e os arquivos de `entrada/`. Quando o pedido vier de uma skill de
   copy de carrossel, siga a copy dela. A mídia que faltar, busque como num insert (`etapas/04-inserts.md`: banco,
   captura do site, fontes oficiais), nunca inventada.
