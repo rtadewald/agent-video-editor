@@ -1,19 +1,19 @@
 // Os carrosséis (4:5): a aba (#/carrosseis: a lista e o "+ Carrossel") e a página de um (#/c/<slug>[/vN]: os slides ao
-// vivo, o preset, os comentários por slide e o aprovar). Os slides são a página render/carrossel.html num iframe; trocar
+// vivo, o preset e o destaque, os comentários por slide e o aprovar). Os slides são a página render/carrossel.html num iframe; trocar
 // o preset avisa todos os iframes (postMessage) e grava no carrossel. O Claude escreve os slides (carrossel.py).
-import { $, $$, ICONE, agora, aviso, confirmar, copiar, enviar, esc, janela, json, preferencia, quandoCurto } from './comum.js'
+import { $, $$, ICONE, abrirAba, agora, aviso, confirmar, copiar, enviar, esc, fecharAba, janela, json, preferencia, quandoCurto } from './comum.js'
 
 const ESTADOS = { novo: ['Aguardando o Claude', 'selo-amarelo'], em_revisao: ['Em revisão', 'selo-coral'], aprovado: ['Aprovado', 'selo-menta'] }
 const TIPOS = { cru: 'Cru', derivado: 'Derivado' }
 
 /** Um slide ao vivo: o iframe de 1080×1350 encolhido para a largura da caixa (`escalar` acerta a escala). */
-const quadro = (slug, v, i, preset, extra = '') =>
-  `<div class="slide-quadro" ${extra}><iframe src="/render/carrossel.html?c=${encodeURIComponent(slug)}&v=${v}&s=${i}&preset=${preset}" loading="lazy" tabindex="-1" title="Slide ${i + 1}"></iframe></div>`
+const quadro = (slug, v, i, preset, destaque = 1, extra = '') =>
+  `<div class="slide-quadro" ${extra}><iframe src="/render/carrossel.html?c=${encodeURIComponent(slug)}&v=${v}&s=${i}&preset=${preset}&destaque=${destaque}" loading="lazy" tabindex="-1" title="Slide ${i + 1}"></iframe></div>`
 function escalar(raiz) {
   for (const q of $$('.slide-quadro', raiz)) q.style.setProperty('--s', q.clientWidth / 1080)
 }
-const avisarPreset = (raiz, preset) => {
-  for (const f of $$('.slide-quadro iframe', raiz)) f.contentWindow?.postMessage({ preset }, '*')
+const avisarPreset = (raiz, preset, destaque) => {
+  for (const f of $$('.slide-quadro iframe', raiz)) f.contentWindow?.postMessage({ preset, destaque }, '*')
 }
 
 // ---------------------------------------------------------------- a aba (a lista)
@@ -28,7 +28,7 @@ export async function abrirCarrosseis(tela) {
       <button class="apagar-projeto" data-apagar title="Apagar o carrossel" aria-label="Apagar ${esc(c.nome)}">${ICONE.lixo}</button>
       ${c.tem_final ? `<button class="abrir-exports" data-abrir-final title="Abrir a pasta dos exports no Finder" aria-label="Abrir os exports de ${esc(c.nome)}">${ICONE.abrir}</button>` : ''}
       <a class="card-projeto" href="#/c/${encodeURIComponent(c.slug)}">
-        <div class="mini mini-45">${c.ultima ? quadro(c.slug, c.ultima, 0, c.preset) : `<div class="mini-vazio">${ICONE.balaoTexto}<span>O Claude ainda vai montar</span></div>`}
+        <div class="mini mini-45">${c.ultima ? quadro(c.slug, c.ultima, 0, c.preset, c.destaque) : `<div class="mini-vazio">${ICONE.balaoTexto}<span>O Claude ainda vai montar</span></div>`}
           <span class="selo ${cor}">${estado}</span></div>
         <div class="card-titulo"><h3 title="${esc(c.nome)}">${esc(c.nome)}</h3></div>
         <p class="sub">${TIPOS[c.tipo] || c.tipo}${c.origem ? ` · de ${esc(c.origem_nome)}` : ''}${c.ultima ? ` · ${c.slides} slides · v${c.ultima}` : ''}${c.comentarios ? ` · ${c.comentarios} ${c.comentarios === 1 ? 'comentário' : 'comentários'}` : ''}</p>
@@ -68,6 +68,7 @@ export async function abrirCarrosseis(tela) {
       try {
         await enviar('DELETE', `/api/carrosseis/${encodeURIComponent(c.slug)}`)
         carrosseis = carrosseis.filter((x) => x !== c)
+        fecharAba(c.slug, true)
         desenhar()
         aviso(`“${c.nome}” foi para a Lixeira`)
       } catch (err) {
@@ -141,6 +142,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
     tela.innerHTML = '<p class="vazio">Carrossel não encontrado. <a href="#/carrosseis">Voltar aos carrosséis</a></p>'
     return
   }
+  abrirAba(slug, c.nome, false, true) // a aba de cima, ao lado dos projetos abertos
   const v = c.versoes.includes(pedida) ? pedida : c.ultima
   if (!v) {
     tela.innerHTML = `<div class="cabeca-secao cabeca-carrossel"><a class="botao pequeno" href="#/carrosseis">${ICONE.voltar} Carrosséis</a><h2 class="nome-carrossel">${esc(c.nome)}</h2></div>
@@ -154,6 +156,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
   const rev = c.revisoes[v] || {}
   rev.comentarios ||= []
   let preset = c.preset
+  let destaque = c.destaque || 1
   let atual = Math.min(preferencia(`carrossel.${slug}.slide`, 0), versao.slides.length - 1)
   let ponto = null // o ponto marcado no slide grande para o próximo comentário ({x, y} de 0 a 1)
   const ultima = v === c.ultima
@@ -199,20 +202,25 @@ export async function abrirCarrossel(tela, slug, pedida) {
       <p class="legenda-carrossel">${esc(versao.legenda || '(sem legenda)')}</p>`
   }
   tela.innerHTML = `<div class="cabeca-secao cabeca-carrossel"></div>
-    <div class="presets-carrossel">${c.presets.map((p) => `<button class="pilula pequena${p.id === preset ? ' ativa' : ''}" data-preset="${p.id}" title="${esc(p.descricao)}"><i class="amostra-preset amostra-${p.id}"></i>${esc(p.nome)}</button>`).join('')}</div>
+    <div class="presets-carrossel">${c.presets.map((p) => `<button class="pilula pequena${p.id === preset ? ' ativa' : ''}" data-preset="${p.id}" title="${esc(p.descricao)}"><i class="amostra-preset amostra-${p.id}"></i>${esc(p.nome)}</button>`).join('')}
+      <span class="separador-presets"></span><span class="sub">Destaque</span><span class="destaques-carrossel"></span></div>
     <div class="corpo-carrossel">
       <div class="palco-carrossel">
         <div class="slide-grande" data-grande><div class="lugar-grande"></div><div class="pinos"></div></div>
-        <div class="fita-carrossel">${versao.slides.map((x, i) => `<button class="slide-mini" data-ir="${i}" title="Slide ${i + 1} · ${esc(x.tipo)}">${quadro(slug, v, i, preset)}<span class="n-slide">${i + 1}</span><span class="n-coment"></span></button>`).join('')}</div>
+        <div class="fita-carrossel">${versao.slides.map((x, i) => `<button class="slide-mini" data-ir="${i}" title="Slide ${i + 1} · ${esc(x.tipo)}">${quadro(slug, v, i, preset, destaque)}<span class="n-slide">${i + 1}</span><span class="n-coment"></span></button>`).join('')}</div>
       </div>
       <aside class="lado-carrossel"></aside>
     </div>`
   let noGrande = -1
   /** Redesenha o que mudou: o cabeçalho, o slide grande (só se trocou de slide), os pinos, os selos da fita e o lado. */
+  // os 5 destaques do preset escolhido (o nome de cada um; o slide mostra como fica)
+  const destaques = () => (c.presets.find((p) => p.id === preset)?.destaques || []).map((nome, k) =>
+    `<button class="pilula pequena${k + 1 === destaque ? ' ativa' : ''}" data-destaque="${k + 1}" title="Destaque ${k + 1}: ${esc(nome)}"><b>${k + 1}</b> ${esc(nome)}</button>`).join('')
   const desenhar = () => {
     $('.cabeca-carrossel', tela).innerHTML = cabeca()
+    $('.destaques-carrossel', tela).innerHTML = destaques()
     if (noGrande !== atual) {
-      $('.lugar-grande', tela).innerHTML = quadro(slug, v, atual, preset)
+      $('.lugar-grande', tela).innerHTML = quadro(slug, v, atual, preset, destaque)
       noGrande = atual
     }
     $('.pinos', tela).innerHTML = pinos()
@@ -274,15 +282,17 @@ export async function abrirCarrossel(tela, slug, pedida) {
       ponto = null
       return desenhar()
     }
-    const pr = e.target.closest('[data-preset]')
-    if (pr && pr.dataset.preset !== preset) {
-      preset = pr.dataset.preset
+    const pr = e.target.closest('[data-preset], [data-destaque]')
+    if (pr && (pr.dataset.preset ? pr.dataset.preset !== preset : +pr.dataset.destaque !== destaque)) {
+      if (pr.dataset.preset) preset = pr.dataset.preset
+      else destaque = +pr.dataset.destaque
       for (const b of $$('[data-preset]', tela)) b.classList.toggle('ativa', b.dataset.preset === preset)
-      avisarPreset(tela, preset)
+      $('.destaques-carrossel', tela).innerHTML = destaques()
+      avisarPreset(tela, preset, destaque)
       try {
-        const r = await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/preset`, { preset })
+        const r = await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/preset`, { preset, destaque })
         if (r.exportando) {
-          aviso('Preset trocado: exportando de novo com ele')
+          aviso('Visual trocado: exportando de novo com ele')
           c.exportando = true
           desenhar()
           vigiar()
@@ -315,7 +325,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
     }
     if (e.target.closest('[data-abrir-final]')) return enviar('POST', `/api/carrosseis/${encodeURIComponent(slug)}/abrir-final`).catch((err) => aviso(err.message, 'erro'))
     if (e.target.closest('[data-aprovar]')) {
-      if (!(await confirmar({ titulo: `Aprovar “${c.nome}”?`, texto: `Exporta os ${versao.slides.length} slides no preset ${c.presets.find((p) => p.id === preset)?.nome} (PNG e MP4) e a legenda.`, ok: 'Aprovar e exportar' }))) return
+      if (!(await confirmar({ titulo: `Aprovar “${c.nome}”?`, texto: `Exporta os ${versao.slides.length} slides no preset ${c.presets.find((p) => p.id === preset)?.nome}, destaque ${destaque} (PNG e MP4) e a legenda.`, ok: 'Aprovar e exportar' }))) return
       rev.aprovado = true
       const r = await gravar()
       c.exportando = !!r?.exportando

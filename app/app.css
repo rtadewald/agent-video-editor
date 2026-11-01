@@ -1514,18 +1514,15 @@ button.tag:hover { background: rgba(185, 166, 242, 0.26); }
 .cabeca-carrossel > .botao { margin-left: 0; }
 .nome-carrossel { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
 .versao-carrossel { height: 28px; padding: 0 10px; border: 1px solid var(--color-coral); border-radius: var(--radius-full); background: var(--color-deep); color: var(--color-cream); font: 12px var(--font-sans); }
-.presets-carrossel { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.presets-carrossel { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 16px; }
+.separador-presets { width: 1px; height: 20px; margin: 0 8px; background: var(--color-line, rgba(255, 255, 255, 0.14)); }
+.destaques-carrossel { display: flex; flex-wrap: wrap; gap: 6px; }
+.destaques-carrossel b { opacity: 0.55; font-weight: 600; }
 .amostra-preset { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.35); }
 .amostra-notas { background: linear-gradient(135deg, #fffefb 50%, #ffe066 50%); }
-.amostra-papel { background: linear-gradient(135deg, #f3eee4 50%, #b4472a 50%); }
-.amostra-post { background: linear-gradient(135deg, #fff 50%, #1d9bf0 50%); }
 .amostra-grafite { background: linear-gradient(135deg, #111 50%, #f57757 50%); }
-.amostra-caderno { background: linear-gradient(135deg, #fbfaf6 50%, #c6f1d3 50%); }
-.amostra-editorial { background: linear-gradient(135deg, #fafaf7 50%, #111 50%); }
 .amostra-codigo { background: linear-gradient(135deg, #f6f8fa 50%, #6234d5 50%); }
-.amostra-pastel { background: linear-gradient(135deg, #ffd5c2, #e0d9ff); }
 .amostra-etiqueta { background: linear-gradient(135deg, #ececea 50%, #0a0a0a 50%); }
-.amostra-aura { background: linear-gradient(135deg, #0b1030 50%, #9ad9ff 50%); }
 .corpo-carrossel { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
 .palco-carrossel { display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 0; }
 .slide-grande { position: relative; width: min(100%, calc((100vh - 290px) * 0.8)); min-width: 280px; cursor: crosshair; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35); }

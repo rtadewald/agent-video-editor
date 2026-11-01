@@ -1,8 +1,8 @@
 # 15 · Carrossel
 
 Um carrossel é uma sequência de slides 4:5 (1080×1350, de 1 a 20) para o feed. Você escreve tudo: o texto, a ordem,
-o tipo de cada slide e a mídia. O criador só escolhe o **preset** no app (o visual; troca ao vivo, sem versão nova) e
-comenta por slide. Mora em `carrosseis/<slug>/`: `carrossel.json` (nome, tipo, origem, pedido, preset), `entrada/` (os
+o tipo de cada slide e a mídia. O criador só escolhe o **preset** e o **destaque** no app (o visual; troca ao vivo, sem
+versão nova) e comenta por slide. Mora em `carrosseis/<slug>/`: `carrossel.json` (nome, tipo, origem, pedido, preset, destaque), `entrada/` (os
 arquivos que ele subiu), `midia/`, `versoes/vN.json` (os slides), `revisoes/vN.json` e `final/` (o export).
 
 > **Antes de começar, leia `biblioteca/aprendizados/carrossel.md`** (se existir): as correções do criador em carrosséis
@@ -27,8 +27,9 @@ uv run ferramentas/carrossel.py ver <slug>     # o pedido, a origem, os arquivos
 - O slide 1 é o gancho (a promessa do carrossel); um ponto por slide; o último fecha (o CTA, quando houver).
 - Pouco texto por slide: o título em uma ideia, o texto em duas ou três frases. O texto encolhe para caber (até 60%),
   mas texto encolhido é sinal de que o slide está cheio: divida.
-- **Destaque**: `**palavra**` no título ou no texto. Cada preset tem o seu jeito (marca-texto, cor, itálico, etiqueta).
-  Use para a palavra ou o número que carrega o slide, uma ou duas por slide.
+- **Destaque**: `**palavra**` no título ou no texto. São 4 presets (Notas, Grafite, Código, Etiqueta), cada um com 5
+  destaques (marcados ou só cor e peso) que o criador escolhe. Use para a palavra ou o número que carrega o slide, uma
+  ou duas por slide.
 - Mídia que prova o que o texto diz (o print, o gráfico, a tela), como nos inserts.
 - A **legenda** do post vai junto (no derivado, adapte a do vídeo).
 
@@ -79,6 +80,6 @@ Aplique os comentários numa versão nova (`versao`) e responda cada um numa fra
 
 ## Aprovado
 
-O app exporta sozinho ao aprovar (e de novo se o preset mudar depois): `final/01.png`, `02.mp4`… na ordem de postar,
+O app exporta sozinho ao aprovar (e de novo se o preset ou o destaque mudar depois): `final/01.png`, `02.mp4`… na ordem de postar,
 e `legenda.txt`. Depois, como no vídeo (`etapas/14-concluir.md`): junte as correções que valem para outros carrosséis,
 mostre ao criador e grave só o que ele confirmar, em `biblioteca/aprendizados/carrossel.md`.

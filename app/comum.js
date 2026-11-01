@@ -244,15 +244,17 @@ const gravarAbas = (l) => {
   preferencia('abas', [], l)
   window.dispatchEvent(new Event('abas-projetos'))
 }
-/** Abre (ou atualiza) a aba de um projeto; `cta`: se ele é um CTA (o ícone da aba). Sem `cta`, fica o que a aba já tinha. */
-export function abrirAba(slug, nome, cta) {
+const mesma = (x, slug, carrossel) => x.slug === slug && !!x.carrossel === carrossel
+/** Abre (ou atualiza) a aba de um projeto; `cta`: se ele é um CTA (o ícone da aba). Sem `cta`, fica o que a aba já tinha.
+ *  `carrossel`: a aba é de um carrossel (#/c/<slug>), não de um projeto. */
+export function abrirAba(slug, nome, cta, carrossel = false) {
   const l = abasAbertas()
-  const a = l.find((x) => x.slug === slug)
-  const nova = { slug, nome, cta: cta ?? a?.cta ?? false }
+  const a = l.find((x) => mesma(x, slug, carrossel))
+  const nova = { slug, nome, cta: cta ?? a?.cta ?? false, ...(carrossel ? { carrossel } : {}) }
   if (a?.nome === nova.nome && a?.cta === nova.cta) return window.dispatchEvent(new Event('abas-projetos'))
-  gravarAbas(a ? l.map((x) => (x.slug === slug ? nova : x)) : [...l, nova])
+  gravarAbas(a ? l.map((x) => (mesma(x, slug, carrossel) ? nova : x)) : [...l, nova])
 }
-export const fecharAba = (slug) => gravarAbas(abasAbertas().filter((x) => x.slug !== slug))
+export const fecharAba = (slug, carrossel = false) => gravarAbas(abasAbertas().filter((x) => !mesma(x, slug, carrossel)))
 
 /** Um Markdown pequeno (títulos, listas — com as linhas recuadas continuando o item —, parágrafos, negrito, itálico,
  *  código, links e imagens), o bastante para as regras e os aprendizados. `imagem(src)` dá o endereço de uma imagem

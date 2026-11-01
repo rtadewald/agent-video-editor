@@ -304,14 +304,15 @@ async function inicio(tela, ctas = false) {
   })
 }
 
-// os projetos abertos, como abas logo depois da marca (× fecha; fechar a aberta volta aos projetos)
+// os projetos e carrosséis abertos, como abas logo depois da marca (× fecha; fechar a aberta volta aos projetos)
 function desenharAbas() {
   const el = $('#abas-projetos')
-  const aberto = location.hash.match(/^#\/p\/([^/]+)/)?.[1]
+  const [, onde, aberto] = location.hash.match(/^#\/(p|c)\/([^/]+)/) || []
   el.innerHTML = abasAbertas().map((a) => {
-    const ativa = aberto && decodeURIComponent(aberto) === a.slug
-    return `<div class="aba-projeto${ativa ? ' ativa' : ''}" data-slug="${esc(a.slug)}" title="${esc(a.nome)}">
-      <a href="#/p/${encodeURIComponent(a.slug)}" title="${a.cta ? 'CTA' : 'Projeto'} · ${esc(a.nome)}">${a.cta ? ICONE.cta : ICONE.projeto}<span>${esc(a.nome)}</span></a>
+    const ativa = aberto && decodeURIComponent(aberto) === a.slug && (onde === 'c') === !!a.carrossel
+    const [rota, rotulo, icone] = a.carrossel ? ['c', 'Carrossel', ICONE.carrossel] : a.cta ? ['p', 'CTA', ICONE.cta] : ['p', 'Projeto', ICONE.projeto]
+    return `<div class="aba-projeto${ativa ? ' ativa' : ''}" data-slug="${esc(a.slug)}"${a.carrossel ? ' data-carrossel' : ''} title="${esc(a.nome)}">
+      <a href="#/${rota}/${encodeURIComponent(a.slug)}" title="${rotulo} · ${esc(a.nome)}">${icone}<span>${esc(a.nome)}</span></a>
       <button type="button" data-fechar-aba title="Fechar a aba" aria-label="Fechar ${esc(a.nome)}">${ICONE.fechar}</button></div>`
   }).join('')
   $('.aba-projeto.ativa', el)?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
@@ -319,7 +320,7 @@ function desenharAbas() {
 window.addEventListener('abas-projetos', desenharAbas)
 // as abas abertas antes (ou de um projeto que trocou de categoria): o ícone de projeto ou CTA pela categoria de agora
 Promise.all([json('/api/projetos', []), carregarCategorias()]).then(([ps, cats]) => {
-  for (const a of abasAbertas()) {
+  for (const a of abasAbertas().filter((x) => !x.carrossel)) {
     const p = ps.find((x) => x.slug === a.slug)
     if (p) abrirAba(a.slug, a.nome, categoriaCta(cats, p.formato || CATEGORIA_PADRAO))
   }
@@ -329,8 +330,8 @@ document.addEventListener('click', (e) => {
   const b = e.target.closest?.('[data-fechar-aba]')
   if (!b) return
   const aba = b.closest('.aba-projeto')
-  fecharAba(aba.dataset.slug)
-  if (aba.classList.contains('ativa')) location.hash = '#/'
+  fecharAba(aba.dataset.slug, aba.hasAttribute('data-carrossel'))
+  if (aba.classList.contains('ativa')) location.hash = aba.hasAttribute('data-carrossel') ? '#/carrosseis' : '#/'
 })
 
 let sair = null

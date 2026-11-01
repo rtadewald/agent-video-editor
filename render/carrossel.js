@@ -1,6 +1,6 @@
 // Um slide de carrossel (render/carrossel.html): lê a versão, monta o slide com as peças que todo preset recebe (o topo
 // com o autor, o conteúdo, o pé com o contador e a seta) e encolhe o texto até caber. Cada preset (carrossel.css) mostra
-// as peças que quer e decide o visual, inclusive o do destaque (**palavra** no texto vira <mark class="d">).
+// as peças que quer e decide o visual; o destaque (**palavra** no texto vira <mark class="d">) é um dos 5 do preset.
 ;(async function () {
   const q = new URLSearchParams(location.search)
   const slug = q.get('c')
@@ -8,6 +8,7 @@
   const AUTOR = { nome: 'Rodrigo Tadewald', arroba: '@rodrigotadewald', iniciais: 'RT' }
   const el = document.querySelector('.slide')
   document.documentElement.dataset.preset = q.get('preset') || 'notas'
+  document.documentElement.dataset.destaque = q.get('destaque') || '1'
   if (exportar) document.documentElement.classList.add('exportar')
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -23,8 +24,6 @@
   const i = Math.min(Math.max(+q.get('s') || 0, 0), slides.length - 1)
   const s = slides[i] || {}
   const tipo = s.tipo || 'texto'
-  const data = new Date(versao.criado_em || Date.now())
-  const quando = `${data.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })} às ${data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
 
   let midia = ''
   if (s.midia) {
@@ -36,8 +35,8 @@
   const corpo = `${s.titulo ? `<h1 class="titulo">${linha(s.titulo)}</h1>` : ''}${s.texto ? `<div class="texto">${texto(s.texto)}</div>` : ''}${s.acao ? `<div class="acao"><span>${linha(s.acao)}</span></div>` : ''}`
   el.className = `slide t-${tipo}${s.midia ? ' com-midia' : ''}${i === 0 ? ' primeiro' : ''}${i === slides.length - 1 ? ' ultimo' : ''}`
   el.innerHTML = `<header class="topo"><span class="avatar">${AUTOR.iniciais}</span><span class="autor"><b>${AUTOR.nome}</b><i>${AUTOR.arroba}</i></span></header>
-    ${tipo === 'midia' ? `${midia}<div class="conteudo sobre" data-data="${quando}">${corpo}</div>`
-      : `<div class="conteudo" data-data="${quando}">${corpo}${midia}</div>`}
+    ${tipo === 'midia' ? `${midia}<div class="conteudo sobre">${corpo}</div>`
+      : `<div class="conteudo">${corpo}${midia}</div>`}
     <footer class="pe"><span class="contador">${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}</span><span class="arrasta">Arrasta</span></footer>`
 
   // o texto encolhe (até 60%) enquanto não cabe: nem dentro do conteúdo nem no slide (as peças passando da margem; o
@@ -77,10 +76,11 @@
   }
   await pronto()
 
-  // o app troca o preset de todos os slides de uma vez, sem recarregar
+  // o app troca o preset e o destaque de todos os slides de uma vez, sem recarregar
   window.addEventListener('message', (e) => {
-    if (e.data?.preset) {
-      document.documentElement.dataset.preset = e.data.preset
+    if (e.data?.preset || e.data?.destaque) {
+      if (e.data.preset) document.documentElement.dataset.preset = e.data.preset
+      if (e.data.destaque) document.documentElement.dataset.destaque = e.data.destaque
       pronto()
     }
     if (e.data?.tocar !== undefined) el.querySelector('video')?.[e.data.tocar ? 'play' : 'pause']?.()

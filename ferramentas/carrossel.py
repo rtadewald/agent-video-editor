@@ -19,7 +19,7 @@ preset no app e comenta por slide. Fluxo e contrato dos slides: .claude/skills/e
     uv run ferramentas/carrossel.py responder <slug> <vN> <id> --status aplicado|respondido|nao_aplicado --resposta "…"
     uv run ferramentas/carrossel.py exportar <slug>
         final/: 01.png, 02.mp4… (na ordem de postar, com o preset escolhido) e legenda.txt. O app exporta sozinho ao
-        aprovar (e de novo se o preset mudar depois).
+        aprovar (e de novo se o preset ou o destaque mudar depois).
 
 O servidor importa este arquivo (só a biblioteca padrão no topo); o Playwright e o Pillow só entram na exportação.
 """
@@ -41,20 +41,32 @@ STATUS = ('aplicado', 'respondido', 'nao_aplicado')
 IMAGENS = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
 VIDEOS = ('.mp4', '.mov', '.webm', '.m4v')
 MAX_VIDEO = 60  # o Instagram corta o vídeo de um slide em 60 s
-# os presets (o visual de cada um em render/carrossel.css): id, nome e o que ele é, para o seletor do app
+# os presets (o visual de cada um em render/carrossel.css): id, nome, o que ele é e os 5 destaques (o **palavra**; o
+# 1º é o padrão), para o seletor do app
 PRESETS = [
-    {'id': 'notas', 'nome': 'Notas', 'descricao': 'A nota do iPhone: data no alto, marca-texto amarelo.'},
-    {'id': 'papel', 'nome': 'Papel', 'descricao': 'Creme, título em serifa, destaque em itálico terracota.'},
-    {'id': 'post', 'nome': 'Post', 'descricao': 'O print de um post: foto, nome e @, destaque em azul.'},
-    {'id': 'grafite', 'nome': 'Grafite', 'descricao': 'Escuro e calmo, destaque em coral.'},
-    {'id': 'caderno', 'nome': 'Caderno', 'descricao': 'Quadriculado, letra arredondada, marca-texto verde.'},
-    {'id': 'editorial', 'nome': 'Editorial', 'descricao': 'Revista: serifa enorme, réguas finas, destaque em itálico.'},
-    {'id': 'codigo', 'nome': 'Código', 'descricao': 'Janela de editor claro, destaque como código.'},
-    {'id': 'pastel', 'nome': 'Pastel', 'descricao': 'Degradê pêssego e lilás, cartão branco, destaque em degradê.'},
-    {'id': 'etiqueta', 'nome': 'Etiqueta', 'descricao': 'Cinza claro, título pesado, destaque em etiqueta preta.'},
-    {'id': 'aura', 'nome': 'Aura', 'descricao': 'A paisagem da Aura atrás de um vidro fosco, destaque que brilha.'},
+    {'id': 'notas', 'nome': 'Notas', 'descricao': 'A nota do iPhone, limpa.',
+     'destaques': ['Marca-texto', 'Marca-texto cheio', 'Sublinhado', 'Âmbar', 'Azul']},
+    {'id': 'grafite', 'nome': 'Grafite', 'descricao': 'Escuro e calmo: título branco, texto cinza.',
+     'destaques': ['Coral', 'Azul gelo', 'Marcado coral', 'Sublinhado coral', 'Cápsula']},
+    {'id': 'codigo', 'nome': 'Código', 'descricao': 'A janela de um editor claro.',
+     'destaques': ['Código roxo', 'Código cinza', 'Roxo', 'Azul', 'Diff verde']},
+    {'id': 'etiqueta', 'nome': 'Etiqueta', 'descricao': 'Cinza claro, título pesado, o "Arrasta" em pílula.',
+     'destaques': ['Etiqueta preta', 'Etiqueta laranja', 'Contorno', 'Laranja', 'Azul']},
 ]
 PRESET_PADRAO = 'notas'
+
+
+def visual(meta: dict) -> tuple[str, int]:
+    """O preset e o destaque (1–5) de um carrossel; um preset que saiu volta ao padrão."""
+    preset = meta.get('preset') if meta.get('preset') in ids_presets() else PRESET_PADRAO
+    d = meta.get('destaque')
+    return preset, d if isinstance(d, int) and 1 <= d <= 5 else 1
+
+
+def nome_visual(meta: dict) -> str:
+    preset, d = visual(meta)
+    p = next(x for x in PRESETS if x['id'] == preset)
+    return f'{p["nome"]} · destaque {d} ({p["destaques"][d - 1]})'
 
 
 def agora() -> str:
@@ -185,7 +197,7 @@ def resumo(p: Path) -> dict:
     origem = meta.get('origem')
     return {'slug': p.name, 'nome': meta.get('nome') or p.name, 'tipo': meta.get('tipo', 'cru'), 'origem': origem,
             'origem_nome': (ler_json(PROJETOS / origem / 'edicao.json', {}) or {}).get('nome') or origem if origem else None,
-            'preset': meta.get('preset') or PRESET_PADRAO, 'versoes': vs, 'ultima': vs[-1] if vs else None,
+            'preset': visual(meta)[0], 'destaque': visual(meta)[1], 'versoes': vs, 'ultima': vs[-1] if vs else None,
             'slides': len((ler_json(p / 'versoes' / f'v{vs[-1]}.json', {}) or {}).get('slides') or []) if vs else 0,
             'estado': 'aprovado' if rev.get('aprovado') else 'em_revisao' if vs else 'novo',
             'comentarios': sum(1 for c in rev.get('comentarios') or [] if (c.get('texto') or '').strip()),
@@ -224,7 +236,7 @@ def texto_revisao(slug: str, v: int | None = None) -> str:
     slides = (ler_json(p / 'versoes' / f'v{v}.json', {}) or {}).get('slides') or []
     rev = revisao(p, v)
     meta = ler_json(p / 'carrossel.json', {}) or {}
-    linhas = [f'Revisão carrossel · {slug} · v{v} · preset {meta.get("preset", PRESET_PADRAO)}']
+    linhas = [f'Revisão carrossel · {slug} · v{v} · preset {nome_visual(meta)}']
     cs = [c for c in rev.get('comentarios') or [] if (c.get('texto') or '').strip()]
     for c in sorted(cs, key=lambda c: (c.get('slide') is None, c.get('slide') or 0)):
         n = c.get('slide')
@@ -271,7 +283,7 @@ def exportar(slug: str) -> Path:
     vs = versoes(p)
     if not vs:
         raise SystemExit('Nada para exportar: o carrossel ainda não tem versão.')
-    v, preset = vs[-1], meta.get('preset') or PRESET_PADRAO
+    v, (preset, destaque) = vs[-1], visual(meta)
     versao = ler_json(p / 'versoes' / f'v{v}.json', {})
     srv = servidor.servir(0)
     porta = srv.server_address[1]
@@ -283,7 +295,7 @@ def exportar(slug: str) -> Path:
             browser = pw.chromium.launch(channel='chromium')
             pg = browser.new_page(viewport={'width': W, 'height': H}, device_scale_factor=1)
             for i, s in enumerate(versao['slides']):
-                pg.goto(f'http://127.0.0.1:{porta}/render/carrossel.html?c={slug}&v={v}&s={i}&preset={preset}&exportar=1')
+                pg.goto(f'http://127.0.0.1:{porta}/render/carrossel.html?c={slug}&v={v}&s={i}&preset={preset}&destaque={destaque}&exportar=1')
                 pg.wait_for_function('window.__carrossel && window.__carrossel.pronto', timeout=30000)
                 info = pg.evaluate('window.__carrossel')
                 nome = f'{i + 1:02d}'
@@ -333,7 +345,7 @@ def exportar(slug: str) -> Path:
         for arq, nome in feitos:
             shutil.move(str(arq), final / nome)
     (final / 'legenda.txt').write_text((versao.get('legenda') or '') + '\n', encoding='utf-8')
-    meta['exportado'] = {'versao': v, 'preset': preset, 'em': agora()}
+    meta['exportado'] = {'versao': v, 'preset': preset, 'destaque': destaque, 'em': agora()}
     gravar_json(p / 'carrossel.json', meta)
     return final
 
@@ -376,7 +388,7 @@ def main() -> None:
             p = pasta(x.slug)
             meta = ler_json(p / 'carrossel.json', {})
             entrada = sorted(str(a.relative_to(p)) for a in (p / 'entrada').glob('*')) if (p / 'entrada').is_dir() else []
-            print(f'{meta["nome"]} · {meta["tipo"]}{" · de " + meta["origem"] if meta.get("origem") else ""} · preset {meta.get("preset")}')
+            print(f'{meta["nome"]} · {meta["tipo"]}{" · de " + meta["origem"] if meta.get("origem") else ""} · preset {nome_visual(meta)}')
             print(f'Pedido: {meta.get("pedido") or "(nenhum)"}')
             print(f'Entrada: {", ".join(entrada) or "(nenhum arquivo)"}')
             print(f'Versões: {", ".join(f"v{v}" for v in versoes(p)) or "nenhuma"}')

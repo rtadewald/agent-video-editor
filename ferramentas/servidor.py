@@ -24,7 +24,7 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
   Reels, Ad…; uma em uso não sai) · PUT /api/referencias/<id>/categoria {categoria} · PUT /api/projetos/<slug>/categoria
   {categoria} · o POST /api/referencias aceita a categoria no cabeçalho X-Categoria.
 - Carrosséis (ferramentas/carrossel.py): GET|POST /api/carrosseis {nome, tipo, origem, pedido} · GET /api/carrosseis/<slug>
-  (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset}
+  (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset, destaque}
   (num aprovado, exporta de novo) · PUT …/<slug>/nome {nome} · PUT …/<slug>/revisao/v<N> (aprovar exporta, em segundo
   plano) · POST …/<slug>/abrir-final · DELETE /api/carrosseis/<slug> (vai para a lixeira).
 - POST /api/projetos/<slug>/abrir-final: abre no Finder a pasta dos exports (final/: as saídas, cada uma com o .md).
@@ -1516,14 +1516,19 @@ def _entrada_carrossel(h, q, slug):
 def _preset_carrossel(h, q, slug):
     c = carrossel()
     p = _pasta_carrossel(slug)
-    preset = h.corpo().get('preset')
+    corpo = h.corpo()
+    meta = ler_json(p / 'carrossel.json', {})
+    preset = corpo.get('preset', meta.get('preset'))
+    destaque = corpo.get('destaque', meta.get('destaque') or 1)
     if preset not in c.ids_presets():
         raise Erro(f'Preset desconhecido: {preset}', 422)
-    meta = ler_json(p / 'carrossel.json', {})
-    meta['preset'] = preset
+    if destaque not in range(1, 6):
+        raise Erro(f'Destaque desconhecido: {destaque}', 422)
+    meta.update(preset=preset, destaque=destaque)
     gravar_json(p / 'carrossel.json', meta)
     vs = c.versoes(p)
-    reexporta = bool(vs and c.revisao(p, vs[-1]).get('aprovado') and (meta.get('exportado') or {}).get('preset') != preset)
+    feito = meta.get('exportado') or {}
+    reexporta = bool(vs and c.revisao(p, vs[-1]).get('aprovado') and (feito.get('preset'), feito.get('destaque') or 1) != (preset, destaque))
     if reexporta:
         _exportar_carrossel(slug)
     return {'ok': True, 'exportando': reexporta}
