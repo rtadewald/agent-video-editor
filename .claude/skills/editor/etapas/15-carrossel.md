@@ -31,37 +31,48 @@ uv run ferramentas/carrossel.py ver <slug>     # o pedido, a origem, os arquivos
 
 ## Escrever
 
+O carrossel é uma **conversa**, não um slide de apresentação: eu contando a história ou explicando o conceito inteiro,
+como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem por slide (o carrossel padrão): só
+**texto**, com **destaque**.
+
+- **Sem título.** Cada slide é um ou dois parágrafos corridos, na mesma letra; o que precisa saltar vai em
+  `**destaque**` (uma ou duas expressões por slide: a palavra, o número, a virada). São 4 presets (Notas, Grafite,
+  Código, Etiqueta), cada um com 5 destaques que o criador escolhe.
 - **Em 1ª pessoa**: é o criador falando ("testei", "eu uso", "o meu processo"), na voz dele (`biblioteca/exemplos/
   criador.md`), como no vídeo; nunca o narrador de fora ("ele testou", "o criador mostra").
-- O slide 1 é o gancho (a promessa do carrossel); um ponto por slide; o último fecha (o CTA, quando houver).
-- Pouco texto por slide: o título em uma ideia, o texto em duas ou três frases. O texto encolhe para caber (até 60%),
-  mas texto encolhido é sinal de que o slide está cheio: divida.
-- **Destaque**: `**palavra**` no título ou no texto. São 4 presets (Notas, Grafite, Código, Etiqueta), cada um com 5
-  destaques (marcados ou só cor e peso) que o criador escolhe. Use para a palavra ou o número que carrega o slide, uma
-  ou duas por slide.
-- Mídia que prova o que o texto diz (o print, o gráfico, a tela), como nos inserts.
+- **Explique de verdade**: o porquê, o como, o exemplo, o que deu errado. É mais texto que no Reels, não menos: de 3 a 6
+  frases por slide (o texto encolhe até 60% para caber; encolheu muito, divida em dois slides).
+- **Loops abertos**: o slide 1 é o gancho (uma promessa, uma pergunta, um resultado estranho) e não entrega tudo.
+  Cada slide fecha abrindo o próximo: uma pergunta que fica, um "só que…", um "mas o que mudou mesmo foi…", a resposta
+  que vem depois. Ninguém deve conseguir parar no meio. Feche o loop do gancho só perto do fim.
+- **Mídia só quando prova** o que o texto acabou de dizer (o print, o antes e depois, a tela em uso), como nos inserts;
+  um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar.
+- O último fecha a conversa (a conclusão e o CTA, quando houver, com `acao`).
 - A **legenda** do post vai junto (no derivado, adapte a do vídeo).
 
 ## Os slides (`versoes/vN.json`)
 
 ```json
 {"slides": [
-  {"tipo": "capa", "titulo": "Testei a skill que promete cortar **65%** dos tokens", "texto": "Será que funciona?"},
+  {"tipo": "capa", "texto": "Tem uma skill que promete cortar **65%** dos tokens do Claude. Eu testei.\n\nO número bateu. Só que não do jeito que eu esperava."},
+  {"tipo": "texto", "texto": "…"},
   {"tipo": "texto-imagem", "texto": "…", "midia": "midia/grafico.png", "ajuste": "conter", "porque": "o print prova o número"},
   {"tipo": "texto-video", "texto": "…", "midia": "midia/demo.mp4", "som": false},
-  {"tipo": "cta", "titulo": "…", "texto": "…", "acao": "Comente IA"}
+  {"tipo": "cta", "texto": "…", "acao": "Comente IA"}
  ],
  "legenda": "…"}
 ```
 
 | tipo | o que é | campos |
 |---|---|---|
-| `capa` | o gancho, grande (mídia opcional abaixo) | `titulo` (e `texto`) |
-| `texto` | só texto | `titulo` e/ou `texto` |
-| `texto-imagem` | texto em cima, imagem embaixo | `texto`/`titulo`, `midia` (imagem) |
-| `texto-video` | texto fixo em cima, vídeo embaixo | `texto`/`titulo`, `midia` (vídeo), `som` |
-| `midia` | imagem ou vídeo ocupando o slide, texto opcional por cima | `midia`, `texto`/`titulo` |
-| `cta` | o fechamento | `titulo`/`texto`, `acao` (o botão) |
+| `capa` | o gancho (mídia opcional abaixo) | `texto` |
+| `texto` | só texto: o normal | `texto` |
+| `texto-imagem` | texto em cima, imagem embaixo | `texto`, `midia` (imagem) |
+| `texto-video` | texto fixo em cima, vídeo embaixo | `texto`, `midia` (vídeo), `som` |
+| `midia` | imagem ou vídeo ocupando o slide, texto opcional por cima | `midia`, `texto` |
+| `cta` | o fechamento | `texto`, `acao` (o botão) |
+
+- `texto`: parágrafos separados por linha em branco; `**destaque**` dentro. Não há `titulo` (o `versao` recusa).
 
 - `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, com faixas; prints e gráficos).
 - `som`: o vídeo leva o áudio dele. Ligue quando a fala do trecho importa; gravação de tela e demonstração vão mudas.

@@ -47,7 +47,7 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 .t-capa { --k: 1.4; }
 .t-capa.com-midia { --k: 1.1; }
 .t-cta { --k: 1.15; }
-.t-texto .texto, .t-cta .texto { font-size: calc(var(--tam-texto, 44px) * 1.14 * var(--e)); }
+.t-capa .texto, .t-texto .texto, .t-cta .texto { font-size: calc(var(--tam-texto, 44px) * 1.22 * var(--e)); }
 .com-midia:not(.t-capa) { --k: 0.82; }
 .t-capa .conteudo, .t-texto .conteudo, .t-cta .conteudo { justify-content: center; }
 .t-midia { padding: 0; }

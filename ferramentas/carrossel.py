@@ -123,7 +123,9 @@ def validar(p: Path, dados: dict) -> dict:
         tipo = s.get('tipo')
         if tipo not in TIPOS:
             raise ValueError(f'Slide {i}: tipo "{tipo}" não existe ({", ".join(TIPOS)}).')
-        x = {k: s[k] for k in ('tipo', 'titulo', 'texto', 'midia', 'ajuste', 'som', 'acao', 'porque') if s.get(k) not in (None, '')}
+        if s.get('titulo'):
+            raise ValueError(f'Slide {i}: o carrossel não tem título; é tudo texto, com **destaque** (etapa 15).')
+        x = {k: s[k] for k in ('tipo', 'texto', 'midia', 'ajuste', 'som', 'acao', 'porque') if s.get(k) not in (None, '')}
         m = x.get('midia')
         if tipo in ('texto-imagem', 'texto-video', 'midia') and not m:
             raise ValueError(f'Slide {i} ({tipo}): falta a mídia.')
@@ -137,8 +139,8 @@ def validar(p: Path, dados: dict) -> dict:
                 raise ValueError(f'Slide {i}: texto-imagem pede uma imagem ({m}).')
             if arq.suffix.lower() in VIDEOS and inspecionar(arq)['duracao'] > MAX_VIDEO + 0.5:
                 raise ValueError(f'Slide {i}: o vídeo passa de {MAX_VIDEO} s (recorte com --de/--ate).')
-        if tipo in ('capa', 'texto', 'cta') and not (x.get('titulo') or x.get('texto')):
-            raise ValueError(f'Slide {i} ({tipo}): sem título nem texto.')
+        if tipo in ('capa', 'texto', 'cta') and not x.get('texto'):
+            raise ValueError(f'Slide {i} ({tipo}): sem texto.')
         if x.get('ajuste') not in (None, 'cobrir', 'conter'):
             raise ValueError(f'Slide {i}: ajuste é cobrir ou conter.')
         limpos.append(x)
