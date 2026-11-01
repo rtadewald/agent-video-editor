@@ -201,15 +201,20 @@ export async function abrirCarrossel(tela, slug, pedida) {
       <span class="eyebrow">Legenda</span>
       <p class="legenda-carrossel">${esc(versao.legenda || '(sem legenda)')}</p>`
   }
+  // à esquerda os slides; no meio o slide grande; à direita o visual (preset e destaque) e a conversa
   tela.innerHTML = `<div class="cabeca-secao cabeca-carrossel"></div>
-    <div class="presets-carrossel">${c.presets.map((p) => `<button class="pilula pequena${p.id === preset ? ' ativa' : ''}" data-preset="${p.id}" title="${esc(p.descricao)}"><i class="amostra-preset amostra-${p.id}"></i>${esc(p.nome)}</button>`).join('')}
-      <span class="separador-presets"></span><span class="sub">Destaque</span><span class="destaques-carrossel"></span></div>
     <div class="corpo-carrossel">
+      <nav class="fita-carrossel">${versao.slides.map((x, i) => `<button class="slide-mini" data-ir="${i}" title="Slide ${i + 1} · ${esc(x.tipo)}">${quadro(slug, v, i, preset, destaque)}<span class="n-slide">${i + 1}</span><span class="n-coment"></span></button>`).join('')}</nav>
       <div class="palco-carrossel">
         <div class="slide-grande" data-grande><div class="lugar-grande"></div><div class="pinos"></div></div>
-        <div class="fita-carrossel">${versao.slides.map((x, i) => `<button class="slide-mini" data-ir="${i}" title="Slide ${i + 1} · ${esc(x.tipo)}">${quadro(slug, v, i, preset, destaque)}<span class="n-slide">${i + 1}</span><span class="n-coment"></span></button>`).join('')}</div>
       </div>
-      <aside class="lado-carrossel"></aside>
+      <aside class="lado-carrossel">
+        <span class="eyebrow">Preset</span>
+        <div class="presets-carrossel">${c.presets.map((p) => `<button class="pilula pequena${p.id === preset ? ' ativa' : ''}" data-preset="${p.id}" title="${esc(p.descricao)}"><i class="amostra-preset amostra-${p.id}"></i>${esc(p.nome)}</button>`).join('')}</div>
+        <span class="eyebrow">Destaque</span>
+        <div class="destaques-carrossel"></div>
+        <div class="conversa-carrossel"></div>
+      </aside>
     </div>`
   let noGrande = -1
   /** Redesenha o que mudou: o cabeçalho, o slide grande (só se trocou de slide), os pinos, os selos da fita e o lado. */
@@ -231,9 +236,16 @@ export async function abrirCarrossel(tela, slug, pedida) {
       $('.n-coment', b).textContent = n || ''
       $('.n-coment', b).hidden = !n
     }
-    $('.lado-carrossel', tela).innerHTML = lado()
+    $('.conversa-carrossel', tela).innerHTML = lado()
     escalar(tela)
-    $('.slide-mini.ativo', tela)?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+    // o slide ativo à vista na fita (só ela rola; o scrollIntoView rolaria a página junto)
+    const fita = $('.fita-carrossel', tela)
+    const ativo = $('.slide-mini.ativo', tela)
+    if (ativo) {
+      const [f, a] = [fita.getBoundingClientRect(), ativo.getBoundingClientRect()]
+      if (a.top < f.top) fita.scrollTop -= f.top - a.top + 4
+      else if (a.bottom > f.bottom) fita.scrollTop += a.bottom - f.bottom + 4
+    }
   }
   desenhar()
   const ro = new ResizeObserver(() => escalar(tela))

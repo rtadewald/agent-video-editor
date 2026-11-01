@@ -22,7 +22,7 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
   `lixeira/` (o que se apaga no app: `base.para_lixeira`; restaurar ou apagar de vez pela página Lixeira).
 - `projetos/<slug>/` (fora do git): um vídeo por pasta.
 - `carrosseis/<slug>/` (fora do git): um carrossel por pasta (4:5; `ferramentas/carrossel.py`, os slides em
-  `render/carrossel.html` e os 10 presets em `render/carrossel.css`).
+  `render/carrossel.html` e os 4 presets, com 5 destaques cada, em `render/carrossel.css`).
 
 Referência: `../18-harness-video-editor` (o app web anterior). Só leitura: copie ideias e código, nunca mexa lá.
 
