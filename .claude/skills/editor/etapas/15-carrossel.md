@@ -24,6 +24,8 @@ uv run ferramentas/carrossel.py ver <slug>     # o pedido, a origem, os arquivos
 
 ## Escrever
 
+- **Em 1ª pessoa**: é o criador falando ("testei", "eu uso", "o meu processo"), na voz dele (`biblioteca/exemplos/
+  criador.md`), como no vídeo; nunca o narrador de fora ("ele testou", "o criador mostra").
 - O slide 1 é o gancho (a promessa do carrossel); um ponto por slide; o último fecha (o CTA, quando houver).
 - Pouco texto por slide: o título em uma ideia, o texto em duas ou três frases. O texto encolhe para caber (até 60%),
   mas texto encolhido é sinal de que o slide está cheio: divida.
