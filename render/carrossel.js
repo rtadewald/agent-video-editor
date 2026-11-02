@@ -13,10 +13,13 @@
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
   // o texto do slide: parágrafos na linha em branco, quebra na linha simples, **destaque**
-  // (uma linha em branco a mais é um parágrafo vazio: espaço no slide)
   const texto = (t) => paragrafos(t)
     .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<mark class="d">$1</mark>').replace(/\n/g, '<br>')}</p>`).join('')
-  const paragrafos = (t) => { const x = String(t || '').replace(/\n[ \t]+(?=\n)/g, '\n').trim(); return x ? x.split('\n\n').map((p) => p.replace(/^\n+|\n+$/g, '')) : [] }
+  const paragrafos = (t) => {
+    const x = String(t || '').replace(/[ \t]+$/gm, '').trim()
+    // a linha em branco separa parágrafos; cada linha em branco a mais é um parágrafo vazio (espaço no slide)
+    return x ? x.split(/(\n{2,})/).flatMap((p, k) => (k % 2 ? Array(p.length - 2).fill('') : [p])) : []
+  }
   const linha = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, '<mark class="d">$1</mark>').replace(/\n/g, '<br>')
   const url = (m) => (m.startsWith('/') ? m : `/carrosseis/${encodeURIComponent(slug)}/${m.split('/').map(encodeURIComponent).join('/')}`)
   const ehVideo = (m) => /\.(mp4|mov|webm|m4v)$/i.test(m || '')

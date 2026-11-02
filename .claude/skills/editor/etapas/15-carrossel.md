@@ -74,7 +74,8 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
 | `cta` | o fechamento | `texto`, `acao` (o botão) |
 
 - `texto`: parágrafos separados por linha em branco; `**destaque**` dentro. Não há `titulo` (o `versao` recusa). Uma
-  linha em branco a mais (`\n\n\n\n`) é um parágrafo vazio: espaço no slide (é o Enter do criador no app; mantenha).
+  quebra simples (`\n`) é só quebra de linha (o Enter do app, mesmo espaço da quebra natural); a linha em branco abre
+  parágrafo; cada linha em branco a mais é um espaço extra no slide. Mantenha as quebras do criador.
 
 - `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, com faixas; prints e gráficos).
 - `som`: o vídeo leva o áudio dele. Ligue quando a fala do trecho importa; gravação de tela e demonstração vão mudas.

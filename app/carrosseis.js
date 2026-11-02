@@ -17,14 +17,12 @@ const avisar = (raiz, msg) => {
   for (const f of $$('.slide-quadro iframe', raiz)) f.contentWindow?.postMessage(msg, '*')
 }
 
-// o editor do texto de um slide: parágrafos (<p>), quebra de linha (<br>) e o **destaque** (<mark>), como no slide
-// (uma linha em branco a mais é um parágrafo vazio: o Enter que abre espaço no slide)
-const paragrafos = (t) => { const x = String(t || '').replace(/\n[ \t]+(?=\n)/g, '\n').trim(); return x ? x.split('\n\n').map((p) => p.replace(/^\n+|\n+$/g, '')) : [] }
-const paraEditor = (t) => paragrafos(t)
-  .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>').replace(/\n/g, '<br>') || '<br>'}</p>`).join('') || '<p><br></p>'
+// o editor do texto de um slide: o texto como ele é, linha a linha (<br>), com o **destaque** (<mark>). O Enter quebra
+// a linha (o mesmo espaço da quebra natural); a linha em branco abre parágrafo, como no slide (render/carrossel.js)
+const paraEditor = (t) => esc(String(t || '').trim()).replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>').replace(/\n/g, '<br>') || '<br>'
 function doEditor(ed) {
   const inline = (n, marcado) => [...n.childNodes].map((x) => {
-    if (x.nodeType === 3) return x.nodeValue.replace(/\u00a0/g, ' ')
+    if (x.nodeType === 3) return x.nodeValue.replace(/ /g, ' ')
     if (x.nodeType !== 1) return ''
     if (x.tagName === 'BR') return '\n'
     if (['MARK', 'B', 'STRONG'].includes(x.tagName)) {
@@ -33,22 +31,9 @@ function doEditor(ed) {
     }
     return (['DIV', 'P'].includes(x.tagName) ? '\n' : '') + inline(x, marcado)
   }).join('')
-  const blocos = []
-  let solto = ''
-  for (const x of ed.childNodes) {
-    if (x.nodeType === 1 && ['P', 'DIV'].includes(x.tagName)) {
-      if (solto.trim()) blocos.push(solto)
-      blocos.push(inline(x))
-      solto = ''
-    } else solto += inline({ childNodes: [x] })
-  }
-  if (solto.trim()) blocos.push(solto)
-  // os parágrafos vazios do meio ficam (espaço no slide); os das pontas saem
-  const b = blocos.map((x) => x.replace(/\*\*(\s*)([^*]*?)(\s*)\*\*/g, '$1**$2**$3').split('\n').map((l) => l.trimEnd()).join('\n').trim())
-  while (b.length && !b[0]) b.shift()
-  while (b.length && !b.at(-1)) b.pop()
-  return b.join('\n\n')
+  return inline(ed).replace(/\*\*(\s*)([^*]*?)(\s*)\*\*/g, '$1**$2**$3').split('\n').map((l) => l.trimEnd()).join('\n').trim()
 }
+
 /** Liga ou desliga o destaque: dentro de um, tira; senão, marca a seleção. */
 function destacar(ed) {
   const sel = getSelection()
@@ -419,6 +404,11 @@ export async function abrirCarrossel(tela, slug, pedida) {
     comentar($('textarea', e.target).value, atual, ponto)
   })
   tela.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey && e.target.closest?.('[data-editor]')) {
+      e.preventDefault() // quebra de linha, não parágrafo (a linha em branco é que abre parágrafo)
+      document.execCommand('insertLineBreak')
+      return
+    }
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && e.target.matches('.novo-comentario textarea')) e.target.form.requestSubmit()
     const ed = e.target.closest?.('[data-editor]')
     if (ed && (e.metaKey || e.ctrlKey) && ['b', 'i', 'u'].includes(e.key.toLowerCase())) {

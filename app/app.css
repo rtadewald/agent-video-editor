@@ -1573,7 +1573,6 @@ button.tag:hover { background: rgba(185, 166, 242, 0.26); }
 /* o texto do slide, editável: parágrafos e o destaque (o <mark>) */
 .editor-texto { padding: 12px 14px; border: 1px solid var(--color-line-dark); border-radius: var(--radius-xl); background: var(--color-deeper); color: var(--color-cream); font-size: 14px; line-height: 1.5; outline: none; }
 .editor-texto[contenteditable]:focus { border-color: var(--color-coral); }
-.editor-texto p + p { margin-top: 0.7em; }
 .editor-texto mark { padding: 0 2px; border-radius: 3px; background: var(--color-yellow); color: var(--color-ink); }
 .editor-texto ::selection { background: rgba(244, 125, 95, 0.5); color: inherit; }
 .editor-acoes { justify-content: space-between; align-items: center; }

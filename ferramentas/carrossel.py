@@ -240,8 +240,8 @@ def margens_padrao(slug: str, m: dict | None) -> None:
 
 
 def editar_texto(slug: str, v: int, i: int, texto: str) -> None:
-    """O criador muda o texto de um slide no app: grava na própria vN (a última, não aprovada) e marca o slide. Uma
-    linha em branco a mais (parágrafo vazio, Enter no app) fica: é espaço no slide."""
+    """O criador muda o texto de um slide no app: grava na própria vN (a última, não aprovada) e marca o slide. As
+    linhas em branco a mais ficam: são espaço no slide."""
     arq, dados = _editavel(slug, v)
     slides = dados.get('slides') or []
     if not 0 <= i < len(slides):
