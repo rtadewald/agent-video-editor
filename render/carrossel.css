@@ -10,7 +10,8 @@ html, body { width: 1080px; height: 1350px; overflow: hidden; background: transp
   --margem: 96px;
   --k: 1;
   position: relative; width: 1080px; height: 1350px; overflow: hidden;
-  display: flex; flex-direction: column; gap: 44px; padding: var(--margem);
+  display: flex; flex-direction: column; gap: 44px;
+  padding: var(--m-topo, var(--margem)) var(--m-lados, var(--margem)) var(--m-base, var(--margem));
   background-color: var(--fundo, #fff); color: var(--tinta, #111); font-family: var(--fonte-texto, Inter, sans-serif);
   -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
 }
@@ -27,6 +28,7 @@ html, body { width: 1080px; height: 1350px; overflow: hidden; background: transp
   color: var(--tinta-texto, var(--tinta)); text-wrap: pretty;
 }
 .texto p + p { margin-top: 0.75em; }
+.texto p:empty::before { content: '\200b'; } /* o parágrafo vazio (Enter no app) é uma linha de espaço */
 mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .acao span {
   display: inline-flex; padding: 0.5em 1.1em; border-radius: 999px; background: var(--tinta); color: var(--fundo);
@@ -54,7 +56,7 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 .t-midia .topo, .t-midia .pe { display: none !important; }
 .t-midia .midia { position: absolute; inset: 0; min-height: 0; border-radius: 0; box-shadow: none; z-index: 0; }
 .t-midia .sobre {
-  position: absolute; inset: auto 0 0 0; flex: none; justify-content: flex-end; padding: 280px var(--margem) var(--margem);
+  position: absolute; inset: auto 0 0 0; flex: none; justify-content: flex-end; padding: 280px var(--m-lados, var(--margem)) var(--m-base, var(--margem));
   background: linear-gradient(to top, rgba(0, 0, 0, 0.74), rgba(0, 0, 0, 0)); --tinta-titulo: #fff; --tinta-texto: rgba(255, 255, 255, 0.92);
 }
 .t-midia .sobre:empty { display: none; }
@@ -68,7 +70,7 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 [data-preset="notas"] .slide {
   --fundo: #fffefb; --tinta: #1d1d1f; --tinta-texto: #2c2c2e; --fonte-texto: 'SF Pro', Inter, sans-serif;
   --tam-titulo: 76px; --tam-texto: 46px; --raio-midia: 22px; --fundo-midia: #f2f2f7;
-  padding-top: 60px; gap: 30px;
+  padding-top: var(--m-topo, 60px); gap: 30px;
 }
 [data-preset="notas"] .topo { display: flex; justify-content: space-between; height: 64px; font: 400 44px 'SF Pro'; color: #dfa400; }
 [data-preset="notas"] .topo > * { display: none; }

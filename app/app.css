@@ -753,6 +753,11 @@ article h3, a h3 { margin-top: 12px; font-size: 15px; font-weight: 600; letter-s
 }
 .editor textarea::placeholder, .caixa-nova textarea::placeholder { color: rgba(185, 198, 186, 0.7); }
 .editor textarea:focus, .caixa-nova textarea:focus { outline: none; border-color: var(--color-cream-50); }
+.margens-carrossel { margin-top: 10px; }
+.margem-linha { display: grid; grid-template-columns: 44px 1fr 32px; align-items: center; gap: 8px; font-size: 12px; color: var(--color-fog); }
+.margem-linha input { width: 100%; accent-color: var(--color-coral); }
+.margem-linha b { text-align: right; font-weight: 500; color: var(--color-cream); font-variant-numeric: tabular-nums; }
+.margens-carrossel .acoes-linha { margin-top: 6px; }
 .editor-acoes { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
 .editor-acoes .dica { margin-right: auto; font-size: 11px; }
 

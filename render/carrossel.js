@@ -13,13 +13,17 @@
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
   // o texto do slide: parágrafos na linha em branco, quebra na linha simples, **destaque**
-  const texto = (t) => String(t || '').trim().split(/\n\s*\n/).filter(Boolean)
+  // (uma linha em branco a mais é um parágrafo vazio: espaço no slide)
+  const texto = (t) => paragrafos(t)
     .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<mark class="d">$1</mark>').replace(/\n/g, '<br>')}</p>`).join('')
+  const paragrafos = (t) => { const x = String(t || '').replace(/\n[ \t]+(?=\n)/g, '\n').trim(); return x ? x.split('\n\n').map((p) => p.replace(/^\n+|\n+$/g, '')) : [] }
   const linha = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, '<mark class="d">$1</mark>').replace(/\n/g, '<br>')
   const url = (m) => (m.startsWith('/') ? m : `/carrosseis/${encodeURIComponent(slug)}/${m.split('/').map(encodeURIComponent).join('/')}`)
   const ehVideo = (m) => /\.(mp4|mov|webm|m4v)$/i.test(m || '')
 
   const versao = await fetch(`/carrosseis/${encodeURIComponent(slug)}/versoes/v${q.get('v')}.json`, { cache: 'no-store' }).then((r) => r.json())
+  // as margens: as do slide, senão o padrão do carrossel, senão as do preset
+  const meta = await fetch(`/carrosseis/${encodeURIComponent(slug)}/carrossel.json`, { cache: 'no-store' }).then((r) => r.json()).catch(() => ({}))
   const slides = versao.slides || []
   const i = Math.min(Math.max(+q.get('s') || 0, 0), slides.length - 1)
   const s = slides[i] || {}
@@ -33,6 +37,11 @@
     midia = `<figure class="midia${s.ajuste === 'conter' ? ' conter' : ''}">${m}</figure>`
   }
   const corpo = `${s.titulo ? `<h1 class="titulo">${linha(s.titulo)}</h1>` : ''}${s.texto ? `<div class="texto">${texto(s.texto)}</div>` : ''}${s.acao ? `<div class="acao"><span>${linha(s.acao)}</span></div>` : ''}`
+  const margens = () => {
+    const m = { ...(meta.margens || {}), ...(s.margens || {}) }
+    for (const k of ['topo', 'lados', 'base']) el.style[m[k] != null ? 'setProperty' : 'removeProperty'](`--m-${k}`, `${m[k]}px`)
+  }
+  margens()
   el.className = `slide t-${tipo}${s.midia ? ' com-midia' : ''}${i === 0 ? ' primeiro' : ''}${i === slides.length - 1 ? ' ultimo' : ''}`
   el.innerHTML = `<header class="topo"><span class="avatar">${AUTOR.iniciais}</span><span class="autor"><b>${AUTOR.nome}</b><i>${AUTOR.arroba}</i></span></header>
     ${tipo === 'midia' ? `${midia}<div class="conteudo sobre">${corpo}</div>`
@@ -89,6 +98,12 @@
       }
       if (t && html) t.innerHTML = html
       else t?.remove()
+      pronto()
+    }
+    if (e.data?.margens !== undefined && (e.data.slide === i || e.data.slide === undefined)) {
+      if (e.data.slide === i) s.margens = e.data.margens || undefined
+      else meta.margens = e.data.margens || undefined
+      margens()
       pronto()
     }
     if (e.data?.preset || e.data?.destaque) {

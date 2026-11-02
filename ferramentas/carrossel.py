@@ -126,6 +126,8 @@ def validar(p: Path, dados: dict) -> dict:
         if s.get('titulo'):
             raise ValueError(f'Slide {i}: o carrossel não tem título; é tudo texto, com **destaque** (etapa 15).')
         x = {k: s[k] for k in ('tipo', 'texto', 'midia', 'ajuste', 'som', 'acao', 'porque') if s.get(k) not in (None, '')}
+        if margens(s.get('margens')):
+            x['margens'] = margens(s.get('margens'))
         m = x.get('midia')
         if tipo in ('texto-imagem', 'texto-video', 'midia') and not m:
             raise ValueError(f'Slide {i} ({tipo}): falta a mídia.')
@@ -154,8 +156,15 @@ def nova_versao(slug: str, dados: dict) -> int:
     return v
 
 
-def editar_texto(slug: str, v: int, i: int, texto: str) -> None:
-    """O criador muda o texto de um slide no app: grava na própria vN (a última, não aprovada) e marca o slide."""
+def margens(m) -> dict:
+    """As margens de um slide (ou o padrão do carrossel), em px do slide: topo, lados e base; o que falta fica com o preset."""
+    if not isinstance(m, dict):
+        return {}
+    return {k: max(0, min(400, int(m[k]))) for k in ('topo', 'lados', 'base') if isinstance(m.get(k), (int, float))}
+
+
+def _editavel(slug: str, v: int) -> tuple[Path, dict]:
+    """A vN que o criador pode mexer no app (a última, não aprovada): o arquivo e os dados."""
     p = pasta(slug)
     vs = versoes(p)
     if not vs or v != vs[-1]:
@@ -163,11 +172,41 @@ def editar_texto(slug: str, v: int, i: int, texto: str) -> None:
     if revisao(p, v).get('aprovado'):
         raise ValueError('O carrossel está aprovado: desaprove para editar.')
     arq = p / 'versoes' / f'v{v}.json'
-    dados = ler_json(arq, {}) or {}
+    return arq, ler_json(arq, {}) or {}
+
+
+def editar_margens(slug: str, v: int, i: int, m: dict | None) -> None:
+    """As margens de um slide no app; vazio volta ao padrão do carrossel."""
+    arq, dados = _editavel(slug, v)
     slides = dados.get('slides') or []
     if not 0 <= i < len(slides):
         raise ValueError(f'Não há o slide {i + 1}.')
-    texto = re.sub(r'\n{3,}', '\n\n', str(texto or '').replace('\r', '')).strip()
+    if margens(m):
+        slides[i]['margens'] = margens(m)
+    else:
+        slides[i].pop('margens', None)
+    gravar_json(arq, dados)
+
+
+def margens_padrao(slug: str, m: dict | None) -> None:
+    """O padrão de margens do carrossel (carrossel.json), para os slides sem margens próprias; vazio volta ao preset."""
+    arq = pasta(slug) / 'carrossel.json'
+    meta = ler_json(arq, {}) or {}
+    if margens(m):
+        meta['margens'] = margens(m)
+    else:
+        meta.pop('margens', None)
+    gravar_json(arq, meta)
+
+
+def editar_texto(slug: str, v: int, i: int, texto: str) -> None:
+    """O criador muda o texto de um slide no app: grava na própria vN (a última, não aprovada) e marca o slide. Uma
+    linha em branco a mais (parágrafo vazio, Enter no app) fica: é espaço no slide."""
+    arq, dados = _editavel(slug, v)
+    slides = dados.get('slides') or []
+    if not 0 <= i < len(slides):
+        raise ValueError(f'Não há o slide {i + 1}.')
+    texto = re.sub(r'\n[ \t]+(?=\n)', '\n', str(texto or '').replace('\r', '')).strip()
     if not texto and slides[i].get('tipo') in ('capa', 'texto', 'cta'):
         raise ValueError(f'O slide {i + 1} precisa de texto.')
     if texto:

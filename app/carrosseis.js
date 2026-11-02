@@ -18,8 +18,10 @@ const avisar = (raiz, msg) => {
 }
 
 // o editor do texto de um slide: parágrafos (<p>), quebra de linha (<br>) e o **destaque** (<mark>), como no slide
-const paraEditor = (t) => String(t || '').trim().split(/\n\s*\n/).filter(Boolean)
-  .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>').replace(/\n/g, '<br>')}</p>`).join('') || '<p><br></p>'
+// (uma linha em branco a mais é um parágrafo vazio: o Enter que abre espaço no slide)
+const paragrafos = (t) => { const x = String(t || '').replace(/\n[ \t]+(?=\n)/g, '\n').trim(); return x ? x.split('\n\n').map((p) => p.replace(/^\n+|\n+$/g, '')) : [] }
+const paraEditor = (t) => paragrafos(t)
+  .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>').replace(/\n/g, '<br>') || '<br>'}</p>`).join('') || '<p><br></p>'
 function doEditor(ed) {
   const inline = (n, marcado) => [...n.childNodes].map((x) => {
     if (x.nodeType === 3) return x.nodeValue.replace(/\u00a0/g, ' ')
@@ -35,13 +37,17 @@ function doEditor(ed) {
   let solto = ''
   for (const x of ed.childNodes) {
     if (x.nodeType === 1 && ['P', 'DIV'].includes(x.tagName)) {
-      blocos.push(solto, inline(x))
+      if (solto.trim()) blocos.push(solto)
+      blocos.push(inline(x))
       solto = ''
     } else solto += inline({ childNodes: [x] })
   }
-  blocos.push(solto)
-  return blocos.map((b) => b.replace(/\*\*(\s*)([^*]*?)(\s*)\*\*/g, '$1**$2**$3').split('\n').map((l) => l.trimEnd()).join('\n').trim())
-    .filter(Boolean).join('\n\n')
+  if (solto.trim()) blocos.push(solto)
+  // os parágrafos vazios do meio ficam (espaço no slide); os das pontas saem
+  const b = blocos.map((x) => x.replace(/\*\*(\s*)([^*]*?)(\s*)\*\*/g, '$1**$2**$3').split('\n').map((l) => l.trimEnd()).join('\n').trim())
+  while (b.length && !b[0]) b.shift()
+  while (b.length && !b.at(-1)) b.pop()
+  return b.join('\n\n')
 }
 /** Liga ou desliga o destaque: dentro de um, tira; senão, marca a seleção. */
 function destacar(ed) {
@@ -237,6 +243,36 @@ export async function abrirCarrossel(tela, slug, pedida) {
         : `<button class="botao pequeno botao-coral" data-aprovar title="Aprovar: exporta os slides (PNG/MP4) e a legenda em final/">${ICONE.check} Aprovar</button>`) : ''}`
   const pinos = () => `${doSlide(atual).filter((x) => x.x != null).map((x, k) => `<span class="pino" style="left:${x.x * 100}%;top:${x.y * 100}%">${k + 1}</span>`).join('')}${ponto ? `<span class="pino novo" style="left:${ponto.x * 100}%;top:${ponto.y * 100}%">+</span>` : ''}`
   const editavel = () => ultima && !rev.aprovado
+  // as margens do slide (fechadas): topo, lados e base, em px do slide. Sem as dele, valem o padrão do carrossel e,
+  // sem padrão, as do preset (lidas do próprio slide)
+  let margensAbertas = false
+  const MARGENS = [['topo', 'Topo'], ['lados', 'Lados'], ['base', 'Base']]
+  const doPreset = () => {
+    const sl = $('.lugar-grande iframe', tela)?.contentDocument?.querySelector('.slide')
+    if (!sl) return {}
+    const cs = sl.ownerDocument.defaultView.getComputedStyle(sl)
+    const sem = (k) => (sl.style.getPropertyValue(`--m-${k}`) ? null : k)
+    return { topo: sem('topo') && parseFloat(cs.paddingTop), lados: sem('lados') && parseFloat(cs.paddingLeft), base: sem('base') && parseFloat(cs.paddingBottom) }
+  }
+  const margensDe = (s) => ({ topo: 96, lados: 96, base: 96, ...Object.fromEntries(Object.entries(doPreset()).filter(([, x]) => x)), ...(c.margens || {}), ...(s.margens || {}) })
+  const margensHtml = (s) => {
+    const m = margensDe(s)
+    return `<details class="dobra-trechos margens-carrossel" data-margens${margensAbertas ? ' open' : ''}><summary>Margens${s.margens ? ' · deste slide' : c.margens ? ' · padrão' : ''}</summary>
+      ${MARGENS.map(([k, nome]) => `<label class="margem-linha"><span>${nome}</span><input type="range" min="0" max="300" step="4" value="${Math.round(m[k])}" data-margem="${k}"><b data-margem-n="${k}">${Math.round(m[k])}</b></label>`).join('')}
+      <div class="acoes-linha"><button type="button" class="botao pequeno" data-margens-padrao title="Estas margens valem para os slides sem margens próprias">Usar como padrão</button>
+        ${s.margens ? '<button type="button" class="link" data-margens-voltar>Voltar ao padrão</button>' : ''}</div></details>`
+  }
+  const margensDosInputs = () => Object.fromEntries($$('[data-margem]', tela).map((x) => [x.dataset.margem, +x.value]))
+  let salvarMargens = null
+  const margensMudaram = () => {
+    const i = atual
+    const m = margensDosInputs()
+    for (const [k, x] of Object.entries(m)) $(`[data-margem-n="${k}"]`, tela).textContent = x
+    versao.slides[i].margens = m
+    avisar(tela, { slide: i, margens: m })
+    clearTimeout(salvarMargens)
+    salvarMargens = setTimeout(() => enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/margens`, { v, slide: i, margens: m }).catch((err) => aviso(err.message, 'erro')), 500)
+  }
   // o lado do slide: o texto (editável na última versão), o porquê, os comentários curtos e a legenda (fechada)
   const lado = () => {
     const s = versao.slides[atual] || {}
@@ -245,13 +281,12 @@ export async function abrirCarrossel(tela, slug, pedida) {
       <div class="editor-texto" data-editor${editavel() ? ' contenteditable="true" spellcheck="true"' : ''}>${paraEditor(s.texto)}</div>
       ${editavel() ? `<div class="acoes-linha editor-acoes"><button type="button" class="botao pequeno" data-destacar title="Selecione o trecho e destaque (⌘B); dentro de um destaque, tira">Destacar</button><span class="sub" data-salvo></span></div>`
         : `<p class="dica">${rev.aprovado ? 'Aprovado: desaprove para editar o texto.' : 'Só a última versão se edita.'}</p>`}
-      ${s.porque ? `<p class="dica">Por quê: ${esc(s.porque)}</p>` : ''}
+      ${editavel() ? margensHtml(s) : ''}
       <span class="eyebrow">Comentários</span>
       ${doSlide(atual).length ? `<ul class="comentarios-carrossel">${doSlide(atual).map(comentario).join('')}</ul>` : ''}
       ${!rev.aprovado ? `<form class="campo novo-comentario" data-comentar><textarea rows="2" placeholder="${ponto ? 'No ponto marcado…' : 'Sobre este slide (clique nele para marcar um ponto)…'}"></textarea>
         <div class="acoes-linha">${ponto ? '<button type="button" class="link" data-sem-ponto>Tirar o ponto</button>' : ''}<button class="botao pequeno botao-coral">Comentar</button></div></form>` : ''}
-      ${gerais.length ? `<span class="eyebrow">Gerais</span><ul class="comentarios-carrossel">${gerais.map(comentario).join('')}</ul>` : ''}
-      <details class="legenda-carrossel"><summary class="eyebrow">Legenda do post</summary><p>${esc(versao.legenda || '(sem legenda)')}</p></details>`
+      ${gerais.length ? `<span class="eyebrow">Gerais</span><ul class="comentarios-carrossel">${gerais.map(comentario).join('')}</ul>` : ''}`
   }
   /** Grava o texto editado do slide i (o slide no app já mudou ao vivo). */
   const gravarTexto = async (i, texto) => {
@@ -372,7 +407,19 @@ export async function abrirCarrossel(tela, slug, pedida) {
   tela.addEventListener('mousedown', (e) => {
     if (e.target.closest('[data-destacar]')) e.preventDefault() // o editor não perde a seleção
   })
+  tela.addEventListener('toggle', (e) => {
+    if (!e.target.matches?.('[data-margens]')) return
+    margensAbertas = e.target.open
+    if (!margensAbertas) return
+    // ao abrir, os valores de agora (as do preset só se leem com o slide carregado)
+    const m = margensDe(versao.slides[atual] || {})
+    for (const x of $$('[data-margem]', tela)) {
+      x.value = Math.round(m[x.dataset.margem])
+      $(`[data-margem-n="${x.dataset.margem}"]`, tela).textContent = x.value
+    }
+  }, true)
   tela.addEventListener('input', (e) => {
+    if (e.target.matches('[data-margem]')) return margensMudaram()
     if (e.target.closest('[data-editor]')) textoMudou()
   })
   tela.addEventListener('paste', (e) => {
@@ -387,6 +434,26 @@ export async function abrirCarrossel(tela, slug, pedida) {
     if (e.target.matches('[data-versao]')) location.hash = `#/c/${encodeURIComponent(slug)}/v${e.target.value}`
   })
   tela.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-margens-padrao], [data-margens-voltar]')) {
+      const padrao = !!e.target.closest('[data-margens-padrao]')
+      const m = padrao ? margensDosInputs() : null
+      clearTimeout(salvarMargens)
+      try {
+        if (padrao) {
+          await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/margens`, { padrao: m })
+          c.margens = m
+          avisar(tela, { margens: m })
+          aviso('Margens padrão do carrossel')
+        }
+        // o slide passa a seguir o padrão (que agora é igual a ele, ou o de antes)
+        await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/margens`, { v, slide: atual, margens: null })
+        delete versao.slides[atual].margens
+        avisar(tela, { slide: atual, margens: null })
+      } catch (err) {
+        aviso(err.message, 'erro')
+      }
+      return desenhar()
+    }
     if (e.target.closest('[data-destacar]')) {
       const ed = $('[data-editor]', tela)
       if (destacar(ed)) textoMudou()

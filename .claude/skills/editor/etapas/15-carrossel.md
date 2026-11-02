@@ -72,11 +72,14 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
 | `midia` | imagem ou vídeo ocupando o slide, texto opcional por cima | `midia`, `texto` |
 | `cta` | o fechamento | `texto`, `acao` (o botão) |
 
-- `texto`: parágrafos separados por linha em branco; `**destaque**` dentro. Não há `titulo` (o `versao` recusa).
+- `texto`: parágrafos separados por linha em branco; `**destaque**` dentro. Não há `titulo` (o `versao` recusa). Uma
+  linha em branco a mais (`\n\n\n\n`) é um parágrafo vazio: espaço no slide (é o Enter do criador no app; mantenha).
 
 - `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, com faixas; prints e gráficos).
 - `som`: o vídeo leva o áudio dele. Ligue quando a fala do trecho importa; gravação de tela e demonstração vão mudas.
-- `porque`: o porquê do slide (o app mostra; o criador pergunta).
+- `porque`: o porquê do slide (para você; o app não mostra).
+- `margens`: `{topo, lados, base}` em px do slide, as que o criador ajustou no app; sem elas, vale o padrão do carrossel
+  (`margens` no `carrossel.json`, o "Usar como padrão" do app) e, sem padrão, o preset. Mantenha as dele.
 - `midia`: o caminho dentro do carrossel (`midia/…`), sempre posto pelo `carrossel.py midia`.
 
 ```bash
@@ -96,7 +99,7 @@ uv run ferramentas/carrossel.py responder <slug> <vN> <id> --status aplicado|res
 ```
 
 Aplique os comentários numa versão nova (`versao`) e responda cada um numa frase curta (o que mudou). O ponto marcado
-(x, y em % do slide) diz onde ele olhou. O criador também edita o texto e o destaque direto no app, na própria vN (o
+(x, y em % do slide) diz onde ele olhou. O criador também edita o texto, o destaque e as margens direto no app, na própria vN (o
 `ler` diz em quais slides): a versão nova parte de `versoes/vN.json`, não do seu JSON antigo, e mantém o que ele
 escreveu.
 
