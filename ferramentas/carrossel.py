@@ -125,14 +125,16 @@ def validar(p: Path, dados: dict) -> dict:
             raise ValueError(f'Slide {i}: tipo "{tipo}" não existe ({", ".join(TIPOS)}).')
         if s.get('titulo'):
             raise ValueError(f'Slide {i}: o carrossel não tem título; é tudo texto, com **destaque** (etapa 15).')
-        x = {k: s[k] for k in ('tipo', 'texto', 'midia', 'ajuste', 'som', 'acao', 'porque') if s.get(k) not in (None, '')}
+        x = {k: s[k] for k in ('tipo', 'texto', 'midia', 'falta', 'ajuste', 'som', 'acao', 'porque') if s.get(k) not in (None, '')}
         if isinstance(s.get('arrasta'), bool):
             x['arrasta'] = s['arrasta']
         if margens(s.get('margens')):
             x['margens'] = margens(s.get('margens'))
         m = x.get('midia')
-        if tipo in ('texto-imagem', 'texto-video', 'midia') and not m:
-            raise ValueError(f'Slide {i} ({tipo}): falta a mídia.')
+        if tipo in ('texto-imagem', 'texto-video', 'midia') and not m and not x.get('falta'):
+            raise ValueError(f'Slide {i} ({tipo}): falta a mídia (ou `falta`: o que vai no lugar, enquanto não chega).')
+        if m:
+            x.pop('falta', None)
         if m:
             arq = RAIZ / m.lstrip('/') if m.startswith('/') else p / m
             if not arq.is_file():
@@ -325,7 +327,7 @@ def texto_revisao(slug: str, v: int | None = None) -> str:
         else:
             s = slides[n] if n < len(slides) else {}
             ponto = f' · ponto ({round(c["x"] * 100)}%, {round(c["y"] * 100)}%)' if c.get('x') is not None else ''
-            onde = f'Slide {n + 1} ({s.get("tipo", "?")}: "{uma_linha(s.get("titulo") or s.get("texto") or s.get("midia") or "")[:70]}"){ponto}'
+            onde = f'Slide {n + 1} ({s.get("tipo", "?")}: "{uma_linha(s.get("titulo") or s.get("texto") or s.get("midia") or "")[:70]}"{" · falta: " + s["falta"] if s.get("falta") else ""}){ponto}'
         estado = '' if (c.get('status') or 'pendente') == 'pendente' else f'  [{c["status"]}: {uma_linha(c.get("resposta") or "")}]'
         linhas.append(f'- [{c["id"]}] {onde}: {uma_linha(c["texto"])}{estado}')
     if not cs:
@@ -368,6 +370,8 @@ def exportar(slug: str) -> Path:
         raise SystemExit('Nada para exportar: o carrossel ainda não tem versão.')
     v, (preset, destaque) = vs[-1], visual(meta)
     versao = ler_json(p / 'versoes' / f'v{v}.json', {})
+    if faltam := [f'{n} ({s["falta"]})' for n, s in enumerate(versao.get('slides') or [], 1) if s.get('falta')]:
+        raise SystemExit(f'Falta mídia: slide {", ".join(faltam)}.')
     srv = servidor.servir(0)
     porta = srv.server_address[1]
     final = p / 'final'

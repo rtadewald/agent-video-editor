@@ -517,6 +517,8 @@ export async function abrirCarrossel(tela, slug, pedida) {
     }
     if (e.target.closest('[data-abrir-final]')) return enviar('POST', `/api/carrosseis/${encodeURIComponent(slug)}/abrir-final`).catch((err) => aviso(err.message, 'erro'))
     if (e.target.closest('[data-aprovar]')) {
+      const faltam = versao.slides.map((x, i) => x.falta && !x.midia ? i + 1 : 0).filter(Boolean)
+      if (faltam.length) return aviso(`Falta mídia no slide ${faltam.join(', ')}: peça ao Claude antes de aprovar`, 'erro')
       if (!(await confirmar({ titulo: `Aprovar “${c.nome}”?`, texto: `Exporta os ${versao.slides.length} slides no preset ${c.presets.find((p) => p.id === preset)?.nome}, destaque ${destaque} (PNG e MP4) e a legenda.`, ok: 'Aprovar e exportar' }))) return
       rev.aprovado = true
       const r = await gravar()

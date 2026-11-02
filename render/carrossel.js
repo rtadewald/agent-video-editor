@@ -35,6 +35,8 @@
       ? `<video src="${url(s.midia)}" muted loop playsinline ${exportar ? 'preload="auto"' : 'autoplay'}></video>`
       : `<img src="${url(s.midia)}" alt="">`
     midia = `<figure class="midia${s.ajuste === 'conter' ? ' conter' : ''}">${m}</figure>`
+  } else if (s.falta) { // a mídia que ainda não chegou: uma caixa vazia dizendo o que vai nela
+    midia = `<figure class="midia falta"><span>${esc(s.falta)}</span></figure>`
   }
   const corpo = `${s.titulo ? `<h1 class="titulo">${linha(s.titulo)}</h1>` : ''}${s.texto ? `<div class="texto">${texto(s.texto)}</div>` : ''}${s.acao ? `<div class="acao"><span>${linha(s.acao)}</span></div>` : ''}`
   const margens = () => {
@@ -43,7 +45,7 @@
   }
   margens()
   const arrasta = () => el.classList.toggle('com-arrasta', s.arrasta ?? (i === 0 && i < slides.length - 1))
-  el.className = `slide t-${tipo}${s.midia ? ' com-midia' : ''}${i === 0 ? ' primeiro' : ''}${i === slides.length - 1 ? ' ultimo' : ''}`
+  el.className = `slide t-${tipo}${s.midia || s.falta ? ' com-midia' : ''}${i === 0 ? ' primeiro' : ''}${i === slides.length - 1 ? ' ultimo' : ''}`
   el.innerHTML = `<header class="topo"><span class="avatar">${AUTOR.iniciais}</span><span class="autor"><b>${AUTOR.nome}</b><i>${AUTOR.arroba}</i></span></header>
     ${tipo === 'midia' ? `${midia}<div class="conteudo sobre">${corpo}</div>`
       : `<div class="conteudo">${corpo}${midia}</div>`}

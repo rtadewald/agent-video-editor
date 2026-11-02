@@ -82,6 +82,8 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   (`margens` no `carrossel.json`, o "Usar como padrão" do app) e, sem padrão, o preset. Mantenha as dele.
 - `arrasta`: `true`/`false`, o botão "Arrasta" que o criador ligou ou desligou no slide; sem ele, só o 1º slide tem.
 - `midia`: o caminho dentro do carrossel (`midia/…`), sempre posto pelo `carrossel.py midia`.
+- `falta`: a mídia que ainda não chegou ("gifs de 2 apps meus"): o slide mostra uma caixa vazia com isso, no lugar dela.
+  Use enquanto se acerta a copy; não se aprova nem exporta com `falta` (a `midia` posta tira).
 
 ```bash
 uv run ferramentas/carrossel.py midia <slug> <arquivo> [--de 12.3 --ate 18.4] [--nome x]   # imagem ou trecho (até 60 s)
