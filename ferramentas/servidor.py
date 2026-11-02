@@ -25,7 +25,8 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
   {categoria} · o POST /api/referencias aceita a categoria no cabeçalho X-Categoria.
 - Carrosséis (ferramentas/carrossel.py): GET|POST /api/carrosseis {nome, tipo, origem, pedido} · GET /api/carrosseis/<slug>
   (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset, destaque}
-  (num aprovado, exporta de novo) · PUT …/<slug>/nome {nome} · PUT …/<slug>/revisao/v<N> (aprovar exporta, em segundo
+  (num aprovado, exporta de novo) · PUT …/<slug>/texto/v<N>/<i> {texto} (o criador edita o texto do slide i, de 0, na
+  própria vN) · PUT …/<slug>/nome {nome} · PUT …/<slug>/revisao/v<N> (aprovar exporta, em segundo
   plano) · POST …/<slug>/abrir-final · DELETE /api/carrosseis/<slug> (vai para a lixeira).
 - POST /api/projetos/<slug>/abrir-final: abre no Finder a pasta dos exports (final/: as saídas, cada uma com o .md).
 - GET /api/aprendizados (as áreas, com os bullets "Do criador", do geral e das categorias) · GET|PUT
@@ -1532,6 +1533,16 @@ def _preset_carrossel(h, q, slug):
     if reexporta:
         _exportar_carrossel(slug)
     return {'ok': True, 'exportando': reexporta}
+
+
+@rota('PUT', r'/api/carrosseis/([\w-]+)/texto/v(\d+)/(\d+)')
+def _texto_carrossel(h, q, slug, v, i):
+    _pasta_carrossel(slug)
+    try:
+        carrossel().editar_texto(slug, int(v), int(i), str(h.corpo().get('texto') or ''))
+    except ValueError as e:
+        raise Erro(str(e), 422) from e
+    return {'ok': True}
 
 
 @rota('PUT', r'/api/carrosseis/([\w-]+)/nome')

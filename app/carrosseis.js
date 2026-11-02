@@ -1,6 +1,7 @@
 // Os carrosséis (4:5): a aba (#/carrosseis: a lista e o "+ Carrossel") e a página de um (#/c/<slug>[/vN]: os slides ao
-// vivo, o preset e o destaque, os comentários por slide e o aprovar). Os slides são a página render/carrossel.html num iframe; trocar
-// o preset avisa todos os iframes (postMessage) e grava no carrossel. O Claude escreve os slides (carrossel.py).
+// vivo, o preset e o destaque, o texto do slide editável, os comentários por slide e o aprovar). Os slides são a página
+// render/carrossel.html num iframe; trocar o preset, ou editar o texto, avisa os iframes (postMessage) e grava. O Claude
+// escreve os slides (carrossel.py).
 import { $, $$, ICONE, abrirAba, agora, aviso, confirmar, copiar, enviar, esc, fecharAba, janela, json, preferencia, quandoCurto } from './comum.js'
 
 const ESTADOS = { novo: ['Aguardando o Claude', 'selo-amarelo'], em_revisao: ['Em revisão', 'selo-coral'], aprovado: ['Aprovado', 'selo-menta'] }
@@ -12,8 +13,55 @@ const quadro = (slug, v, i, preset, destaque = 1, extra = '') =>
 function escalar(raiz) {
   for (const q of $$('.slide-quadro', raiz)) q.style.setProperty('--s', q.clientWidth / 1080)
 }
-const avisarPreset = (raiz, preset, destaque) => {
-  for (const f of $$('.slide-quadro iframe', raiz)) f.contentWindow?.postMessage({ preset, destaque }, '*')
+const avisar = (raiz, msg) => {
+  for (const f of $$('.slide-quadro iframe', raiz)) f.contentWindow?.postMessage(msg, '*')
+}
+
+// o editor do texto de um slide: parágrafos (<p>), quebra de linha (<br>) e o **destaque** (<mark>), como no slide
+const paraEditor = (t) => String(t || '').trim().split(/\n\s*\n/).filter(Boolean)
+  .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>').replace(/\n/g, '<br>')}</p>`).join('') || '<p><br></p>'
+function doEditor(ed) {
+  const inline = (n, marcado) => [...n.childNodes].map((x) => {
+    if (x.nodeType === 3) return x.nodeValue.replace(/\u00a0/g, ' ')
+    if (x.nodeType !== 1) return ''
+    if (x.tagName === 'BR') return '\n'
+    if (['MARK', 'B', 'STRONG'].includes(x.tagName)) {
+      const d = inline(x, true)
+      return marcado || !d.trim() ? d : `**${d}**`
+    }
+    return (['DIV', 'P'].includes(x.tagName) ? '\n' : '') + inline(x, marcado)
+  }).join('')
+  const blocos = []
+  let solto = ''
+  for (const x of ed.childNodes) {
+    if (x.nodeType === 1 && ['P', 'DIV'].includes(x.tagName)) {
+      blocos.push(solto, inline(x))
+      solto = ''
+    } else solto += inline({ childNodes: [x] })
+  }
+  blocos.push(solto)
+  return blocos.map((b) => b.replace(/\*\*(\s*)([^*]*?)(\s*)\*\*/g, '$1**$2**$3').split('\n').map((l) => l.trimEnd()).join('\n').trim())
+    .filter(Boolean).join('\n\n')
+}
+/** Liga ou desliga o destaque: dentro de um, tira; senão, marca a seleção. */
+function destacar(ed) {
+  const sel = getSelection()
+  if (!sel.rangeCount) return false
+  const r = sel.getRangeAt(0)
+  if (!ed.contains(r.commonAncestorContainer)) return false
+  const marca = (n) => (n.nodeType === 1 ? n : n.parentElement)?.closest('mark')
+  const m = marca(r.startContainer) || marca(r.endContainer)
+  if (m && ed.contains(m)) {
+    m.replaceWith(...m.childNodes)
+    ed.normalize()
+  } else if (!r.collapsed) {
+    const novo = document.createElement('mark')
+    novo.append(r.extractContents())
+    for (const x of novo.querySelectorAll('mark')) x.replaceWith(...x.childNodes)
+    r.insertNode(novo)
+    sel.selectAllChildren(novo)
+  } else return false
+  return true
 }
 
 // ---------------------------------------------------------------- a aba (a lista)
@@ -160,6 +208,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
   let atual = Math.min(preferencia(`carrossel.${slug}.slide`, 0), versao.slides.length - 1)
   let ponto = null // o ponto marcado no slide grande para o próximo comentário ({x, y} de 0 a 1)
   const ultima = v === c.ultima
+  let salvarTexto = null // a gravação pendente do texto editado (sai ao parar de digitar ou ao trocar de slide)
 
   const gravar = async () => {
     try {
@@ -187,19 +236,51 @@ export async function abrirCarrossel(tela, slug, pedida) {
       ${ultima ? (rev.aprovado ? `<button class="botao pequeno botao-verde" data-desaprovar title="Desaprovar (volta para Em revisão)">${ICONE.check} Aprovado</button>`
         : `<button class="botao pequeno botao-coral" data-aprovar title="Aprovar: exporta os slides (PNG/MP4) e a legenda em final/">${ICONE.check} Aprovar</button>`) : ''}`
   const pinos = () => `${doSlide(atual).filter((x) => x.x != null).map((x, k) => `<span class="pino" style="left:${x.x * 100}%;top:${x.y * 100}%">${k + 1}</span>`).join('')}${ponto ? `<span class="pino novo" style="left:${ponto.x * 100}%;top:${ponto.y * 100}%">+</span>` : ''}`
+  const editavel = () => ultima && !rev.aprovado
+  // o lado do slide: o texto (editável na última versão), o porquê, os comentários curtos e a legenda (fechada)
   const lado = () => {
     const s = versao.slides[atual] || {}
+    const gerais = doSlide(null)
     return `<span class="eyebrow">Slide ${atual + 1} de ${versao.slides.length} · ${esc(s.tipo || '')}</span>
+      <div class="editor-texto" data-editor${editavel() ? ' contenteditable="true" spellcheck="true"' : ''}>${paraEditor(s.texto)}</div>
+      ${editavel() ? `<div class="acoes-linha editor-acoes"><button type="button" class="botao pequeno" data-destacar title="Selecione o trecho e destaque (⌘B); dentro de um destaque, tira">Destacar</button><span class="sub" data-salvo></span></div>`
+        : `<p class="dica">${rev.aprovado ? 'Aprovado: desaprove para editar o texto.' : 'Só a última versão se edita.'}</p>`}
       ${s.porque ? `<p class="dica">Por quê: ${esc(s.porque)}</p>` : ''}
-      <ul class="comentarios-carrossel">${doSlide(atual).map(comentario).join('') || '<li class="vazio">Sem comentários neste slide.</li>'}</ul>
-      ${!rev.aprovado ? `<form class="campo novo-comentario" data-comentar><textarea rows="3" placeholder="${ponto ? 'Comentário no ponto marcado…' : 'Comentário neste slide (clique no slide para marcar um ponto)…'}"></textarea>
+      <span class="eyebrow">Comentários</span>
+      ${doSlide(atual).length ? `<ul class="comentarios-carrossel">${doSlide(atual).map(comentario).join('')}</ul>` : ''}
+      ${!rev.aprovado ? `<form class="campo novo-comentario" data-comentar><textarea rows="2" placeholder="${ponto ? 'No ponto marcado…' : 'Sobre este slide (clique nele para marcar um ponto)…'}"></textarea>
         <div class="acoes-linha">${ponto ? '<button type="button" class="link" data-sem-ponto>Tirar o ponto</button>' : ''}<button class="botao pequeno botao-coral">Comentar</button></div></form>` : ''}
-      <span class="eyebrow">Geral</span>
-      <ul class="comentarios-carrossel">${doSlide(null).map(comentario).join('') || '<li class="vazio">Sem comentários gerais.</li>'}</ul>
-      ${!rev.aprovado ? `<form class="campo novo-comentario" data-comentar-geral><textarea rows="2" placeholder="Sobre o carrossel inteiro…"></textarea>
-        <div class="acoes-linha"><button class="botao pequeno">Comentar</button></div></form>` : ''}
-      <span class="eyebrow">Legenda</span>
-      <p class="legenda-carrossel">${esc(versao.legenda || '(sem legenda)')}</p>`
+      ${gerais.length ? `<span class="eyebrow">Gerais</span><ul class="comentarios-carrossel">${gerais.map(comentario).join('')}</ul>` : ''}
+      <details class="legenda-carrossel"><summary class="eyebrow">Legenda do post</summary><p>${esc(versao.legenda || '(sem legenda)')}</p></details>`
+  }
+  /** Grava o texto editado do slide i (o slide no app já mudou ao vivo). */
+  const gravarTexto = async (i, texto) => {
+    const salvo = $('[data-salvo]', tela)
+    if (salvo) salvo.textContent = 'Salvando…'
+    try {
+      await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/texto/v${v}/${i}`, { texto })
+      if (i === atual && salvo) salvo.textContent = 'Salvo'
+    } catch (err) {
+      aviso(err.message, 'erro')
+      if (salvo) salvo.textContent = ''
+    }
+  }
+  const textoMudou = () => {
+    const ed = $('[data-editor]', tela)
+    const i = atual
+    const texto = doEditor(ed)
+    versao.slides[i].texto = texto
+    avisar(tela, { slide: i, texto })
+    clearTimeout(salvarTexto?.t)
+    salvarTexto = { t: setTimeout(() => { salvarTexto = null; gravarTexto(i, texto) }, 700), i, texto }
+    $('[data-salvo]', tela).textContent = ''
+  }
+  const gravarPendente = () => {
+    if (!salvarTexto) return
+    clearTimeout(salvarTexto.t)
+    const { i, texto } = salvarTexto
+    salvarTexto = null
+    return gravarTexto(i, texto)
   }
   // à esquerda os slides; no meio o slide grande; à direita o visual (preset e destaque) e a conversa
   tela.innerHTML = `<div class="cabeca-secao cabeca-carrossel"></div>
@@ -278,18 +359,42 @@ export async function abrirCarrossel(tela, slug, pedida) {
   }
   tela.addEventListener('submit', (e) => {
     e.preventDefault()
-    const geral = e.target.matches('[data-comentar-geral]')
-    comentar($('textarea', e.target).value, geral ? null : atual, geral ? null : ponto)
+    comentar($('textarea', e.target).value, atual, ponto)
   })
   tela.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && e.target.matches('.novo-comentario textarea')) e.target.form.requestSubmit()
+    const ed = e.target.closest?.('[data-editor]')
+    if (ed && (e.metaKey || e.ctrlKey) && ['b', 'i', 'u'].includes(e.key.toLowerCase())) {
+      e.preventDefault() // nada de negrito, itálico ou sublinhado do navegador: só o destaque
+      if (e.key.toLowerCase() === 'b' && destacar(ed)) textoMudou()
+    }
+  })
+  tela.addEventListener('mousedown', (e) => {
+    if (e.target.closest('[data-destacar]')) e.preventDefault() // o editor não perde a seleção
+  })
+  tela.addEventListener('input', (e) => {
+    if (e.target.closest('[data-editor]')) textoMudou()
+  })
+  tela.addEventListener('paste', (e) => {
+    if (!e.target.closest?.('[data-editor]')) return
+    e.preventDefault() // colar vira texto puro
+    document.execCommand('insertText', false, e.clipboardData.getData('text/plain'))
+  })
+  tela.addEventListener('focusout', (e) => {
+    if (e.target.closest?.('[data-editor]')) gravarPendente()
   })
   tela.addEventListener('change', (e) => {
     if (e.target.matches('[data-versao]')) location.hash = `#/c/${encodeURIComponent(slug)}/v${e.target.value}`
   })
   tela.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-destacar]')) {
+      const ed = $('[data-editor]', tela)
+      if (destacar(ed)) textoMudou()
+      return
+    }
     const ir = e.target.closest('[data-ir]')
     if (ir) {
+      gravarPendente()
       atual = preferencia(`carrossel.${slug}.slide`, 0, +ir.dataset.ir)
       ponto = null
       return desenhar()
@@ -300,7 +405,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
       else destaque = +pr.dataset.destaque
       for (const b of $$('[data-preset]', tela)) b.classList.toggle('ativa', b.dataset.preset === preset)
       $('.destaques-carrossel', tela).innerHTML = destaques()
-      avisarPreset(tela, preset, destaque)
+      avisar(tela, { preset, destaque })
       try {
         const r = await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/preset`, { preset, destaque })
         if (r.exportando) {
@@ -354,5 +459,6 @@ export async function abrirCarrossel(tela, slug, pedida) {
   return () => {
     ro.disconnect()
     clearTimeout(vigia)
+    gravarPendente()
   }
 }

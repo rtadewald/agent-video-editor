@@ -1555,4 +1555,15 @@ button.tag:hover { background: rgba(185, 166, 242, 0.26); }
 .pino-n { float: left; margin-right: 6px; color: var(--color-coral); }
 .resposta-claude { margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--color-sage); color: var(--color-fog); }
 .novo-comentario .acoes-linha { justify-content: flex-end; align-items: center; }
-.legenda-carrossel { font-size: 13px; color: var(--color-fog); white-space: pre-wrap; }
+.legenda-carrossel { margin-top: 12px; }
+.legenda-carrossel summary { cursor: pointer; list-style: none; }
+.legenda-carrossel summary::before { content: '▸ '; }
+.legenda-carrossel[open] summary::before { content: '▾ '; }
+.legenda-carrossel p { margin-top: 8px; font-size: 13px; color: var(--color-fog); white-space: pre-wrap; }
+/* o texto do slide, editável: parágrafos e o destaque (o <mark>) */
+.editor-texto { padding: 12px 14px; border: 1px solid var(--color-line-dark); border-radius: var(--radius-xl); background: var(--color-deeper); color: var(--color-cream); font-size: 14px; line-height: 1.5; outline: none; }
+.editor-texto[contenteditable]:focus { border-color: var(--color-coral); }
+.editor-texto p + p { margin-top: 0.7em; }
+.editor-texto mark { padding: 0 2px; border-radius: 3px; background: var(--color-yellow); color: var(--color-ink); }
+.editor-texto ::selection { background: rgba(244, 125, 95, 0.5); color: inherit; }
+.editor-acoes { justify-content: space-between; align-items: center; }

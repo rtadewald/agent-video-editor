@@ -96,7 +96,9 @@ uv run ferramentas/carrossel.py responder <slug> <vN> <id> --status aplicado|res
 ```
 
 Aplique os comentários numa versão nova (`versao`) e responda cada um numa frase curta (o que mudou). O ponto marcado
-(x, y em % do slide) diz onde ele olhou.
+(x, y em % do slide) diz onde ele olhou. O criador também edita o texto e o destaque direto no app, na própria vN (o
+`ler` diz em quais slides): a versão nova parte de `versoes/vN.json`, não do seu JSON antigo, e mantém o que ele
+escreveu.
 
 ## Aprovado
 

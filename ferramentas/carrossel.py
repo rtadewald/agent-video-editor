@@ -46,12 +46,12 @@ MAX_VIDEO = 60  # o Instagram corta o vídeo de um slide em 60 s
 PRESETS = [
     {'id': 'notas', 'nome': 'Notas', 'descricao': 'A nota do iPhone, limpa.',
      'destaques': ['Marca-texto', 'Marca-texto cheio', 'Sublinhado', 'Âmbar', 'Azul']},
-    {'id': 'grafite', 'nome': 'Grafite', 'descricao': 'Escuro e calmo: título branco, texto cinza.',
-     'destaques': ['Coral', 'Azul gelo', 'Marcado coral', 'Sublinhado coral', 'Cápsula']},
+    {'id': 'etiqueta', 'nome': 'Etiqueta', 'descricao': 'Cinza claro, letra firme, o "Arrasta" em pílula.',
+     'destaques': ['Etiqueta preta', 'Etiqueta laranja', 'Contorno', 'Laranja', 'Azul']},
     {'id': 'codigo', 'nome': 'Código', 'descricao': 'A janela de um editor claro.',
      'destaques': ['Código roxo', 'Código cinza', 'Roxo', 'Azul', 'Diff verde']},
-    {'id': 'etiqueta', 'nome': 'Etiqueta', 'descricao': 'Cinza claro, título pesado, o "Arrasta" em pílula.',
-     'destaques': ['Etiqueta preta', 'Etiqueta laranja', 'Contorno', 'Laranja', 'Azul']},
+    {'id': 'grafite', 'nome': 'Grafite', 'descricao': 'Escuro e calmo, texto cinza.',
+     'destaques': ['Coral', 'Azul gelo', 'Marcado coral', 'Sublinhado coral', 'Cápsula']},
 ]
 PRESET_PADRAO = 'notas'
 
@@ -154,6 +154,30 @@ def nova_versao(slug: str, dados: dict) -> int:
     return v
 
 
+def editar_texto(slug: str, v: int, i: int, texto: str) -> None:
+    """O criador muda o texto de um slide no app: grava na própria vN (a última, não aprovada) e marca o slide."""
+    p = pasta(slug)
+    vs = versoes(p)
+    if not vs or v != vs[-1]:
+        raise ValueError('Só a última versão se edita.')
+    if revisao(p, v).get('aprovado'):
+        raise ValueError('O carrossel está aprovado: desaprove para editar.')
+    arq = p / 'versoes' / f'v{v}.json'
+    dados = ler_json(arq, {}) or {}
+    slides = dados.get('slides') or []
+    if not 0 <= i < len(slides):
+        raise ValueError(f'Não há o slide {i + 1}.')
+    texto = re.sub(r'\n{3,}', '\n\n', str(texto or '').replace('\r', '')).strip()
+    if not texto and slides[i].get('tipo') in ('capa', 'texto', 'cta'):
+        raise ValueError(f'O slide {i + 1} precisa de texto.')
+    if texto:
+        slides[i]['texto'] = texto
+    else:
+        slides[i].pop('texto', None)
+    slides[i]['editado_em'] = agora()
+    gravar_json(arq, dados)
+
+
 def midia(slug: str, arquivo: Path, de: float | None = None, ate: float | None = None, nome: str | None = None) -> str:
     """Uma imagem (copiada) ou um trecho de vídeo (H.264 até 1080 de largura, 30 fps, com o som) em midia/."""
     p = pasta(slug)
@@ -252,6 +276,9 @@ def texto_revisao(slug: str, v: int | None = None) -> str:
         linhas.append(f'- [{c["id"]}] {onde}: {uma_linha(c["texto"])}{estado}')
     if not cs:
         linhas.append('(sem comentários)')
+    editados = [str(n + 1) for n, s in enumerate(slides) if s.get('editado_em')]
+    if editados:
+        linhas.append(f'Texto editado pelo criador nos slides {", ".join(editados)} (já está na v{v}: parta dela).')
     if rev.get('aprovado'):
         linhas.append('Aprovado.')
     return '\n'.join(linhas)

@@ -76,8 +76,21 @@
   }
   await pronto()
 
-  // o app troca o preset e o destaque de todos os slides de uma vez, sem recarregar
+  // o app troca o preset e o destaque de todos os slides de uma vez, sem recarregar; e o texto deste slide, enquanto o
+  // criador edita
   window.addEventListener('message', (e) => {
+    if (e.data?.slide === i && typeof e.data.texto === 'string') {
+      s.texto = e.data.texto
+      const html = texto(s.texto)
+      let t = conteudo.querySelector('.texto')
+      if (!t && html) {
+        t = Object.assign(document.createElement('div'), { className: 'texto' })
+        conteudo.insertBefore(t, conteudo.querySelector('.acao, .midia'))
+      }
+      if (t && html) t.innerHTML = html
+      else t?.remove()
+      pronto()
+    }
     if (e.data?.preset || e.data?.destaque) {
       if (e.data.preset) document.documentElement.dataset.preset = e.data.preset
       if (e.data.destaque) document.documentElement.dataset.destaque = e.data.destaque
