@@ -18,7 +18,7 @@ preset no app e comenta por slide. Fluxo e contrato dos slides: .claude/skills/e
         a revisão em texto: cada comentário com o slide (o texto dele) e o ponto marcado
     uv run ferramentas/carrossel.py responder <slug> <vN> <id> --status aplicado|respondido|nao_aplicado --resposta "…"
     uv run ferramentas/carrossel.py exportar <slug>
-        final/: 01.png, 02.mp4… (na ordem de postar, com o preset escolhido) e legenda.txt. O app exporta sozinho ao
+        final/: 01.png, 02.mp4… (na ordem de postar, com o preset escolhido), a legenda.txt e a copy.md. O app exporta sozinho ao
         aprovar (e de novo se o preset ou o destaque mudar depois).
 
 O servidor importa este arquivo (só a biblioteca padrão no topo); o Playwright e o Pillow só entram na exportação.
@@ -390,9 +390,20 @@ def responder(slug: str, v: int, cid: str, status: str, resposta: str) -> None:
 
 # ---------------------------------------------------------------- a exportação
 
+def copy_md(nome: str, slides: list) -> str:
+    """A copy do carrossel, slide a slide (**c1**, **c2**…), com o [mídia] onde a mídia entra."""
+    partes = [f'# {nome}']
+    for i, s in enumerate(slides, 1):
+        texto = (s.get('texto') or '').strip()
+        if s.get('midia') and not re.search(r'^\s*\[m[ií]dia\]\s*$', texto, re.M):
+            texto = f'{texto}\n\n[mídia]'.strip()
+        partes.append(f'**c{i}**\n\n{texto}')
+    return '\n\n'.join(partes) + '\n'
+
+
 def exportar(slug: str) -> Path:
     """final/: cada slide fotografado com o preset escolhido (PNG); os de vídeo, o clipe posto no lugar dele pelo
-    ffmpeg (MP4 H.264 30 fps, com o som se o slide pede `som`); e a legenda.txt."""
+    ffmpeg (MP4 H.264 30 fps, com o som se o slide pede `som`); a legenda.txt; e a copy.md (o texto de cada slide)."""
     import tempfile
 
     from PIL import Image, ImageDraw
@@ -463,12 +474,13 @@ def exportar(slug: str) -> Path:
         srv.shutdown()
         if final.is_dir():  # só a entrega de agora (as de antes, de outro preset ou versão, saem)
             for velho in final.iterdir():
-                if re.fullmatch(r'\d{2}\.(png|mp4)|legenda\.txt', velho.name):
+                if re.fullmatch(r'\d{2}\.(png|mp4)|legenda\.txt|copy\.md', velho.name):
                     velho.unlink()
         final.mkdir(exist_ok=True)
         for arq, nome in feitos:
             shutil.move(str(arq), final / nome)
     (final / 'legenda.txt').write_text((versao.get('legenda') or '') + '\n', encoding='utf-8')
+    (final / 'copy.md').write_text(copy_md(meta.get('nome') or slug, versao['slides']), encoding='utf-8')
     meta['exportado'] = {'versao': v, 'preset': preset, 'destaque': destaque, 'cor': (meta.get('cores') or {}).get(preset) or cores_padrao().get(preset), 'em': agora()}
     gravar_json(p / 'carrossel.json', meta)
     return final

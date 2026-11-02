@@ -115,5 +115,5 @@ escreveu.
 ## Aprovado
 
 O app exporta sozinho ao aprovar (e de novo se o preset ou o destaque mudar depois): `final/01.png`, `02.mp4`… na ordem de postar,
-e `legenda.txt`. Depois, como no vídeo (`etapas/14-concluir.md`): junte as correções que valem para outros carrosséis,
+a `legenda.txt` e a `copy.md` (o texto de cada slide, **c1**, **c2**…, com `[mídia]` onde ela entra). Depois, como no vídeo (`etapas/14-concluir.md`): junte as correções que valem para outros carrosséis,
 mostre ao criador e grave só o que ele confirmar, em `biblioteca/aprendizados/carrossel.md`.
