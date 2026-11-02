@@ -84,6 +84,8 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   (`margens` no `carrossel.json`, o "Usar como padrão" do app) e, sem padrão, o preset. Mantenha as dele.
 - `arrasta`: `true`/`false`, o botão "Arrasta" que o criador ligou ou desligou no slide; sem ele, só o 1º slide tem.
 - `midia`: o caminho dentro do carrossel (`midia/…`), sempre posto pelo `carrossel.py midia`.
+- A mídia vem depois do texto; para pô-la no meio, uma linha só com `[mídia]` no `texto` marca onde (o criador também
+  move essa linha no app).
 - `falta`: a mídia que ainda não chegou ("gifs de 2 apps meus"): o slide mostra uma caixa vazia com isso, no lugar dela.
   Use enquanto se acerta a copy; não se aprova nem exporta com `falta` (a `midia` posta tira).
 

@@ -49,7 +49,7 @@
   } else if (s.falta) { // a mídia que ainda não chegou: uma caixa vazia dizendo o que vai nela
     midia = `<figure class="midia falta"><span>${esc(s.falta)}</span></figure>`
   }
-  const corpo = `${s.titulo ? `<h1 class="titulo">${linha(s.titulo)}</h1>` : ''}${s.texto ? `<div class="texto">${texto(s.texto)}</div>` : ''}${s.acao ? `<div class="acao"><span>${linha(s.acao)}</span></div>` : ''}`
+  const corpo = `${s.titulo ? `<h1 class="titulo">${linha(s.titulo)}</h1>` : ''}${s.acao ? `<div class="acao"><span>${linha(s.acao)}</span></div>` : ''}`
   const margens = () => {
     const m = { ...(meta.margens || {}), ...(s.margens || {}) }
     for (const k of ['topo', 'lados', 'base']) el.style[m[k] != null ? 'setProperty' : 'removeProperty'](`--m-${k}`, `${m[k]}px`)
@@ -66,6 +66,22 @@
   // o texto encolhe (até 60%) enquanto não cabe: nem dentro do conteúdo nem no slide (as peças passando da margem; o
   // fundo dos presets, maior que o slide para o desfoque, não conta)
   const conteudo = el.querySelector('.conteudo')
+  // o texto: uma linha só com [mídia] diz onde a mídia entra no meio dele (sem ela, a mídia vem depois do texto e do
+  // botão); no slide de mídia cheia a linha só sai
+  const porTexto = () => {
+    for (const t of conteudo.querySelectorAll('.texto')) t.remove()
+    const fig = conteudo.querySelector('.midia')
+    const [a, b] = String(s.texto || '').split(/^[ \t]*\[m[ií]dia\][ \t]*$/m)
+    const bloco = (t) => texto(t) && Object.assign(document.createElement('div'), { className: 'texto', innerHTML: texto(t) })
+    const meio = b !== undefined && fig && tipo !== 'midia'
+    const antes = bloco(meio ? a : [a, b].filter((x) => x !== undefined).join('\n'))
+    const depois = meio && bloco(b)
+    const titulo = conteudo.querySelector('.titulo')
+    if (antes) conteudo.insertBefore(antes, meio ? fig : titulo ? titulo.nextSibling : conteudo.firstChild)
+    if (depois) conteudo.insertBefore(depois, fig.nextSibling)
+    if (meio && conteudo.querySelector('.acao')) conteudo.append(conteudo.querySelector('.acao')) // o botão fecha o slide
+  }
+  porTexto()
   const naoCabe = () => {
     if (conteudo.scrollHeight > conteudo.clientHeight + 1) return true
     const cs = getComputedStyle(el)
@@ -105,14 +121,7 @@
   window.addEventListener('message', (e) => {
     if (e.data?.slide === i && typeof e.data.texto === 'string') {
       s.texto = e.data.texto
-      const html = texto(s.texto)
-      let t = conteudo.querySelector('.texto')
-      if (!t && html) {
-        t = Object.assign(document.createElement('div'), { className: 'texto' })
-        conteudo.insertBefore(t, conteudo.querySelector('.acao, .midia'))
-      }
-      if (t && html) t.innerHTML = html
-      else t?.remove()
+      porTexto()
       pronto()
     }
     if (e.data?.margens !== undefined && (e.data.slide === i || e.data.slide === undefined)) {
