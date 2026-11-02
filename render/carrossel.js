@@ -79,7 +79,10 @@
     const titulo = conteudo.querySelector('.titulo')
     if (antes) conteudo.insertBefore(antes, meio ? fig : titulo ? titulo.nextSibling : conteudo.firstChild)
     if (depois) conteudo.insertBefore(depois, fig.nextSibling)
-    if (meio && conteudo.querySelector('.acao')) conteudo.append(conteudo.querySelector('.acao')) // o botão fecha o slide
+    // o botão: depois do texto e antes da mídia; com a mídia no meio, fecha o slide
+    const acao = conteudo.querySelector('.acao')
+    if (acao && meio) conteudo.append(acao)
+    else if (acao && fig && fig.parentNode === conteudo) conteudo.insertBefore(acao, fig)
   }
   porTexto()
   const naoCabe = () => {
@@ -128,6 +131,13 @@
       if (e.data.slide === i) s.margens = e.data.margens || undefined
       else meta.margens = e.data.margens || undefined
       margens()
+      pronto()
+    }
+    if (e.data?.slide === i && e.data.acao !== undefined) {
+      s.acao = e.data.acao || undefined
+      conteudo.querySelector('.acao')?.remove()
+      if (s.acao) conteudo.append(Object.assign(document.createElement('div'), { className: 'acao', innerHTML: `<span>${linha(s.acao)}</span>` }))
+      porTexto()
       pronto()
     }
     if (e.data?.slide === i && e.data.arrasta !== undefined) {

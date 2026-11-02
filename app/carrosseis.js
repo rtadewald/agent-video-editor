@@ -249,6 +249,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
   }
   const margensDosInputs = () => Object.fromEntries($$('[data-margem]', tela).map((x) => [x.dataset.margem, +x.value]))
   let salvarMargens = null
+  let salvarAcao = null
   const margensMudaram = () => {
     const i = atual
     const m = margensDosInputs()
@@ -266,6 +267,8 @@ export async function abrirCarrossel(tela, slug, pedida) {
       <div class="editor-texto" data-editor${editavel() ? ' contenteditable="true" spellcheck="true"' : ''}>${paraEditor(s.texto)}</div>
       ${editavel() ? `<div class="acoes-linha editor-acoes"><button type="button" class="botao pequeno" data-destacar title="Selecione o trecho e destaque (⌘B); dentro de um destaque, tira">Destacar</button><span class="sub" data-salvo></span></div>`
         : `<p class="dica">${rev.aprovado ? 'Aprovado: desaprove para editar o texto.' : 'Só a última versão se edita.'}</p>`}
+      ${editavel() ? `<div class="botao-acao"><label class="margem-arrasta"><input type="checkbox" data-acao-liga${s.acao ? ' checked' : ''}> Botão de ação</label>
+        <input type="text" class="campo-acao" data-acao value="${esc(s.acao || '')}" placeholder="Comente SKILL" maxlength="60"${s.acao ? '' : ' hidden'}></div>` : ''}
       ${editavel() ? `<label class="margem-arrasta"><input type="checkbox" data-arrasta${(s.arrasta ?? (atual === 0 && atual < versao.slides.length - 1)) ? ' checked' : ''}> Botão "Arrasta" neste slide</label>` : ''}
       ${editavel() ? margensHtml(s) : ''}
       <span class="eyebrow">Comentários</span>
@@ -433,6 +436,24 @@ export async function abrirCarrossel(tela, slug, pedida) {
   tela.addEventListener('input', (e) => {
     if (e.target.matches('[data-cor]')) return avisar(tela, { cores: { ...c.cores, [preset]: e.target.value } })
     if (e.target.matches('[data-margem]')) return margensMudaram()
+    if (e.target.matches('[data-acao], [data-acao-liga]')) {
+      const i = atual
+      const campo = $('[data-acao]', tela)
+      if (e.target.matches('[data-acao-liga]')) {
+        campo.hidden = !e.target.checked
+        if (e.target.checked) {
+          campo.value ||= versao.slides[i].acao_antes || 'Comente'
+          campo.focus()
+        }
+      }
+      const acao = $('[data-acao-liga]', tela).checked ? campo.value.trim() : ''
+      if (!acao && versao.slides[i].acao) versao.slides[i].acao_antes = versao.slides[i].acao
+      versao.slides[i].acao = acao || undefined
+      avisar(tela, { slide: i, acao })
+      clearTimeout(salvarAcao)
+      salvarAcao = setTimeout(() => enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/margens`, { v, slide: i, acao }).catch((err) => aviso(err.message, 'erro')), 500)
+      return
+    }
     if (e.target.matches('[data-arrasta]')) {
       const i = atual
       const arrasta = e.target.checked

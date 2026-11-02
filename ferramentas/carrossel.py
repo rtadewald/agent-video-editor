@@ -228,6 +228,20 @@ def editar_arrasta(slug: str, v: int, i: int, arrasta: bool | None) -> None:
     gravar_json(arq, dados)
 
 
+def editar_acao(slug: str, v: int, i: int, acao: str | None) -> None:
+    """O botão de ação de um slide no app ("Comente SKILL"); vazio tira o botão."""
+    arq, dados = _editavel(slug, v)
+    slides = dados.get('slides') or []
+    if not 0 <= i < len(slides):
+        raise ValueError(f'Não há o slide {i + 1}.')
+    acao = ' '.join(str(acao or '').split())[:60]
+    if acao:
+        slides[i]['acao'] = acao
+    else:
+        slides[i].pop('acao', None)
+    gravar_json(arq, dados)
+
+
 def margens_padrao(slug: str, m: dict | None) -> None:
     """O padrão de margens do carrossel (carrossel.json), para os slides sem margens próprias; vazio volta ao preset."""
     arq = pasta(slug) / 'carrossel.json'
