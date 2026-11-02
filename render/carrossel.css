@@ -85,15 +85,16 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 [data-preset="notas"] .pe .contador { display: none; }
 [data-preset="notas"] .arrasta { padding: 18px 34px; border-radius: 999px; background: #ffcc00; color: #1d1d1f; font: 600 30px 'SF Pro'; }
 [data-preset="notas"] mark.d { font-weight: 600; }
-/* marca-texto (meia altura) · marca-texto cheio · sublinhado amarelo · âmbar · azul do iOS */
-[data-preset="notas"][data-destaque="1"] mark.d { background: linear-gradient(transparent 56%, #ffe066 56%, #ffe066 94%, transparent 94%); padding: 0 0.06em; }
-[data-preset="notas"][data-destaque="2"] mark.d { background: #ffe680; border-radius: 0.18em; padding: 0 0.14em; }
-[data-preset="notas"][data-destaque="3"] mark.d { text-decoration: underline 0.11em #ffcc00; text-underline-offset: 0.14em; text-decoration-skip-ink: none; }
-[data-preset="notas"][data-destaque="4"] mark.d { font-weight: 700; color: #c98a00; }
-[data-preset="notas"][data-destaque="5"] mark.d { font-weight: 700; color: #007aff; }
-[data-preset="notas"]:is([data-destaque="1"], [data-destaque="2"]) .sobre mark.d { background: #ffe066; color: #1d1d1f; border-radius: 0.14em; padding: 0 0.14em; }
-[data-preset="notas"][data-destaque="4"] .sobre mark.d { color: #ffd54a; }
-[data-preset="notas"][data-destaque="5"] .sobre mark.d { color: #64b5ff; }
+/* marca-texto (meia altura) · marca-texto cheio · sublinhado amarelo · âmbar · azul do iOS; o seletor do app troca a
+   cor de todos (--cor-d) */
+[data-preset="notas"][data-destaque="1"] mark.d { background: linear-gradient(transparent 56%, var(--cor-d, #ffe066) 56%, var(--cor-d, #ffe066) 94%, transparent 94%); padding: 0 0.06em; }
+[data-preset="notas"][data-destaque="2"] mark.d { background: var(--cor-d, #ffe680); border-radius: 0.18em; padding: 0 0.14em; }
+[data-preset="notas"][data-destaque="3"] mark.d { text-decoration: underline 0.11em var(--cor-d, #ffcc00); text-underline-offset: 0.14em; text-decoration-skip-ink: none; }
+[data-preset="notas"][data-destaque="4"] mark.d { font-weight: 700; color: var(--cor-d, #c98a00); }
+[data-preset="notas"][data-destaque="5"] mark.d { font-weight: 700; color: var(--cor-d, #007aff); }
+[data-preset="notas"]:is([data-destaque="1"], [data-destaque="2"]) .sobre mark.d { background: var(--cor-d, #ffe066); color: #1d1d1f; border-radius: 0.14em; padding: 0 0.14em; }
+[data-preset="notas"][data-destaque="4"] .sobre mark.d { color: var(--cor-d, #ffd54a); }
+[data-preset="notas"][data-destaque="5"] .sobre mark.d { color: var(--cor-d, #64b5ff); }
 
 /* 4 · Grafite: escuro e calmo, título branco, texto cinza */
 [data-preset="grafite"] .slide {

@@ -32,7 +32,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from base import PROJETOS, RAIZ, ffmpeg, gravar_json, inspecionar, ler_json  # noqa: E402
+from base import BIBLIOTECA, PROJETOS, RAIZ, ffmpeg, gravar_json, inspecionar, ler_json  # noqa: E402
 
 CARROSSEIS = RAIZ / 'carrosseis'
 W, H = 1080, 1350
@@ -61,6 +61,29 @@ def visual(meta: dict) -> tuple[str, int]:
     preset = meta.get('preset') if meta.get('preset') in ids_presets() else PRESET_PADRAO
     d = meta.get('destaque')
     return preset, d if isinstance(d, int) and 1 <= d <= 5 else 1
+
+
+# a cor do destaque, por preset (só o Notas a usa): a do carrossel (`cores` no carrossel.json), senão o padrão de todos
+# (biblioteca/carrosseis.json), senão a do CSS
+CORES = BIBLIOTECA / 'carrosseis.json'
+
+
+def cor_ok(cor) -> str | None:
+    return cor.lower() if isinstance(cor, str) and re.fullmatch(r'#[0-9a-fA-F]{6}', cor) else None
+
+
+def cores_padrao() -> dict:
+    return (ler_json(CORES, {}) or {}).get('cores') or {}
+
+
+def salvar_cor_padrao(preset: str, cor: str | None) -> None:
+    dados = ler_json(CORES, {}) or {}
+    cores = dados.setdefault('cores', {})
+    if cor_ok(cor):
+        cores[preset] = cor_ok(cor)
+    else:
+        cores.pop(preset, None)
+    gravar_json(CORES, dados)
 
 
 def nome_visual(meta: dict) -> str:
@@ -432,7 +455,7 @@ def exportar(slug: str) -> Path:
         for arq, nome in feitos:
             shutil.move(str(arq), final / nome)
     (final / 'legenda.txt').write_text((versao.get('legenda') or '') + '\n', encoding='utf-8')
-    meta['exportado'] = {'versao': v, 'preset': preset, 'destaque': destaque, 'em': agora()}
+    meta['exportado'] = {'versao': v, 'preset': preset, 'destaque': destaque, 'cor': (meta.get('cores') or {}).get(preset) or cores_padrao().get(preset), 'em': agora()}
     gravar_json(p / 'carrossel.json', meta)
     return final
 

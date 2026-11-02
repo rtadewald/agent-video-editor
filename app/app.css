@@ -754,6 +754,9 @@ article h3, a h3 { margin-top: 12px; font-size: 15px; font-weight: 600; letter-s
 .editor textarea::placeholder, .caixa-nova textarea::placeholder { color: rgba(185, 198, 186, 0.7); }
 .editor textarea:focus, .caixa-nova textarea:focus { outline: none; border-color: var(--color-cream-50); }
 .margens-carrossel { margin-top: 10px; }
+.cor-destaque { flex-basis: 100%; display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--color-fog); }
+.cor-destaque label { display: flex; align-items: center; gap: 6px; margin-right: auto; cursor: pointer; }
+.cor-destaque input[type="color"] { width: 26px; height: 26px; padding: 0; border: 1px solid var(--color-line-dark); border-radius: 6px; background: none; cursor: pointer; }
 .margem-arrasta { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--color-fog); cursor: pointer; }
 .margem-arrasta input { accent-color: var(--color-coral); }
 .margem-linha { display: grid; grid-template-columns: 44px 1fr 32px; align-items: center; gap: 8px; font-size: 12px; color: var(--color-fog); }

@@ -24,6 +24,14 @@
   const versao = await fetch(`/carrosseis/${encodeURIComponent(slug)}/versoes/v${q.get('v')}.json`, { cache: 'no-store' }).then((r) => r.json())
   // as margens: as do slide, senão o padrão do carrossel, senão as do preset
   const meta = await fetch(`/carrosseis/${encodeURIComponent(slug)}/carrossel.json`, { cache: 'no-store' }).then((r) => r.json()).catch(() => ({}))
+  // a cor do destaque: a deste carrossel no preset, senão a padrão de todos (biblioteca/carrosseis.json), senão a do CSS
+  const padrao = await fetch('/biblioteca/carrosseis.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})).catch(() => ({}))
+  const cor = () => {
+    const p = document.documentElement.dataset.preset
+    const x = meta.cores?.[p] || padrao.cores?.[p]
+    document.documentElement.style[x ? 'setProperty' : 'removeProperty']('--cor-d', x)
+  }
+  cor()
   const slides = versao.slides || []
   const i = Math.min(Math.max(+q.get('s') || 0, 0), slides.length - 1)
   const s = slides[i] || {}
@@ -115,9 +123,15 @@
       arrasta()
       pronto()
     }
+    if (e.data?.cores !== undefined || e.data?.coresPadrao !== undefined) {
+      if (e.data.cores !== undefined) meta.cores = e.data.cores
+      if (e.data.coresPadrao !== undefined) padrao.cores = e.data.coresPadrao
+      cor()
+    }
     if (e.data?.preset || e.data?.destaque) {
       if (e.data.preset) document.documentElement.dataset.preset = e.data.preset
       if (e.data.destaque) document.documentElement.dataset.destaque = e.data.destaque
+      cor()
       pronto()
     }
     if (e.data?.tocar !== undefined) el.querySelector('video')?.[e.data.tocar ? 'play' : 'pause']?.()

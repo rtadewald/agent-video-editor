@@ -37,7 +37,8 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
 
 - **Sem título.** Cada slide é um ou dois parágrafos corridos, na mesma letra; o que precisa saltar vai em
   `**destaque**` (uma ou duas expressões por slide: a palavra, o número, a virada). São 4 presets (Notas, Grafite,
-  Código, Etiqueta), cada um com 5 destaques que o criador escolhe.
+  Código, Etiqueta), cada um com 5 destaques que o criador escolhe. No Notas ele também escolhe a cor do destaque (`cores`
+  no `carrossel.json`; a padrão de todos em `biblioteca/carrosseis.json`): não mexa.
 - **Em 1ª pessoa**: é o criador falando ("testei", "eu uso", "o meu processo"), na voz dele (`biblioteca/exemplos/
   criador.md`), como no vídeo; nunca o narrador de fora ("ele testou", "o criador mostra").
 - **Explique de verdade**: o porquê, o como, o exemplo, o que deu errado. É mais texto que no Reels, não menos: de 3 a 6

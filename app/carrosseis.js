@@ -337,7 +337,28 @@ export async function abrirCarrossel(tela, slug, pedida) {
   /** Redesenha o que mudou: o cabeçalho, o slide grande (só se trocou de slide), os pinos, os selos da fita e o lado. */
   // os 5 destaques do preset escolhido (o nome de cada um; o slide mostra como fica)
   const destaques = () => (c.presets.find((p) => p.id === preset)?.destaques || []).map((nome, k) =>
-    `<button class="pilula pequena${k + 1 === destaque ? ' ativa' : ''}" data-destaque="${k + 1}" title="Destaque ${k + 1}: ${esc(nome)}"><b>${k + 1}</b> ${esc(nome)}</button>`).join('')
+    `<button class="pilula pequena${k + 1 === destaque ? ' ativa' : ''}" data-destaque="${k + 1}" title="Destaque ${k + 1}: ${esc(nome)}"><b>${k + 1}</b> ${esc(nome)}</button>`).join('') + corDestaque()
+  // a cor do destaque (só no Notas): a deste carrossel, senão a padrão de todos, senão a do destaque escolhido
+  const COR_NOTAS = ['#ffe066', '#ffe680', '#ffcc00', '#c98a00', '#007aff']
+  c.cores ||= {}
+  c.cores_padrao ||= {}
+  const corDestaque = () => preset !== 'notas' ? '' : `<div class="cor-destaque">
+      <label title="A cor do destaque neste carrossel"><input type="color" data-cor value="${c.cores[preset] || c.cores_padrao[preset] || COR_NOTAS[destaque - 1]}"> Cor${c.cores[preset] ? ' · deste carrossel' : c.cores_padrao[preset] ? ' · padrão' : ''}</label>
+      <button type="button" class="botao pequeno" data-cor-padrao title="Esta cor para os destaques de todos os carrosséis no Notas (os que não têm cor própria)">Salvar como padrão</button>
+      ${c.cores[preset] ? '<button type="button" class="link" data-cor-voltar>Voltar ao padrão</button>' : ''}</div>`
+  const gravarCor = async (cor) => {
+    try {
+      const r = await enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/preset`, { preset, destaque, cor })
+      if (r.exportando) {
+        aviso('Cor trocada: exportando de novo com ela')
+        c.exportando = true
+        desenhar()
+        vigiar()
+      }
+    } catch (err) {
+      aviso(err.message, 'erro')
+    }
+  }
   const desenhar = () => {
     $('.cabeca-carrossel', tela).innerHTML = cabeca()
     $('.destaques-carrossel', tela).innerHTML = destaques()
@@ -420,6 +441,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
     }
   }, true)
   tela.addEventListener('input', (e) => {
+    if (e.target.matches('[data-cor]')) return avisar(tela, { cores: { ...c.cores, [preset]: e.target.value } })
     if (e.target.matches('[data-margem]')) return margensMudaram()
     if (e.target.matches('[data-arrasta]')) {
       const i = atual
@@ -439,9 +461,31 @@ export async function abrirCarrossel(tela, slug, pedida) {
     if (e.target.closest?.('[data-editor]')) gravarPendente()
   })
   tela.addEventListener('change', (e) => {
+    if (e.target.matches('[data-cor]')) {
+      c.cores = { ...c.cores, [preset]: e.target.value }
+      $('.destaques-carrossel', tela).innerHTML = destaques()
+      return gravarCor(e.target.value)
+    }
     if (e.target.matches('[data-versao]')) location.hash = `#/c/${encodeURIComponent(slug)}/v${e.target.value}`
   })
   tela.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-cor-padrao], [data-cor-voltar]')) {
+      if (e.target.closest('[data-cor-padrao]')) {
+        const cor = $('[data-cor]', tela).value
+        try {
+          c.cores_padrao = (await enviar('PUT', '/api/carrosseis-cores', { preset, cor })).cores_padrao
+        } catch (err) {
+          return aviso(err.message, 'erro')
+        }
+        aviso('Cor padrão dos destaques no Notas')
+      }
+      // este carrossel passa a seguir o padrão
+      const { [preset]: _, ...resto } = c.cores
+      c.cores = resto
+      avisar(tela, { cores: c.cores, coresPadrao: c.cores_padrao })
+      $('.destaques-carrossel', tela).innerHTML = destaques()
+      return gravarCor(null)
+    }
     if (e.target.closest('[data-margens-padrao], [data-margens-voltar]')) {
       const padrao = !!e.target.closest('[data-margens-padrao]')
       const m = padrao ? margensDosInputs() : null

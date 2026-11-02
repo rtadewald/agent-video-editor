@@ -24,7 +24,7 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
   Reels, Ad…; uma em uso não sai) · PUT /api/referencias/<id>/categoria {categoria} · PUT /api/projetos/<slug>/categoria
   {categoria} · o POST /api/referencias aceita a categoria no cabeçalho X-Categoria.
 - Carrosséis (ferramentas/carrossel.py): GET|POST /api/carrosseis {nome, tipo, origem, pedido} · GET /api/carrosseis/<slug>
-  (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset, destaque}
+  (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset, destaque, cor?}
   (num aprovado, exporta de novo) · PUT …/<slug>/texto/v<N>/<i> {texto} (o criador edita o texto do slide i, de 0, na
   própria vN) · PUT …/<slug>/nome {nome} · PUT …/<slug>/revisao/v<N> (aprovar exporta, em segundo
   plano) · PUT …/<slug>/margens {v, slide, margens} | {padrao} | {v, slide, arrasta} · POST …/<slug>/abrir-final · DELETE /api/carrosseis/<slug> (vai para a lixeira).
@@ -1487,6 +1487,7 @@ def _ver_carrossel(h, q, slug):
     vs = c.versoes(p)
     meta = ler_json(p / 'carrossel.json', {}) or {}
     return {**c.resumo(p), 'pedido': meta.get('pedido') or '', 'margens': meta.get('margens'),
+            'cores': meta.get('cores') or {}, 'cores_padrao': c.cores_padrao(),
             'entrada': sorted(a.name for a in (p / 'entrada').iterdir()) if (p / 'entrada').is_dir() else [],
             'revisoes': {v: c.revisao(p, v) for v in vs}, 'exportando': _exportando(p), 'presets': c.PRESETS}
 
@@ -1527,13 +1528,32 @@ def _preset_carrossel(h, q, slug):
     if destaque not in range(1, 6):
         raise Erro(f'Destaque desconhecido: {destaque}', 422)
     meta.update(preset=preset, destaque=destaque)
+    if 'cor' in corpo:  # a cor do destaque deste carrossel, no preset de agora (null volta ao padrão)
+        cores = meta.setdefault('cores', {})
+        if c.cor_ok(corpo['cor']):
+            cores[preset] = c.cor_ok(corpo['cor'])
+        else:
+            cores.pop(preset, None)
     gravar_json(p / 'carrossel.json', meta)
     vs = c.versoes(p)
     feito = meta.get('exportado') or {}
-    reexporta = bool(vs and c.revisao(p, vs[-1]).get('aprovado') and (feito.get('preset'), feito.get('destaque') or 1) != (preset, destaque))
+    cor = (meta.get('cores') or {}).get(preset) or c.cores_padrao().get(preset)
+    reexporta = bool(vs and c.revisao(p, vs[-1]).get('aprovado')
+                     and (feito.get('preset'), feito.get('destaque') or 1, feito.get('cor')) != (preset, destaque, cor))
     if reexporta:
         _exportar_carrossel(slug)
     return {'ok': True, 'exportando': reexporta}
+
+
+@rota('PUT', '/api/carrosseis-cores')
+def _cores_carrosseis(h, q):
+    """{preset, cor}: a cor padrão do destaque de todos os carrosséis nesse preset (biblioteca/carrosseis.json; null tira)."""
+    c = carrossel()
+    corpo = h.corpo()
+    if corpo.get('preset') not in c.ids_presets():
+        raise Erro(f'Preset desconhecido: {corpo.get("preset")}', 422)
+    c.salvar_cor_padrao(corpo['preset'], corpo.get('cor'))
+    return {'ok': True, 'cores_padrao': c.cores_padrao()}
 
 
 @rota('PUT', r'/api/carrosseis/([\w-]+)/texto/v(\d+)/(\d+)')
