@@ -47,7 +47,8 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   Cada slide fecha abrindo o próximo: uma pergunta que fica, um "só que…", um "mas o que mudou mesmo foi…", a resposta
   que vem depois. Ninguém deve conseguir parar no meio. Feche o loop do gancho só perto do fim.
 - **Mídia só quando prova** o que o texto acabou de dizer (o print, o antes e depois, a tela em uso), como nos inserts;
-  um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar.
+  um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. Uma sessão com IA é print real do app
+  claro do Claude, nunca uma simulação nem o terminal preto.
 - O último fecha a conversa (a conclusão e o CTA, quando houver, com `acao`).
 - A **legenda** do post vai junto (no derivado, adapte a do vídeo).
 
