@@ -61,7 +61,7 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 }
 .t-midia .sobre:empty { display: none; }
 .arrasta::after { content: ' →'; }
-.slide:not(.primeiro) .arrasta, .slide.ultimo .arrasta { display: none; }
+.slide:not(.com-arrasta) .arrasta { display: none; } /* no 1º slide, ou onde o criador ligou no app */
 .avatar { display: grid; place-items: center; width: 112px; height: 112px; border-radius: 50%; font-weight: 600; font-size: 38px; letter-spacing: 0.02em; }
 .autor { display: flex; flex-direction: column; gap: 4px; line-height: 1.15; }
 .autor b { font-weight: 700; }

@@ -27,7 +27,7 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
   (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset, destaque}
   (num aprovado, exporta de novo) · PUT …/<slug>/texto/v<N>/<i> {texto} (o criador edita o texto do slide i, de 0, na
   própria vN) · PUT …/<slug>/nome {nome} · PUT …/<slug>/revisao/v<N> (aprovar exporta, em segundo
-  plano) · PUT …/<slug>/margens {v, slide, margens} | {padrao} · POST …/<slug>/abrir-final · DELETE /api/carrosseis/<slug> (vai para a lixeira).
+  plano) · PUT …/<slug>/margens {v, slide, margens} | {padrao} | {v, slide, arrasta} · POST …/<slug>/abrir-final · DELETE /api/carrosseis/<slug> (vai para a lixeira).
 - POST /api/projetos/<slug>/abrir-final: abre no Finder a pasta dos exports (final/: as saídas, cada uma com o .md).
 - GET /api/aprendizados (as áreas, com os bullets "Do criador", do geral e das categorias) · GET|PUT
   /api/aprendizados/<área>[?categoria=…] {texto} (o aprendizados/<área>.md, ou o exemplos/<categoria>/aprendizados/<área>.md)
@@ -1548,11 +1548,14 @@ def _texto_carrossel(h, q, slug, v, i):
 
 @rota('PUT', r'/api/carrosseis/([\w-]+)/margens')
 def _margens_carrossel(h, q, slug):
-    """{v, slide, margens}: as do slide (null volta ao padrão); {padrao}: o padrão do carrossel (null volta ao preset)."""
+    """{v, slide, margens}: as do slide (null volta ao padrão); {padrao}: o padrão do carrossel (null volta ao preset);
+    {v, slide, arrasta}: o botão Arrasta do slide (true, false; null volta ao padrão)."""
     _pasta_carrossel(slug)
     corpo = h.corpo()
     try:
-        if 'padrao' in corpo:
+        if 'arrasta' in corpo:
+            carrossel().editar_arrasta(slug, int(corpo.get('v')), int(corpo.get('slide')), corpo.get('arrasta'))
+        elif 'padrao' in corpo:
             carrossel().margens_padrao(slug, corpo.get('padrao'))
         else:
             carrossel().editar_margens(slug, int(corpo.get('v')), int(corpo.get('slide')), corpo.get('margens'))

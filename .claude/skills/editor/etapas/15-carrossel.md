@@ -80,6 +80,7 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
 - `porque`: o porquê do slide (para você; o app não mostra).
 - `margens`: `{topo, lados, base}` em px do slide, as que o criador ajustou no app; sem elas, vale o padrão do carrossel
   (`margens` no `carrossel.json`, o "Usar como padrão" do app) e, sem padrão, o preset. Mantenha as dele.
+- `arrasta`: `true`/`false`, o botão "Arrasta" que o criador ligou ou desligou no slide; sem ele, só o 1º slide tem.
 - `midia`: o caminho dentro do carrossel (`midia/…`), sempre posto pelo `carrossel.py midia`.
 
 ```bash

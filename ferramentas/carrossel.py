@@ -126,6 +126,8 @@ def validar(p: Path, dados: dict) -> dict:
         if s.get('titulo'):
             raise ValueError(f'Slide {i}: o carrossel não tem título; é tudo texto, com **destaque** (etapa 15).')
         x = {k: s[k] for k in ('tipo', 'texto', 'midia', 'ajuste', 'som', 'acao', 'porque') if s.get(k) not in (None, '')}
+        if isinstance(s.get('arrasta'), bool):
+            x['arrasta'] = s['arrasta']
         if margens(s.get('margens')):
             x['margens'] = margens(s.get('margens'))
         m = x.get('midia')
@@ -185,6 +187,19 @@ def editar_margens(slug: str, v: int, i: int, m: dict | None) -> None:
         slides[i]['margens'] = margens(m)
     else:
         slides[i].pop('margens', None)
+    gravar_json(arq, dados)
+
+
+def editar_arrasta(slug: str, v: int, i: int, arrasta: bool | None) -> None:
+    """O botão Arrasta de um slide no app (ligado ou desligado); None volta ao padrão (só no 1º slide)."""
+    arq, dados = _editavel(slug, v)
+    slides = dados.get('slides') or []
+    if not 0 <= i < len(slides):
+        raise ValueError(f'Não há o slide {i + 1}.')
+    if isinstance(arrasta, bool):
+        slides[i]['arrasta'] = arrasta
+    else:
+        slides[i].pop('arrasta', None)
     gravar_json(arq, dados)
 
 

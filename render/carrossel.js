@@ -42,11 +42,13 @@
     for (const k of ['topo', 'lados', 'base']) el.style[m[k] != null ? 'setProperty' : 'removeProperty'](`--m-${k}`, `${m[k]}px`)
   }
   margens()
+  const arrasta = () => el.classList.toggle('com-arrasta', s.arrasta ?? (i === 0 && i < slides.length - 1))
   el.className = `slide t-${tipo}${s.midia ? ' com-midia' : ''}${i === 0 ? ' primeiro' : ''}${i === slides.length - 1 ? ' ultimo' : ''}`
   el.innerHTML = `<header class="topo"><span class="avatar">${AUTOR.iniciais}</span><span class="autor"><b>${AUTOR.nome}</b><i>${AUTOR.arroba}</i></span></header>
     ${tipo === 'midia' ? `${midia}<div class="conteudo sobre">${corpo}</div>`
       : `<div class="conteudo">${corpo}${midia}</div>`}
     <footer class="pe"><span class="contador">${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}</span><span class="arrasta">Arrasta</span></footer>`
+  arrasta()
 
   // o texto encolhe (até 60%) enquanto não cabe: nem dentro do conteúdo nem no slide (as peças passando da margem; o
   // fundo dos presets, maior que o slide para o desfoque, não conta)
@@ -104,6 +106,11 @@
       if (e.data.slide === i) s.margens = e.data.margens || undefined
       else meta.margens = e.data.margens || undefined
       margens()
+      pronto()
+    }
+    if (e.data?.slide === i && e.data.arrasta !== undefined) {
+      s.arrasta = e.data.arrasta ?? undefined
+      arrasta()
       pronto()
     }
     if (e.data?.preset || e.data?.destaque) {

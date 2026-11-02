@@ -281,6 +281,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
       <div class="editor-texto" data-editor${editavel() ? ' contenteditable="true" spellcheck="true"' : ''}>${paraEditor(s.texto)}</div>
       ${editavel() ? `<div class="acoes-linha editor-acoes"><button type="button" class="botao pequeno" data-destacar title="Selecione o trecho e destaque (⌘B); dentro de um destaque, tira">Destacar</button><span class="sub" data-salvo></span></div>`
         : `<p class="dica">${rev.aprovado ? 'Aprovado: desaprove para editar o texto.' : 'Só a última versão se edita.'}</p>`}
+      ${editavel() ? `<label class="margem-arrasta"><input type="checkbox" data-arrasta${(s.arrasta ?? (atual === 0 && atual < versao.slides.length - 1)) ? ' checked' : ''}> Botão "Arrasta" neste slide</label>` : ''}
       ${editavel() ? margensHtml(s) : ''}
       <span class="eyebrow">Comentários</span>
       ${doSlide(atual).length ? `<ul class="comentarios-carrossel">${doSlide(atual).map(comentario).join('')}</ul>` : ''}
@@ -420,6 +421,13 @@ export async function abrirCarrossel(tela, slug, pedida) {
   }, true)
   tela.addEventListener('input', (e) => {
     if (e.target.matches('[data-margem]')) return margensMudaram()
+    if (e.target.matches('[data-arrasta]')) {
+      const i = atual
+      const arrasta = e.target.checked
+      versao.slides[i].arrasta = arrasta
+      avisar(tela, { slide: i, arrasta })
+      return enviar('PUT', `/api/carrosseis/${encodeURIComponent(slug)}/margens`, { v, slide: i, arrasta }).catch((err) => aviso(err.message, 'erro'))
+    }
     if (e.target.closest('[data-editor]')) textoMudou()
   })
   tela.addEventListener('paste', (e) => {
