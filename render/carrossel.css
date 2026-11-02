@@ -77,6 +77,10 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 [data-preset="notas"] .topo::before { content: '‹  Notas'; letter-spacing: -0.01em; }
 [data-preset="notas"] .topo::after { content: '⋯'; display: grid; place-items: center; width: 64px; height: 64px; border: 3px solid #dfa400; border-radius: 50%; font-size: 34px; }
 [data-preset="notas"] .acao span { background: #ffcc00; color: #1d1d1f; }
+/* o rodapé só onde há o Arrasta: o botão amarelo das Notas, à direita */
+[data-preset="notas"] .com-arrasta .pe { display: flex; justify-content: flex-end; }
+[data-preset="notas"] .pe .contador { display: none; }
+[data-preset="notas"] .arrasta { padding: 18px 34px; border-radius: 999px; background: #ffcc00; color: #1d1d1f; font: 600 30px 'SF Pro'; }
 [data-preset="notas"] mark.d { font-weight: 600; }
 /* marca-texto (meia altura) · marca-texto cheio · sublinhado amarelo · âmbar · azul do iOS */
 [data-preset="notas"][data-destaque="1"] mark.d { background: linear-gradient(transparent 56%, #ffe066 56%, #ffe066 94%, transparent 94%); padding: 0 0.06em; }
