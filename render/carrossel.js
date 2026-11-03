@@ -96,12 +96,18 @@
     })
   }
   const encaixar = () => {
+    const f = conteudo.querySelector('.midia.conter')
+    if (f) f.style.flex = f.style.minHeight = ''
     let e = 1
     conteudo.style.setProperty('--e', e)
     while (e > 0.6 && naoCabe()) {
       e = Math.round((e - 0.04) * 100) / 100
       conteudo.style.setProperty('--e', e)
     }
+    // "conter": a moldura encolhe até a altura da mídia, e o bloco mídia + texto fica centralizado (nunca uma sobra
+    // entre a mídia e a mensagem)
+    const m = f && f.querySelector('img, video')
+    if (m) Object.assign(f.style, { flex: `0 0 ${m.getBoundingClientRect().height}px`, minHeight: '0' })
   }
   // onde o vídeo fica (px do slide), para o ffmpeg pôr o clipe no lugar dele
   const ondeVideo = () => {
@@ -115,6 +121,7 @@
   const pronto = async () => {
     await document.fonts.ready
     await Promise.all([...el.querySelectorAll('img')].map((im) => (im.complete ? null : new Promise((r) => { im.onload = im.onerror = r }))))
+    await Promise.all([...el.querySelectorAll('video')].map((v) => (v.readyState >= 1 ? null : new Promise((r) => { v.addEventListener('loadedmetadata', r, { once: true }); v.addEventListener('error', r, { once: true }) }))))
     encaixar()
     window.__carrossel = { pronto: true, tipo, video: ondeVideo(), frente: tipo === 'midia' && !!(s.titulo || s.texto || s.acao), som: !!s.som }
   }
