@@ -120,4 +120,7 @@ escreveu.
 
 O app exporta sozinho ao aprovar (e de novo se o preset ou o destaque mudar depois): `final/01.png`, `02.mp4`… na ordem de postar,
 a `legenda.txt` e a `copy.md` (o texto de cada slide, **c1**, **c2**…, com `[mídia]` onde ela entra). Depois, como no vídeo (`etapas/14-concluir.md`): junte as correções que valem para outros carrosséis,
-mostre ao criador e grave só o que ele confirmar, em `biblioteca/aprendizados/carrossel.md`.
+mostre ao criador e grave só o que ele confirmar. Separe as de copy das de edição:
+- **Copy** (o que o texto diz, argumento, tom, ordem): na skill de copy de carrossel do vault,
+  `~/Obsidian Notes/3 Skills/carrossel-builder/SKILL.md`, onde também entra o carrossel aprovado como exemplo.
+- **Edição** (mídia, prova visual, layout, cards, motions): em `biblioteca/aprendizados/carrossel.md`.
