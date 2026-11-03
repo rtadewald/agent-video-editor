@@ -48,9 +48,9 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   que vem depois. Ninguém deve conseguir parar no meio. Feche o loop do gancho só perto do fim.
 - **Mídia só quando prova** o que o texto acabou de dizer (o print, o antes e depois, a tela em uso), como nos inserts;
   um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. Uma sessão com IA é print real do app
-  claro do Claude, nunca uma simulação nem o terminal preto. A pergunta de um seguidor que abre o carrossel é o card
-  de comentário dos Reels (`render/src/comentario.ts`: foto e usuário borrados, o texto, "Responder"), nunca a caixinha
-  de pergunta dos Stories. _wordpress-em-2026 v5 · 2026-11-03_
+  claro do Claude, nunca uma simulação nem o terminal preto. A pergunta de um seguidor que abre o carrossel é um
+  comentário do Instagram como aparece na lista, em card branco: foto e usuário borrados, o usuário na mesma linha do
+  texto, o coração à direita e "5 d · 1 curtida · Responder · •••" embaixo. Nunca a caixinha de pergunta dos Stories. _wordpress-em-2026 v5 · 2026-11-03_
 - O último fecha a conversa (a conclusão e o CTA, quando houver, com `acao`).
 - A **legenda** do post vai junto (no derivado, adapte a do vídeo).
 
