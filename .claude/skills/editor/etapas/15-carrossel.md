@@ -80,7 +80,7 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   quebra simples (`\n`) é só quebra de linha (o Enter do app, mesmo espaço da quebra natural); a linha em branco abre
   parágrafo; cada linha em branco a mais é um espaço extra no slide. Mantenha as quebras do criador.
 
-- `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, sem moldura: prints, gráficos e recortes).
+- `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, sem moldura e encostada no texto: prints, gráficos e recortes).
   Imagem recortada (card, selo, elemento) é PNG com fundo transparente e `conter`: nunca uma caixa ou borda quadrada em
   volta dela. _wordpress-em-2026 v5 · 2026-11-03_
 - `som`: o vídeo leva o áudio dele. Ligue quando a fala do trecho importa; gravação de tela e demonstração vão mudas.
