@@ -40,6 +40,9 @@ mark.d { background: none; color: inherit; font-weight: 700; -webkit-box-decorat
 }
 .midia img, .midia video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .midia.conter img, .midia.conter video { object-fit: contain; }
+/* "conter" sem moldura: a imagem inteira, com os cantos dela arredondados, e o fundo transparente (nunca a caixa cinza) */
+.midia.conter { background: transparent; box-shadow: none; }
+.midia.conter img { margin: auto; width: auto; height: auto; max-width: 100%; max-height: 100%; border-radius: var(--raio-midia, 28px); }
 .midia.falta { display: grid; place-items: center; padding: 48px; background: transparent; box-shadow: none; border: 5px dashed currentColor; opacity: 0.45; }
 .midia.falta span { font-size: 34px; font-weight: 500; line-height: 1.3; text-align: center; }
 .midia.falta span::before { content: 'Falta: '; font-weight: 700; }

@@ -48,7 +48,9 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   que vem depois. Ninguém deve conseguir parar no meio. Feche o loop do gancho só perto do fim.
 - **Mídia só quando prova** o que o texto acabou de dizer (o print, o antes e depois, a tela em uso), como nos inserts;
   um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. Uma sessão com IA é print real do app
-  claro do Claude, nunca uma simulação nem o terminal preto.
+  claro do Claude, nunca uma simulação nem o terminal preto. A pergunta de um seguidor que abre o carrossel é o card
+  de comentário dos Reels (`render/src/comentario.ts`: foto e usuário borrados, o texto, "Responder"), nunca a caixinha
+  de pergunta dos Stories. _wordpress-em-2026 v5 · 2026-11-03_
 - O último fecha a conversa (a conclusão e o CTA, quando houver, com `acao`).
 - A **legenda** do post vai junto (no derivado, adapte a do vídeo).
 
@@ -78,7 +80,9 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   quebra simples (`\n`) é só quebra de linha (o Enter do app, mesmo espaço da quebra natural); a linha em branco abre
   parágrafo; cada linha em branco a mais é um espaço extra no slide. Mantenha as quebras do criador.
 
-- `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, com faixas; prints e gráficos).
+- `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, sem moldura: prints, gráficos e recortes).
+  Imagem recortada (card, selo, elemento) é PNG com fundo transparente e `conter`: nunca uma caixa ou borda quadrada em
+  volta dela. _wordpress-em-2026 v5 · 2026-11-03_
 - `som`: o vídeo leva o áudio dele. Ligue quando a fala do trecho importa; gravação de tela e demonstração vão mudas.
 - `porque`: o porquê do slide (para você; o app não mostra).
 - `margens`: `{topo, lados, base}` em px do slide, as que o criador ajustou no app; sem elas, vale o padrão do carrossel
