@@ -107,7 +107,8 @@
   const ondeVideo = () => {
     const f = el.querySelector('.midia')
     if (!f || !f.querySelector('video')) return null
-    const r = f.getBoundingClientRect()
+    // no "conter" o vídeo tem o tamanho dele (sem moldura): o retângulo é o do vídeo
+    const r = (f.classList.contains('conter') ? f.querySelector('video') : f).getBoundingClientRect()
     return { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height),
       raio: parseFloat(getComputedStyle(f).borderTopLeftRadius) || 0, conter: f.classList.contains('conter') }
   }
