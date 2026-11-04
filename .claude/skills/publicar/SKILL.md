@@ -192,6 +192,15 @@ vai para `1 Priorizar` com o nome do card e 👁️. Sem CTA "comente X", segue 
 
 Depois que sair, confira que a automação ficou presa no Reels certo (ManyChat → a automação → o post do gatilho).
 
+**Carrossel** (`carrosseis/<slug>/final/`: slides 1080×1350 em png/mp4, `legenda.txt`, `copy.md`): pasta no Drive
+`NN_carrossel_<tema>`, card com Formato 🎠 Carrossel e Mídia 📱 Feed (modelo: "Carrossel Grill me"), nota 🏞️. A legenda é
+complementar aos slides (`roteiro-to-descricao`). As redes aceitam coisas diferentes (2026-11-03):
+- **Instagram**: os png e mp4 do `final/`, `instagramData.type "POST"`.
+- **Facebook e TikTok**: só imagens. Com vídeo no meio, o Facebook deu erro 500 e o TikTok não aceita. Gere uma versão em
+  JPG (`ffmpeg -i NN.png -q:v 2 NN.jpg`; o vídeo vira um quadro limpo dele, olhe antes de escolher), suba em
+  `<pasta>/tiktok/` e use nas duas. TikTok com `tiktokData.title` curto e `autoAddMusic: true`.
+- Uma postagem por grupo: IG numa, FB + TikTok noutra (mesma legenda).
+
 ## 7. Entrega
 
 Mande ao criador **todos os links do Notion criados/preenchidos** (para conferência), os das pastas do Drive, a lista das notas 👁️ do Obsidian para conferir e o que ficou agendado (Metricool, com o link do planner, e a automação do ManyChat). Depois,
