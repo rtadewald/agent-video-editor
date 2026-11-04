@@ -293,7 +293,8 @@ const TARJA = { y: 0.13, x: 0.04, larguraMax: 0.84, letra: 3.4, peso: 800 }
 /** O texto da tarja em duas linhas equilibradas (o criador: "de preferência em 2 linhas"), no maior tamanho até
  *  `letra` em que a linha mais longa cabe; uma quebra escrita no texto manda. */
 function linhasDaTarja(texto: string) {
-  const cabe = (s: string) => caberEm(s, TARJA.letra, TARJA.larguraMax, TARJA.peso)
+  // a linha cabe na caixa sem o respiro dela (2,6 cqw de cada lado) e com folga para a medida do canvas
+  const cabe = (s: string) => caberEm(s, TARJA.letra, TARJA.larguraMax - 2 * 0.026 - 0.02, TARJA.peso)
   if (texto.includes('\n')) return { texto, tam: Math.min(...texto.split('\n').map(cabe)), n: texto.split('\n').length }
   const ps = texto.trim().split(/\s+/)
   let melhor = { texto, tam: cabe(texto), n: 1, sobra: Infinity }
@@ -320,7 +321,6 @@ function tarja(e: Elemento): V | null {
     estilo: {
       left: `${TARJA.x * 100}cqw`,
       top: `${TARJA.y * 100}cqh`,
-      maxWidth: `${TARJA.larguraMax * 100}cqw`,
       padding: '1.1cqh 2.6cqw 1.3cqh',
       borderRadius: '2.2cqw',
       background: 'rgba(255,255,255,0.94)',
