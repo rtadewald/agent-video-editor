@@ -1750,6 +1750,41 @@ ${b}` };
       texto
     };
   }
+  var TARJA = { y: 0.13, x: 0.04, larguraMax: 0.86, letra: 3.05 };
+  var medidasTarja = (e) => {
+    const linhas = Math.ceil([...e.texto ?? ""].length / 26);
+    const h = (linhas * TARJA.letra * 1.12 + 2.4) / 100;
+    return { y: TARJA.y + h / 2, h };
+  };
+  function tarja(e, rel) {
+    if (!e.texto) return null;
+    const p = limite01(rel / POP.dur);
+    const s = POP.escala + (1 - POP.escala) * POP.curva(p);
+    return {
+      chave: e.id,
+      classe: "absolute",
+      estilo: {
+        left: `${TARJA.x * 100}cqw`,
+        top: `${TARJA.y * 100}cqh`,
+        maxWidth: `${TARJA.larguraMax * 100}cqw`,
+        padding: "1.1cqh 2.6cqw 1.3cqh",
+        borderRadius: "2.2cqw",
+        background: "rgba(255,255,255,0.94)",
+        boxShadow: "0 0.5cqh 1.6cqh rgba(0,0,0,0.22)",
+        fontFamily: "'SF Pro Display', system-ui, sans-serif, 'Apple Color Emoji'",
+        fontWeight: 800,
+        fontSize: `${TARJA.letra}cqh`,
+        lineHeight: 1.12,
+        letterSpacing: "-0.01em",
+        color: "#111",
+        whiteSpace: "pre-line",
+        transformOrigin: "left top",
+        transform: `scale(${s})`,
+        opacity: POP.curva(p)
+      },
+      texto: e.texto
+    };
+  }
   function desenharElementos(t, elementos, banco) {
     const agora = elementos.filter((e) => e.inicio <= t && t < e.fim);
     if (!agora.length) return { vs: [], chave: "" };
@@ -1763,6 +1798,7 @@ ${b}` };
       if (e.tipo === "palavra_manychat") return manychat(e, rel);
       if (e.tipo === "caixinha_perguntas") return caixinha(e, rel);
       if (e.tipo === "print_sobreposto") return print(e, rel, banco);
+      if (e.tipo === "tarja") return tarja(e, rel);
       return null;
     });
     const vs = [{ chave: "elementos", classe: "pointer-events-none absolute inset-0 select-none", estilo: { containerType: "size", zIndex: 20 }, filhos }];
@@ -1771,7 +1807,7 @@ ${b}` };
   var intervalosDeLettering = (elementos) => elementos.filter((e) => (e.tipo === "full_ator_lettering" || e.tipo === "lettering") && e.texto).map((e) => ({ ini: e.inicio, fim: e.fim }));
   function zonasDosElementos(elementos, banco) {
     return elementos.flatMap((e) => {
-      const card = e.tipo === "palavra_manychat" ? { y: yBarra(e.lugar), h: BARRA.h } : e.tipo === "caixinha_perguntas" ? medidasCaixinha(e) : e.tipo === "print_sobreposto" ? medidasPrint(e, e.banco ? banco.get(e.banco) : void 0) : null;
+      const card = e.tipo === "palavra_manychat" ? { y: yBarra(e.lugar), h: BARRA.h } : e.tipo === "caixinha_perguntas" ? medidasCaixinha(e) : e.tipo === "print_sobreposto" ? medidasPrint(e, e.banco ? banco.get(e.banco) : void 0) : e.tipo === "tarja" ? medidasTarja(e) : null;
       return card ? [{ ini: e.inicio, fim: e.fim, divisao: null, ator: null, card: { y: card.y, h: card.h } }] : [];
     });
   }

@@ -187,17 +187,17 @@ def alinhar(blocos: list[dict], saida: list[dict], letterings: list[dict] | None
     return faixas, len(casado)
 
 
-# + palavra manychat «X» · + caixinha de perguntas «Y» · + print/imagem sobreposta «…» (variações de caixa e escrita);
+# + palavra manychat «X» · + caixinha de perguntas «Y» · + print/imagem sobreposta «…» · + tarja «texto do post» (variações de caixa e escrita);
 # + lettering «…» na marcação não vale (o lettering vai na fala, com a tag): sai da descrição com um aviso
 ELEMENTO = re.compile(r'\+\s*(palavra\s+(?:do\s+)?many\s*chat|caixinha(?:\s+de\s+perguntas?)?|(?:print\s*/\s*imagem|print|imagem)\s+sobrepost[ao]'
-                      r'|lettering)\s*(?:«([^»]*)»)?', re.I)
+                      r'|lettering|tarja)\s*(?:«([^»]*)»)?', re.I)
 TEXTO = re.compile(r'«([^»]*)»')
 
 
 def tipo_elemento(nome: str) -> str:
     nome = nome.lower()
     return ('palavra_manychat' if 'many' in nome else 'caixinha_perguntas' if 'caixinha' in nome
-            else 'lettering' if nome == 'lettering' else 'print_sobreposto')
+            else 'lettering' if nome == 'lettering' else 'tarja' if nome == 'tarja' else 'print_sobreposto')
 
 
 def tipo_plano(nome: str) -> str | None:

@@ -67,6 +67,7 @@ referências do criador, está em `render/src/elementos.ts`:
 | palavra ManyChat | barra branca de comentário, a palavra digitada e o botão de enviar (com som de digitação) |
 | caixinha de perguntas | sticker de pergunta do Instagram (cabeçalho em degradê), acima dos olhos sobre o ator; na tela dividida, na costura (como o card do comentário), e pode atravessar várias telas: estenda o `palavra_fim` dela até o fim da pergunta |
 | print sobreposto | com `banco` (id de uma mídia): a mídia num card no peito/costura; sem: uma etiqueta mono com o `texto` |
+| tarja | o texto do post em cima do vídeo, como o sticker de texto do Instagram: caixa branca no alto à esquerda, texto preto em negrito, emojis coloridos (🤯). Vai no 1º plano, nos primeiros 5–10 s; o criador quer emoji de espanto ou cérebro explodindo |
 
 Todos entram com um "pop" de 0,18 s e saem secos. A legenda desvia deles.
 

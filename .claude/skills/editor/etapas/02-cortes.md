@@ -75,6 +75,10 @@ deles: separe.
    "finais": [{"destino": "ManyChat", "manter": [["w00215","w00225"], ["w00249","w00260"]]},
               {"destino": "Prompt na descrição", "manter": [["w00215","w00225"]]}]}
   ```
+- Um final pode **reordenar** os trechos dele com `mover` (como o do corpo): uma frase gravada depois que entra antes,
+  `{"destino": "Link fixado", "manter": [[…]], "mover": [{"trecho": ["w01044","w01054"], "antes_de": "w00996"}]}`.
+  O final do link segue a mesma ordem do ManyChat: "se tu quiser participar, clica no link fixado, faz o teu cadastro e
+  amanhã te encontro…" — a ação no lugar do "comenta", e o resto igual. _progressao · 2026-11-03_
 - Detecte os finais sozinho (falas de fechamento que se repetem no fim, cada uma levando a um lugar); o briefing, se
   houver, manda. Liste as saídas na entrega da v1 para o criador conferir. Um final que ele pedir depois do vídeo fechado:
   `cortes.py saida <slug> "<Destino>" --falado w…..w…`. Um CTA gravado à parte (outro projeto, página CTAs):

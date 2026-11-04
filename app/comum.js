@@ -164,6 +164,7 @@ export const ELEMENTOS = {
   palavra_manychat: 'Palavra ManyChat',
   caixinha_perguntas: 'Caixinha de perguntas',
   print_sobreposto: 'Print/imagem sobreposta',
+  tarja: 'Tarja',
 }
 /** Um arquivo de uma referência da calibragem. */
 export const urlRef = (ref, arq) => `/biblioteca/referencias/${encodeURIComponent(ref)}/${arq}`

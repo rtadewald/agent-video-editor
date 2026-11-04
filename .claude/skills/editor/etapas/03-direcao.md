@@ -71,7 +71,7 @@ refs: REF-12·p4, REF-07·p31
 - **Planos** (use estes nomes): Full ator · Full ator com lettering «texto» · Insert tela cheia · Motion tela cheia ·
   Tela dividida · insert · Tela dividida · motion · Comentário + insert + ator «comentário».
 - **Elementos** (na marcação, com "+"): + palavra manychat «PALAVRA» · + caixinha de perguntas «pergunta» ·
-  + print/imagem sobreposta «o que é».
+  + print/imagem sobreposta «o que é» · + tarja «texto do post» (a caixa branca no alto, nos primeiros segundos).
 - **Lettering** (destaque de palavras) vai **na fala**, não na marcação: `<lettering>GPT 3.7</lettering>`, ou
   `<lettering texto="R$ 97">noventa e sete reais</lettering>` quando o texto na tela é diferente do falado. Uma tag por
   trecho, sem aninhar. Sobre o ator em tela cheia, o certo é o plano Full ator com lettering.

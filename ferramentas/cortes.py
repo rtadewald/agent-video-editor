@@ -8,7 +8,7 @@ e as pausas longas cortadas (do 18: backend/app/cortes.py, sem a LLM).
     uv run ferramentas/cortes.py texto <slug>                    a transcrição, uma palavra por linha (ID<TAB>texto) + pausas
     uv run ferramentas/cortes.py aplicar <slug> <selecao.json>   {"manter": [["w00004","w00011"], …], "duvidas": [{ini, fim, motivo}],
                                                                   "mover": [{"trecho": [ini, fim], "antes_de": id}],
-                                                                  "finais": [{"destino": "ManyChat", "manter": [[…], …]}, …]}
+                                                                  "finais": [{"destino": "ManyChat", "manter": [[…], …], "mover": […]}, …]}
 
 As saídas (corpo + final; edicao.json → `saidas`): `manter` é o CORPO, o que é comum a todas, até a última palavra comum;
 cada final falado (gravado na mesma tomada: "comente X", "o prompt está na descrição") é uma faixa de palavras depois
@@ -302,7 +302,8 @@ def montar_saidas(edicao: dict, ws: list[dict], sil: list[dict]) -> None:
             continue
         checar_final(ws, mantidas, x['final']['manter'], x['destino'])
         clipes = montar_clipes(ws, mantidas_por_indice(ws, mantidas + x['final']['manter']), sil, edicao['fontes'][0]['duracao'], **parametros)
-        mover_clipes(clipes, cortes.get('mover') or [], ws)
+        # o final pode reordenar os trechos dele (`mover` no final, como o do corpo): uma frase gravada depois que entra antes
+        mover_clipes(clipes, (cortes.get('mover') or []) + (x['final'].get('mover') or []), ws)
         x['V1'] = clipes
 
 
@@ -447,7 +448,8 @@ def aplicar(slug: str, arquivo: str) -> None:
     edicao.setdefault('timeline', {})['V1'] = clipes
     # os finais falados da seleção viram saídas; as que já existem (e as de CTA) ficam, com os cortes refeitos
     for f in sel.get('finais') or []:
-        por_saida(edicao, f['destino'], {'tipo': 'falado', 'manter': validar(f.get('manter') or [], ws)})
+        por_saida(edicao, f['destino'], {'tipo': 'falado', 'manter': validar(f.get('manter') or [], ws)}
+                  | ({'mover': f['mover']} if f.get('mover') else {}))
     montar_saidas(edicao, ws, silencios(slug))
     gravar(slug, edicao)
     print(resumo(edicao, ws, fica))

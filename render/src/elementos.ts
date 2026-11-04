@@ -286,6 +286,46 @@ function print(e: Elemento, rel: number, banco: Map<string, ItemBanco>): V | nul
   }
 }
 
+/** A tarja: o texto do post em cima do vídeo, nos primeiros segundos, como o sticker de texto do Instagram (caixa branca,
+ *  texto preto em negrito, emojis coloridos), alinhada à esquerda no alto do quadro, abaixo da barra do Instagram
+ *  (progressao · 2026-11-03: "uma tarja estilo isso", o print do post "As interfaces… são BIZARRAS 🤯🤯🤯"). */
+const TARJA = { y: 0.13, x: 0.04, larguraMax: 0.86, letra: 3.05 }
+const medidasTarja = (e: Elemento) => {
+  const linhas = Math.ceil([...(e.texto ?? '')].length / 26)
+  const h = (linhas * TARJA.letra * 1.12 + 2.4) / 100
+  return { y: TARJA.y + h / 2, h }
+}
+
+function tarja(e: Elemento, rel: number): V | null {
+  if (!e.texto) return null
+  const p = limite01(rel / POP.dur)
+  const s = POP.escala + (1 - POP.escala) * POP.curva(p)
+  return {
+    chave: e.id,
+    classe: 'absolute',
+    estilo: {
+      left: `${TARJA.x * 100}cqw`,
+      top: `${TARJA.y * 100}cqh`,
+      maxWidth: `${TARJA.larguraMax * 100}cqw`,
+      padding: '1.1cqh 2.6cqw 1.3cqh',
+      borderRadius: '2.2cqw',
+      background: 'rgba(255,255,255,0.94)',
+      boxShadow: '0 0.5cqh 1.6cqh rgba(0,0,0,0.22)',
+      fontFamily: "'SF Pro Display', system-ui, sans-serif, 'Apple Color Emoji'",
+      fontWeight: 800,
+      fontSize: `${TARJA.letra}cqh`,
+      lineHeight: 1.12,
+      letterSpacing: '-0.01em',
+      color: '#111',
+      whiteSpace: 'pre-line',
+      transformOrigin: 'left top',
+      transform: `scale(${s})`,
+      opacity: POP.curva(p),
+    },
+    texto: e.texto,
+  }
+}
+
 /** Os elementos na tela no instante `t` (dentro do contêiner do quadro, acima dos inserts, motions e do card do
  *  comentário) e a chave deles: '' sem nenhum, null se algum está mexendo (o pop, a digitação, o toque), senão os ids
  *  (parados: o render reaproveita a foto). */
@@ -302,6 +342,7 @@ export function desenharElementos(t: number, elementos: Elemento[], banco: Map<s
     if (e.tipo === 'palavra_manychat') return manychat(e, rel)
     if (e.tipo === 'caixinha_perguntas') return caixinha(e, rel)
     if (e.tipo === 'print_sobreposto') return print(e, rel, banco)
+    if (e.tipo === 'tarja') return tarja(e, rel)
     return null
   })
   const vs: V[] = [{ chave: 'elementos', classe: 'pointer-events-none absolute inset-0 select-none', estilo: { containerType: 'size', zIndex: 20 }, filhos }]
@@ -321,6 +362,7 @@ export function zonasDosElementos(elementos: Elemento[], banco: Map<string, Item
       e.tipo === 'palavra_manychat' ? { y: yBarra(e.lugar), h: BARRA.h }
       : e.tipo === 'caixinha_perguntas' ? medidasCaixinha(e)
       : e.tipo === 'print_sobreposto' ? medidasPrint(e, e.banco ? banco.get(e.banco) : undefined)
+      : e.tipo === 'tarja' ? medidasTarja(e)
       : null
     return card ? [{ ini: e.inicio, fim: e.fim, divisao: null, ator: null, card: { y: card.y, h: card.h } }] : []
   })
