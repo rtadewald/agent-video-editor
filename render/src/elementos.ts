@@ -289,17 +289,31 @@ function print(e: Elemento, rel: number, banco: Map<string, ItemBanco>): V | nul
 /** A tarja: o texto do post em cima do vídeo, nos primeiros segundos, como o sticker de texto do Instagram (caixa branca,
  *  texto preto em negrito, emojis coloridos), alinhada à esquerda no alto do quadro, abaixo da barra do Instagram
  *  (progressao · 2026-11-03: "uma tarja estilo isso", o print do post "As interfaces… são BIZARRAS 🤯🤯🤯"). */
-const TARJA = { y: 0.13, x: 0.04, larguraMax: 0.86, letra: 3.05 }
+const TARJA = { y: 0.13, x: 0.04, larguraMax: 0.84, letra: 3.4, peso: 800 }
+/** O texto da tarja em duas linhas equilibradas (o criador: "de preferência em 2 linhas"), no maior tamanho até
+ *  `letra` em que a linha mais longa cabe; uma quebra escrita no texto manda. */
+function linhasDaTarja(texto: string) {
+  const cabe = (s: string) => caberEm(s, TARJA.letra, TARJA.larguraMax, TARJA.peso)
+  if (texto.includes('\n')) return { texto, tam: Math.min(...texto.split('\n').map(cabe)), n: texto.split('\n').length }
+  const ps = texto.trim().split(/\s+/)
+  let melhor = { texto, tam: cabe(texto), n: 1, sobra: Infinity }
+  for (let k = 1; k < ps.length; k++) {
+    const a = ps.slice(0, k).join(' '), b = ps.slice(k).join(' ')
+    const tam = Math.min(cabe(a), cabe(b))
+    const sobra = Math.abs(emEm(a, TARJA.peso) - emEm(b, TARJA.peso)) // as duas linhas do mesmo tamanho, de preferência
+    if (melhor.n === 1 || tam > melhor.tam + 0.01 || (tam > melhor.tam - 0.01 && sobra < melhor.sobra)) melhor = { texto: `${a}\n${b}`, tam, n: 2, sobra }
+  }
+  return melhor
+}
 const medidasTarja = (e: Elemento) => {
-  const linhas = Math.ceil([...(e.texto ?? '')].length / 26)
-  const h = (linhas * TARJA.letra * 1.12 + 2.4) / 100
+  const l = linhasDaTarja(e.texto ?? '')
+  const h = (l.n * l.tam * 1.12 + 2.4) / 100
   return { y: TARJA.y + h / 2, h }
 }
 
-function tarja(e: Elemento, rel: number): V | null {
+function tarja(e: Elemento): V | null {
   if (!e.texto) return null
-  const p = limite01(rel / POP.dur)
-  const s = POP.escala + (1 - POP.escala) * POP.curva(p)
+  const l = linhasDaTarja(e.texto)
   return {
     chave: e.id,
     classe: 'absolute',
@@ -312,17 +326,14 @@ function tarja(e: Elemento, rel: number): V | null {
       background: 'rgba(255,255,255,0.94)',
       boxShadow: '0 0.5cqh 1.6cqh rgba(0,0,0,0.22)',
       fontFamily: "'SF Pro Display', system-ui, sans-serif, 'Apple Color Emoji'",
-      fontWeight: 800,
-      fontSize: `${TARJA.letra}cqh`,
+      fontWeight: TARJA.peso,
+      fontSize: `${l.tam.toFixed(3)}cqh`,
       lineHeight: 1.12,
       letterSpacing: '-0.01em',
       color: '#111',
-      whiteSpace: 'pre-line',
-      transformOrigin: 'left top',
-      transform: `scale(${s})`,
-      opacity: POP.curva(p),
+      whiteSpace: 'pre',
     },
-    texto: e.texto,
+    texto: l.texto,
   }
 }
 
@@ -336,13 +347,13 @@ export function desenharElementos(t: number, elementos: Elemento[], banco: Map<s
   const filhos = agora.map((e) => {
     const rel = t - e.inicio
     const d = e.tipo === 'palavra_manychat' ? digitacao(e) : null
-    if (rel < (d ? d.ini + d.dur + DIGITAR.toque : POP.dur)) parado = false
+    if (e.tipo !== 'tarja' && rel < (d ? d.ini + d.dur + DIGITAR.toque : POP.dur)) parado = false
     if (e.tipo === 'full_ator_lettering' || (e.tipo === 'lettering' && e.lugar.modo === 'ator')) return letteringNoAtor(e, rel)
     if (e.tipo === 'lettering') return letteringNoInsert(e, rel)
     if (e.tipo === 'palavra_manychat') return manychat(e, rel)
     if (e.tipo === 'caixinha_perguntas') return caixinha(e, rel)
     if (e.tipo === 'print_sobreposto') return print(e, rel, banco)
-    if (e.tipo === 'tarja') return tarja(e, rel)
+    if (e.tipo === 'tarja') return tarja(e)
     return null
   })
   const vs: V[] = [{ chave: 'elementos', classe: 'pointer-events-none absolute inset-0 select-none', estilo: { containerType: 'size', zIndex: 20 }, filhos }]

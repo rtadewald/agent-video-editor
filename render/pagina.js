@@ -1750,16 +1750,29 @@ ${b}` };
       texto
     };
   }
-  var TARJA = { y: 0.13, x: 0.04, larguraMax: 0.86, letra: 3.05 };
+  var TARJA = { y: 0.13, x: 0.04, larguraMax: 0.84, letra: 3.4, peso: 800 };
+  function linhasDaTarja(texto) {
+    const cabe = (s) => caberEm(s, TARJA.letra, TARJA.larguraMax, TARJA.peso);
+    if (texto.includes("\n")) return { texto, tam: Math.min(...texto.split("\n").map(cabe)), n: texto.split("\n").length };
+    const ps = texto.trim().split(/\s+/);
+    let melhor = { texto, tam: cabe(texto), n: 1, sobra: Infinity };
+    for (let k = 1; k < ps.length; k++) {
+      const a = ps.slice(0, k).join(" "), b = ps.slice(k).join(" ");
+      const tam = Math.min(cabe(a), cabe(b));
+      const sobra = Math.abs(emEm(a, TARJA.peso) - emEm(b, TARJA.peso));
+      if (melhor.n === 1 || tam > melhor.tam + 0.01 || tam > melhor.tam - 0.01 && sobra < melhor.sobra) melhor = { texto: `${a}
+${b}`, tam, n: 2, sobra };
+    }
+    return melhor;
+  }
   var medidasTarja = (e) => {
-    const linhas = Math.ceil([...e.texto ?? ""].length / 26);
-    const h = (linhas * TARJA.letra * 1.12 + 2.4) / 100;
+    const l = linhasDaTarja(e.texto ?? "");
+    const h = (l.n * l.tam * 1.12 + 2.4) / 100;
     return { y: TARJA.y + h / 2, h };
   };
-  function tarja(e, rel) {
+  function tarja(e) {
     if (!e.texto) return null;
-    const p = limite01(rel / POP.dur);
-    const s = POP.escala + (1 - POP.escala) * POP.curva(p);
+    const l = linhasDaTarja(e.texto);
     return {
       chave: e.id,
       classe: "absolute",
@@ -1772,17 +1785,14 @@ ${b}` };
         background: "rgba(255,255,255,0.94)",
         boxShadow: "0 0.5cqh 1.6cqh rgba(0,0,0,0.22)",
         fontFamily: "'SF Pro Display', system-ui, sans-serif, 'Apple Color Emoji'",
-        fontWeight: 800,
-        fontSize: `${TARJA.letra}cqh`,
+        fontWeight: TARJA.peso,
+        fontSize: `${l.tam.toFixed(3)}cqh`,
         lineHeight: 1.12,
         letterSpacing: "-0.01em",
         color: "#111",
-        whiteSpace: "pre-line",
-        transformOrigin: "left top",
-        transform: `scale(${s})`,
-        opacity: POP.curva(p)
+        whiteSpace: "pre"
       },
-      texto: e.texto
+      texto: l.texto
     };
   }
   function desenharElementos(t, elementos, banco) {
@@ -1792,13 +1802,13 @@ ${b}` };
     const filhos = agora.map((e) => {
       const rel = t - e.inicio;
       const d = e.tipo === "palavra_manychat" ? digitacao(e) : null;
-      if (rel < (d ? d.ini + d.dur + DIGITAR.toque : POP.dur)) parado = false;
+      if (e.tipo !== "tarja" && rel < (d ? d.ini + d.dur + DIGITAR.toque : POP.dur)) parado = false;
       if (e.tipo === "full_ator_lettering" || e.tipo === "lettering" && e.lugar.modo === "ator") return letteringNoAtor(e, rel);
       if (e.tipo === "lettering") return letteringNoInsert(e, rel);
       if (e.tipo === "palavra_manychat") return manychat(e, rel);
       if (e.tipo === "caixinha_perguntas") return caixinha(e, rel);
       if (e.tipo === "print_sobreposto") return print(e, rel, banco);
-      if (e.tipo === "tarja") return tarja(e, rel);
+      if (e.tipo === "tarja") return tarja(e);
       return null;
     });
     const vs = [{ chave: "elementos", classe: "pointer-events-none absolute inset-0 select-none", estilo: { containerType: "size", zIndex: 20 }, filhos }];
@@ -1910,7 +1920,7 @@ ${b}` };
       return m.length === ls.length ? m.reduce((a, b) => b.f < a.f ? b : a) : lugarEm(ini, fim);
     };
     const originais = new Map((edicao.direcao?.itens ?? []).map((i) => [i.id, i]));
-    const desenhaveis = [...planos.filter((p) => p.tipo === "full_ator_lettering"), ...elementos].sort((a, b) => a.inicio - b.inicio).map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, lugar: e.tipo === "caixinha_perguntas" ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }));
+    const desenhaveis = [...planos.filter((p) => p.tipo === "full_ator_lettering"), ...elementos].sort((a, b) => a.inicio - b.inicio).map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === "tarja" && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, lugar: e.tipo === "caixinha_perguntas" ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }));
     lista2.forEach((x, i) => {
       if (x.tipo === "comentario_insert_ator" || desenhaveis.some((e) => e.inicio < x.t.fim && e.fim > x.t.inicio)) return;
       trechos[i].geometria = geometriaDoInsert(x, banco, receitaDoInsert(x, banco, presets), divisaoDe(x, banco, presets), fundoInserts);
