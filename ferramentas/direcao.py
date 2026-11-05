@@ -360,9 +360,20 @@ def sincronizar(edicao: dict, saida: list[dict]) -> list[dict]:
     enriquecimento e o card de comentário."""
     ins = edicao.setdefault('inserts', {})
     antigos = {x.get('plano') or x.get('id'): x for x in ins.get('pedidos') or []}
+    # casa pela descrição antes do número: tirar um plano renumera os seguintes, e pelo número as mídias escorregavam
+    # um plano (carrinho-c v4: o «50% OFF» saiu e cada insert ficou com a mídia do anterior)
+    por_desc = {}
+    for x in ins.get('pedidos') or []:
+        if x.get('descricao'):
+            por_desc.setdefault(x['descricao'], x)
+    novos = pedidos_da_direcao(edicao['direcao']['itens'], saida)
+    descs_novas = {n['descricao'] for n in novos}
     pedidos = []
-    for n in pedidos_da_direcao(edicao['direcao']['itens'], saida):
-        velho = antigos.get(n['plano']) or {}
+    for n in novos:
+        velho = por_desc.get(n['descricao']) if n['descricao'] else None
+        if velho is None:
+            v = antigos.get(n['plano']) or {}
+            velho = {} if v.get('descricao') in descs_novas and v.get('descricao') != n['descricao'] else v
         pedidos.append({**n, 'midias': velho.get('midias') or [],
                         **{k: velho[k] for k in ('enriquecimento', 'comentario') if velho.get(k)}})
     ins['pedidos'] = pedidos
@@ -412,6 +423,18 @@ def aplicar(slug: str, arquivo: str) -> None:
     for i in itens:
         if i['tipo'] == 'print_sobreposto' and (b := midia_dos_prints.get((i.get('texto') or '').strip().lower())):
             i['banco'] = b
+    # os motions e as transições são presos ao número do plano: leva-os pela descrição para o número novo
+    desc_velha = {i['id']: i.get('descricao') for i in (edicao.get('direcao') or {}).get('itens', [])
+                  if i.get('camada') == 'plano'}
+    id_novo = {}
+    for i in itens:
+        if i['camada'] == 'plano' and i.get('descricao'):
+            id_novo.setdefault(i['descricao'], i['id'])
+    motions = edicao.get('motions') or {}
+    if motions:
+        levados = {id_novo[desc_velha[k]]: m for k, m in motions.items() if desc_velha.get(k) in id_novo}
+        edicao['motions'] = levados | {k: m for k, m in motions.items()
+                                       if desc_velha.get(k) not in id_novo and k not in levados}
     edicao['direcao'] = {'roteiro': roteiro, 'itens': itens}
     pedidos = sincronizar(edicao, saida)
     planos = {i['id'] for i in itens if i['camada'] == 'plano'}
