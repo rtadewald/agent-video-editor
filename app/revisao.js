@@ -540,6 +540,262 @@ class Revisao {
     }, 3000)
   }
 
+  // ---------- a música (a faixa e o volume do fundo; servidor.py musica, render.py musica/remixar) ----------
+  // O vídeo fica mudo e toca o áudio da versão sem a música, com a faixa por cima pelo Web Audio, como a mistura do render
+  // (audio.filtros_fundo): o nível base, o ducking nas falas, as voltas do laço com crossfade e o fade no fim. Trocar a
+  // faixa ou o volume soa na hora; Salvar grava no projeto (travada para o Claude) e põe a música no proxy.
+
+  async abrirMusica() {
+    const el = $('#musica')
+    if (!this.ctxMusica) { // criado no clique: o Safari (iPad) só deixa o Web Audio tocar se ele nasce num toque
+      this.ctxMusica = new AudioContext()
+      this.ctxMusica.resume()
+      if (navigator.audioSession) navigator.audioSession.type = 'playback' // o iPhone/iPad no silencioso não cala o Web Audio
+    }
+    if (this.mu?.aberto) {
+      this.mu.aberto = false
+      el.hidden = true
+      return
+    }
+    el.hidden = false
+    if (!this.mu) {
+      el.innerHTML = '<span class="eyebrow">Música</span><p class="dica">Preparando o áudio sem a música…</p>'
+      try {
+        // numa saída, a mistura dela (a falada, a própria; a de CTA, corpo e CTA com uma trilha só)
+        const sid = this.dir === this.base ? null : this.saidaId
+        const d = await enviar('GET', `/api/projetos/${encodeURIComponent(this.slug)}/musica/v${this.v}${sid ? `?saida=${encodeURIComponent(sid)}` : ''}`)
+        d.aoVivo = !!d.sem_musica && !d.fundo_mudo
+        this.mu = { d, fundo: d.fundo, nivel: d.nivel, salvo: { fundo: d.fundo, nivel: d.nivel }, buffers: {}, fontes: [], estado: d.remixando ? 'pondo' : '' }
+      } catch (e) {
+        el.innerHTML = `<span class="eyebrow">Música</span><p class="dica">${esc(e.message)}</p>`
+        return
+      }
+      this.mu.aoVivo = this.mu.d.aoVivo
+      if (this.mu.aoVivo) this.ligarMusica()
+      if (this.mu.estado === 'pondo') this.esperarRemix()
+      el.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-musica]')
+        if (!b) return
+        const v = b.dataset.musica
+        if (v === 'fechar') return this.abrirMusica()
+        if (v === 'salvar') return this.salvarMusica()
+        if (v === 'padrao') return this.volumeMusica(0)
+        this.mu.fundo = v === '-' ? null : v
+        this.renderMusica()
+        this.tocarMusica()
+      })
+      el.addEventListener('input', (e) => e.target.matches('[data-musica-nivel]') && this.volumeMusica(+e.target.value))
+    }
+    this.mu.aberto = true
+    this.renderMusica()
+  }
+
+  renderMusica() {
+    const mu = this.mu
+    const el = $('#musica')
+    if (!mu || !el) return
+    const mudou = mu.fundo !== mu.salvo.fundo || mu.nivel !== mu.salvo.nivel
+    const linha = (id, nome, clima) => `<button class="musica-faixa${(mu.fundo ?? '-') === id ? ' ativa' : ''}" data-musica="${esc(id)}">
+        <b>${esc(nome)}</b>${clima ? `<span>${esc(clima)}</span>` : ''}${id !== '-' && id === mu.d.na_versao ? '<i title="A que está no vídeo desta versão">no vídeo</i>' : ''}</button>`
+    const estado = mu.estado === 'pondo' ? 'Pondo a música no vídeo…' : mu.estado === 'pronto' ? 'Salvo, e já no vídeo' : mu.estado === 'proxima' ? 'Salvo: entra na próxima versão' : mudou ? '' : mu.d.travada ? 'Escolhida por você' : ''
+    el.innerHTML = `<div class="musica-cabeca"><span class="eyebrow">Música</span><button class="botao-icone pequeno" data-musica="fechar" title="Fechar">${ICONE.fechar}</button></div>
+      <div class="musica-faixas">${linha('-', 'Sem música', '')}${mu.d.faixas.map((f) => linha(f.id, f.nome, f.clima)).join('')}</div>
+      <label class="musica-volume"><span class="dica">Volume</span><input type="range" min="-12" max="6" step="0.5" value="${mu.nivel}" data-musica-nivel ${mu.fundo ? '' : 'disabled'}>
+        <b>${mu.nivel > 0 ? '+' : ''}${num(mu.nivel, mu.nivel % 1 ? 1 : 0)} dB</b></label>
+      <button class="botao-link" data-musica="padrao" ${mu.nivel ? '' : 'hidden'}>Voltar ao padrão (0 dB)</button>
+      <div class="musica-acoes"><span class="dica">${esc(estado)}</span><button class="botao pequeno botao-coral" data-musica="salvar" ${mudou && mu.estado !== 'salvando' ? '' : 'disabled'}>Salvar</button></div>
+      <p class="dica">${mu.aoVivo ? 'Toque o vídeo para ouvir: a troca soa na hora.' : (mu.d.fundo_mudo ? 'Este vídeo toca sem música própria (a de quem vem antes dele).' : 'Esta saída é de antes da prévia ao vivo: escolha no corpo, ou salve e ela pega a música na próxima versão.')}</p>`
+  }
+
+  volumeMusica(nivel) {
+    const mu = this.mu
+    mu.nivel = nivel
+    if (mu.ctx) mu.nivelNo.gain.setTargetAtTime(10 ** (nivel / 20), mu.ctx.currentTime, 0.03)
+    const el = $('#musica')
+    if (!$('[data-musica-nivel]', el)) return
+    $('[data-musica-nivel]', el).value = nivel
+    $('.musica-volume b', el).textContent = `${nivel > 0 ? '+' : ''}${num(nivel, nivel % 1 ? 1 : 0)} dB`
+    $('[data-musica="padrao"]', el).hidden = !nivel
+    $('[data-musica="salvar"]', el).disabled = mu.fundo === mu.salvo.fundo && nivel === mu.salvo.nivel
+  }
+
+  async salvarMusica() {
+    const mu = this.mu
+    mu.estado = 'salvando'
+    this.renderMusica()
+    try {
+      const r = await enviar('PUT', `/api/projetos/${encodeURIComponent(this.slug)}/musica/v${this.v}`, { fundo: mu.fundo, nivel: mu.nivel })
+      mu.salvo = { fundo: mu.fundo, nivel: mu.nivel }
+      mu.d.travada = true
+      mu.estado = r.remixando ? 'pondo' : 'proxima'
+      if (r.aviso) aviso(r.aviso)
+      if (r.remixando) this.esperarRemix()
+    } catch (e) {
+      mu.estado = ''
+      aviso(e.message, 'erro')
+    }
+    this.renderMusica()
+  }
+
+  /** Enquanto a música entra no proxy (alguns segundos), o painel diz; pronto, a versão passa a ter essa faixa. */
+  esperarRemix() {
+    clearInterval(this.relogioMusica)
+    this.relogioMusica = setInterval(async () => {
+      if (this.fechado) return clearInterval(this.relogioMusica)
+      const d = await json(`/api/projetos/${encodeURIComponent(this.slug)}/musica/v${this.v}?estado=1`, null)
+      if (d && !d.remixando) {
+        clearInterval(this.relogioMusica)
+        this.mu.estado = 'pronto'
+        this.mu.d.na_versao = this.mu.salvo.fundo
+        this.renderMusica()
+      }
+    }, 2000)
+  }
+
+  /** O modo ao vivo: o vídeo mudo; a voz sem música e a faixa tocam pelo Web Audio, agendadas no mesmo relógio a partir
+   *  do instante do vídeo (de novo a cada play, pulo, troca de velocidade ou quando o vídeo escorrega mais de 0,15 s). */
+  ligarMusica() {
+    const mu = this.mu
+    const v = this.video
+    mu.ctx = this.ctxMusica
+    mu.nivelNo = mu.ctx.createGain()
+    mu.nivelNo.gain.value = 10 ** (mu.nivel / 20)
+    mu.nivelNo.connect(mu.ctx.destination)
+    mu.bufVoz = fetch(mu.d.sem_musica).then((r) => r.arrayBuffer()).then((b) => mu.ctx.decodeAudioData(b))
+    v.muted = true
+    const tocar = () => {
+      mu.ctx.resume()
+      this.tocarMusica()
+    }
+    const parar = () => this.pararMusica()
+    const conferir = () => {
+      if (v.paused || !mu.relogio) return
+      const esperado = mu.relogio.t0 + (mu.ctx.currentTime - mu.relogio.quando) * mu.relogio.rate
+      if (Math.abs(esperado - v.currentTime) > 0.15) this.tocarMusica()
+    }
+    mu.eventos = { playing: tocar, pause: parar, waiting: parar, seeking: parar, seeked: () => !v.paused && tocar(), ratechange: () => !v.paused && tocar(),
+      timeupdate: conferir, ended: parar }
+    for (const [ev, f] of Object.entries(mu.eventos)) v.addEventListener(ev, f)
+    if (!v.paused) tocar()
+  }
+
+  desligarMusica() {
+    const mu = this.mu
+    clearInterval(this.relogioMusica)
+    this.ctxMusica?.close()
+    if (!mu?.eventos) return
+    for (const [ev, f] of Object.entries(mu.eventos)) this.video.removeEventListener(ev, f)
+    this.video.muted = false
+  }
+
+  pararMusica() {
+    for (const f of this.mu?.fontes || []) {
+      try {
+        f.stop?.()
+      } catch {}
+      f.disconnect()
+    }
+    if (this.mu) Object.assign(this.mu, { fontes: [], relogio: null })
+  }
+
+  async bufferMusica(id) {
+    const mu = this.mu
+    if (!mu.buffers[id]) {
+      const f = mu.d.faixas.find((x) => x.id === id)
+      mu.buffers[id] = fetch(f.url).then((r) => r.arrayBuffer()).then((b) => mu.ctx.decodeAudioData(b))
+    }
+    return mu.buffers[id]
+  }
+
+  /** A voz sem música e a faixa a partir do instante do vídeo: as voltas do laço (`audio.voltas_do_fundo`), cada uma
+   *  com o seu crossfade, e o ganho da faixa no tempo (o nível base, o ducking das falas, o fade no fim) numa curva só. */
+  async tocarMusica() {
+    const mu = this.mu
+    if (!mu?.ctx) return
+    this.pararMusica()
+    const v = this.video
+    if (v.paused) return
+    const pedido = (mu.pedido = (mu.pedido || 0) + 1)
+    const id = mu.fundo
+    const [bufVoz, buf] = await Promise.all([mu.bufVoz, id ? this.bufferMusica(id) : null])
+    if (pedido !== mu.pedido || v.paused || mu.fundo !== id) return
+    const d = mu.d
+    const ctx = mu.ctx
+    const rate = v.playbackRate
+    const t0 = v.currentTime
+    const quando = ctx.currentTime + 0.03
+    const fimV = d.duracao
+    if (t0 >= fimV - 0.05) return
+    const voz = ctx.createBufferSource()
+    voz.buffer = bufVoz
+    voz.playbackRate.value = rate
+    voz.connect(ctx.destination)
+    voz.start(quando, t0)
+    mu.fontes = [voz]
+    mu.relogio = { t0, quando, rate }
+    if (!id) return
+    const f = d.faixas.find((x) => x.id === id)
+    const [ini, fimL0] = f.laco
+    const fimL = Math.min(fimL0, buf.duration)
+    const desde = ini + (d.continua || 0)
+    const cruza = Math.min(d.cruza, (fimL - ini) / 2)
+    // as voltas no tempo da faixa emendada: a 1ª de 0 a fimL, as outras de ini a fimL, cada uma cruzando a anterior
+    const voltas = []
+    for (let S = 0, k = 0; S < desde + fimV; k++) {
+      const de = k ? ini : 0
+      voltas.push({ S, de, L: fimL - de })
+      S += fimL - de - cruza
+      if (fimL - de - cruza <= 0) break
+    }
+    // o ganho no tempo do vídeo: base + ducking + fade (dB → linear)
+    const sobe = (x) => { x = Math.min(Math.max(x, 0), 1); return x * x * (3 - 2 * x) }
+    const baixo = 1 - 10 ** (-d.ducking_db / 20)
+    const ganho = (t) => {
+      let soma = 0
+      for (const [a, b] of d.falas) {
+        if (t < a - d.subida || t > b + d.descida) continue
+        soma += Math.min(sobe((t - (a - d.subida)) / d.subida), sobe((b + d.descida - t) / d.descida))
+      }
+      const fade = d.fade_fim ? Math.min(Math.max((fimV - t) / d.fade, 0), 1) : 1
+      return 10 ** (d.base_db / 20) * (1 - baixo * Math.min(soma, 1)) * fade
+    }
+    const passo = 1 / 30
+    const n = Math.max(2, Math.ceil((fimV - t0) / passo) + 1)
+    const curva = new Float32Array(n)
+    for (let k = 0; k < n; k++) curva[k] = ganho(Math.min(t0 + k * passo, fimV))
+    const g = ctx.createGain()
+    g.gain.setValueCurveAtTime(curva, quando, (n - 1) * passo / rate)
+    g.connect(mu.nivelNo)
+    const T0 = desde + t0
+    const T1 = desde + fimV
+    const fontes = mu.fontes
+    fontes.push(g)
+    voltas.forEach((vt, k) => {
+      const fimV_ = vt.S + vt.L
+      if (fimV_ <= T0 || vt.S >= T1) return
+      const a = Math.max(vt.S, T0)
+      const b = Math.min(fimV_, T1)
+      const src = ctx.createBufferSource()
+      src.buffer = buf
+      src.playbackRate.value = rate
+      const sg = ctx.createGain()
+      // o crossfade de potência constante (o qsin do acrossfade): entra na volta k, sai antes da k+1
+      const m = Math.max(2, Math.ceil((b - a) * 60) + 1)
+      const cv = new Float32Array(m)
+      for (let i = 0; i < m; i++) {
+        const T = a + (b - a) * i / (m - 1)
+        const entra = k ? Math.sin(Math.PI / 2 * Math.min(Math.max((T - vt.S) / cruza, 0), 1)) : 1
+        const sai = k < voltas.length - 1 ? Math.cos(Math.PI / 2 * Math.min(Math.max((T - (fimV_ - cruza)) / cruza, 0), 1)) : 1
+        cv[i] = entra * sai
+      }
+      const em = quando + (a - T0) / rate
+      sg.gain.setValueCurveAtTime(cv, em, (b - a) / rate)
+      src.connect(sg).connect(g)
+      src.start(em, vt.de + (a - vt.S), b - a)
+      fontes.push(src, sg)
+    })
+  }
+
   // ---------- a tela ----------
 
   montar() {
@@ -575,6 +831,8 @@ class Revisao {
         </div>
         <div class="grupo velocidades">${VELOCIDADES.map((x) => `<button class="pilula pequena${x === 1 ? ' ativa' : ''}" data-vel="${x}">${num(x, x % 1 ? 1 : 0)}×</button>`).join('')}</div>
         <div class="grupo">
+          <span class="musica-ancora"><button class="botao" data-acao="musica" title="Escolher a música de fundo e o volume, ouvindo na hora">${ICONE.som} Música</button>
+            <div class="bloco musica" id="musica" hidden></div></span>
           <button class="botao" data-acao="look" title="Testar LUT, intensidade e vinheta do ator">${ICONE.ajustes} Look</button>
           <button class="botao" data-acao="entrada" id="b-entrada">Entrada <kbd>I</kbd></button>
           <button class="botao" data-acao="saida">Saída <kbd>O</kbd></button>
@@ -732,6 +990,11 @@ class Revisao {
   async trocarSaida(id) {
     preferencia(`saida.${this.slug}`, null, id || null)
     this.saidaId = id || null
+    if (this.mu) { // a música ao vivo é da mistura de cada saída: reabrir o painel prepara a da nova
+      this.desligarMusica()
+      this.mu = this.ctxMusica = null
+      $('#musica').hidden = true
+    }
     this.versoesBloco = null // as versões do Final são da saída: refeitas para a nova (o que já foi lido fica em memória)
     this.dir = this.saidaAtual()?.info ? `${this.base}saidas/${this.saidaId}/` : this.base // a sem final é o próprio corpo
     const t = this.video.currentTime
@@ -1899,6 +2162,7 @@ class Revisao {
       'quadro-': () => this.passo(-QUADRO),
       'quadro+': () => this.passo(QUADRO),
       look: () => this.abrirLook(),
+      musica: () => this.abrirMusica(),
       'corte-': () => this.irAoCorte(-1),
       'corte+': () => this.irAoCorte(1),
       ajustar: () => this.zoom(0),
@@ -2017,6 +2281,7 @@ class Revisao {
     if (this.sujo) this.salvar(true)
     clearInterval(this.relogio)
     clearInterval(this.relogioRender)
+    this.desligarMusica()
     clearTimeout(this.timer)
     cancelAnimationFrame(this.raf)
     window.removeEventListener('keydown', this.teclas)

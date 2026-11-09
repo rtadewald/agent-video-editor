@@ -22,6 +22,10 @@ fala, em laço com crossfade e fade no fim). No final, −14 LUFS (o padrão do 
 
   Tutorial/ferramenta → `arpejo-suave`; notícia/novidade de IA → `arpejo-suave`, `piano-pulsante` ou
   `grave-tech` (o criador achou a `pads-ambiente` tosca); opinião forte/polêmica → `cinematico`. Varie entre vídeos seguidos.
+- **A música do criador é travada.** Na revisão, ele escolhe a faixa e o volume no botão Música (ouve ao vivo; ao salvar,
+  o app grava `audio.fundo`, `audio.niveis.fundo` e `audio.fundo_do_criador: true` no edicao.json e põe a música no
+  proxy da versão: `render.py remixar`). Com `fundo_do_criador`, não mexa na faixa nem no `niveis.fundo` em nenhuma
+  versão, a não ser que ele peça.
 - **`voz.limpeza`**: `leve` (padrão, já feita no preparar). `media`/`forte` só se o ruído de fundo incomodar (pede
   rodar a limpeza de novo; veja o preparar). `voz.timbre`: `encorpada` (padrão: a voz do criador
   com o equilíbrio das VSLs de referência — mais grave, menos médio, mais ar; o microfone dele não pega o brilho) ·

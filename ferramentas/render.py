@@ -18,6 +18,10 @@
     uv run ferramentas/render.py <slug> --camadas --final  → o mesmo no tamanho do 4K: o export final só monta
     uv run ferramentas/render.py amostra-look <slug> <t> <lut|-> <intensidade> <vinheta> [nitidez]
         → um trecho de 3 s do ator (do bruto, no instante t do vídeo final) com aquele look: o provador da revisão
+    uv run ferramentas/render.py musica <slug> <v> [<saída>]   → o que o app precisa para tocar a música ao vivo na revisão (JSON):
+        o áudio da versão sem a música (versoes/vN/sem-musica.m4a, feito na primeira vez), as falas, o nível e as faixas
+    uv run ferramentas/render.py remixar <slug> <v>  → a música do edicao.json (a escolhida no app) no proxy da vN: só o
+        áudio é misturado de novo e trocado no MP4 (o vídeo fica), com o áudio sem música e as prévias das saídas de CTA
     uv run ferramentas/render.py previas-motions [--refazer] [<id> …]
         → biblioteca/motions/previas/<id>.mp4: a prévia de cada motion (720×1280, 30 fps quadro a quadro, mudo), o que a aba
         Motions do app toca na grade (a animação ao vivo fica só no modal). Só refaz o que mudou desde a última prévia.
@@ -672,6 +676,8 @@ def render(slug: str, final: bool = False, saida: str | None = None, pasta_saida
                       f"{encaixar.paragrafos([w['texto'] for w in palavras_na_saida(transcricao, clipes)])}\n", encoding='utf-8')
         print(f'Transcrição: {md}')
     if pasta_saida:  # a prévia de uma saída: os dados dela ao lado do vídeo (o app troca para eles); a versão é do corpo
+        receita['a']['medida'] = a['medida']
+        gravar_json(pasta_saida / 'audio.json', receita)  # a música ao vivo e a remistura dela (`sem_musica`, `remixar`)
         for campo in ('palavras', 'planos'):
             if r.get(campo) is not None:
                 gravar_json(pasta_saida / f'{campo}.json', r[campo])
@@ -683,6 +689,7 @@ def render(slug: str, final: bool = False, saida: str | None = None, pasta_saida
         marcar_exportada(slug, saida, destino)
     if not final:
         gravar_json(pasta_versao / 'edicao.json', edicao)
+        receita['a']['medida'] = a['medida']  # o ganho do −14 LUFS: o áudio sem música (`sem_musica`) leva o mesmo
         gravar_json(pasta_versao / 'audio.json', receita)
         for campo in ('palavras', 'planos'):
             if r.get(campo) is None:
@@ -748,8 +755,8 @@ def previa_cta(x: dict, pasta_versao: Path, alvo: Path, corpo_dur: float) -> Non
     corpo = pasta_versao / 'proxy.mp4'
     wav = alvo / '.audio.wav'
     try:
-        mix_da_saida(pasta_versao / 'audio.json', dc / 'audio.json', inspecionar(corpo)['duracao'], inspecionar(dc / 'proxy.mp4')['duracao'],
-                     x['final'].get('transicao') or 'luz-colorida', wav)
+        mix = mix_da_saida(pasta_versao / 'audio.json', dc / 'audio.json', inspecionar(corpo)['duracao'], inspecionar(dc / 'proxy.mp4')['duracao'],
+                           x['final'].get('transicao') or 'luz-colorida', wav, alvo / 'sem-musica.m4a')
         ffmpeg('-i', str(corpo), '-i', str(dc / 'proxy.mp4'), '-i', str(wav), '-filter_complex',
                '[0:v]scale=720:1280,setsar=1,fps=24[a];[1:v]scale=720:1280,setsar=1,fps=24[b];[a][b]concat=n=2:v=1:a=0[v]',
                '-map', '[v]', '-map', '2:a', '-c:v', 'libx264', '-crf', '23', '-preset', 'veryfast', '-pix_fmt', 'yuv420p',
@@ -768,6 +775,7 @@ def previa_cta(x: dict, pasta_versao: Path, alvo: Path, corpo_dur: float) -> Non
         gravar_json(alvo / f'{campo}.json', do_corpo + do_cta)
     gravar_json(alvo / 'info.json', {'saida': x['id'], 'destino': x['destino'], 'final': 'cta', 'cta': cta, 'cta_versao': vc,
                                      'duracao': inspecionar(alvo / 'proxy.mp4')['duracao'], 'corpo': round(corpo_dur, 3),
+                                     'musica': {'ganho': mix['ganho'], 'falas': mix['falas']},  # a prévia ao vivo (`dados_musica`)
                                      'criado_em': datetime.now().isoformat(timespec='seconds')})
     print(f'      corpo + {cta} v{vc}', flush=True)
 
@@ -812,14 +820,16 @@ def receita(arq: Path) -> dict:
     return rec
 
 
-def mix_da_saida(rec_corpo: Path, rec_cta: Path, dur_corpo: float, dur_cta: float, transicao: str, destino: Path) -> dict:
+def mix_da_saida(rec_corpo: Path, rec_cta: Path, dur_corpo: float, dur_cta: float, transicao: str, destino: Path,
+                 sem_musica: Path | None = None) -> dict:
     """O áudio de uma saída de CTA à parte, numa mistura só, para não dar para perceber onde o corpo acaba e o CTA começa:
     - a voz do CTA **casada** com a do corpo: o mesmo equilíbrio por faixa de frequência (um equalizador medido nas duas
       vozes já tratadas, `audio.casar_voz`) e a mesma sonoridade (o CTA inteiro, voz e sons, sobe ou desce junto);
     - **uma trilha só** (a do corpo), do começo ao fim da saída: sem corte nem volta na emenda, o ducking pelas falas dos
       dois e o fade só no fim;
     - o som da transição na emenda e o −14 LUFS medido na saída inteira.
-    As vozes e os sons de cada lado saem da receita do render (`versoes/vN/audio.json`). Devolve o que foi casado."""
+    As vozes e os sons de cada lado saem da receita do render (`versoes/vN/audio.json`). Devolve o que foi casado.
+    `sem_musica`: também a mistura sem a trilha, com o mesmo ganho (a prévia ao vivo da música na revisão)."""
     rc, rk = receita(rec_corpo), receita(rec_cta)
     tmp = Path(tempfile.mkdtemp(prefix='.mix-', dir=destino.parent))
     try:
@@ -872,6 +882,7 @@ def mix_da_saida(rec_corpo: Path, rec_cta: Path, dur_corpo: float, dur_cta: floa
             f.append(f'[2:a]aresample=48000,aformat=channel_layouts=stereo,volume={ganho:.4f},adelay={atraso}|{atraso}[ptr]')
             f.append(f'[{atual}][ptr]amix=inputs=2:duration=first:normalize=0[pcomtr]')
             atual = 'pcomtr'
+        sem_f = (list(entradas), list(f), atual)
         if a.get('fundo') and not a.get('fundo_mudo'):
             ent_f, f_f = audio.filtros_fundo(a, total, entradas.count('-i'), 'pfd')
             entradas += ent_f
@@ -883,9 +894,13 @@ def mix_da_saida(rec_corpo: Path, rec_cta: Path, dur_corpo: float, dur_cta: floa
                '-map', '[pfim]', '-t', f'{total:.4f}', '-c:a', 'pcm_f32le', str(cru))
         m = audio.medir(a, [], [], total, cru)
         ffmpeg('-i', str(cru), '-af', f"{audio.final(m['ganho'])},aresample=48000,aformat=channel_layouts=stereo", '-c:a', 'pcm_f32le', str(destino))
+        if sem_musica:
+            ent_s, f_s, at_s = sem_f
+            ffmpeg(*ent_s, '-filter_complex', ';'.join(f_s) + f";[{at_s}]{audio.final(m['ganho'])},aresample=48000,aformat=channel_layouts=stereo[pfim]",
+                   '-map', '[pfim]', '-t', f'{total:.4f}', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', str(sem_musica))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
-    casado = {'nivel_db': nivel, 'eq': eq, 'diferenca_db': dif, 'sobra_db': resto, 'lufs': m['i']}
+    casado = {'nivel_db': nivel, 'eq': eq, 'diferenca_db': dif, 'sobra_db': resto, 'lufs': m['i'], 'ganho': m['ganho'], 'falas': a['falas']}
     if pronto:
         print(f"      áudio da saída: corpo já editado; CTA {nivel:+.1f} dB, com a trilha dele; {m['i']:.1f} LUFS", flush=True)
     else:
@@ -1142,7 +1157,151 @@ def previas_motions(refazer: bool = False, ids: list[str] | None = None) -> None
     print(f'{len(fila)} prévia(s) em biblioteca/motions/previas/.')
 
 
+# ---------------------------------------------------------------- a música escolhida pelo criador na revisão
+
+def _rec_partes(rec: dict) -> tuple[dict, list[dict], list[dict], float]:
+    return rec['a'], rec['clipes'], rec['eventos'], float(rec['duracao'])
+
+
+def sem_musica(slug: str, pv: Path) -> Path:
+    """O áudio de uma prévia (a vN ou uma saída falada dela) sem a música: a voz e os sons, com o ganho do −14 LUFS da
+    mistura inteira. O app toca a música por cima, ao vivo, para o criador escolher a faixa e o volume. Feito na primeira
+    vez e guardado ao lado do proxy."""
+    arq, rec_arq = pv / 'sem-musica.m4a', pv / 'audio.json'
+    rec = receita(rec_arq)
+    if arq.exists() and arq.stat().st_mtime >= rec_arq.stat().st_mtime:
+        return arq
+    a, clipes, eventos, dur = _rec_partes(rec)
+    if not a.get('medida'):  # uma versão de antes: mede a mistura inteira (com a música) uma vez
+        a['medida'], _ = mistura(pasta(slug), a, clipes, eventos, dur)
+        gravar_json(rec_arq, rec)
+    with tempfile.TemporaryDirectory() as t:
+        faixa = Path(t) / 'sons.wav'
+        sons.faixa(audio.com_faders(a, eventos), dur, faixa)
+        entradas, f = audio.filtros({**a, 'fundo_mudo': True}, clipes, eventos, 0, 'pfim', dur, {'ganho': a['medida']['ganho']}, faixa)
+        parte = Path(t) / 'sem-musica.m4a'
+        ffmpeg(*entradas, '-filter_complex', ';'.join(f), '-map', '[pfim]', '-t', f'{dur:.4f}', '-c:a', 'aac', '-b:a', '192k',
+               '-movflags', '+faststart', str(parte))
+        shutil.move(str(parte), arq)
+    return arq
+
+
+def _lacos() -> dict[str, list[float]]:
+    """O laço de cada faixa da biblioteca (`audio.laco`), guardado em biblioteca/trilhas/.lacos.json pelo tamanho e data."""
+    cache_arq = BIBLIOTECA / 'trilhas' / '.lacos.json'
+    cache, out = ler_json(cache_arq, {}) or {}, {}
+    for f in (ler_json(BIBLIOTECA / 'trilhas' / 'catalogo.json', {}) or {}).get('faixas') or []:
+        arq = audio.arquivo_trilha(f['id'])
+        if not arq:
+            continue
+        chave = f'{arq.stat().st_size}@{arq.stat().st_mtime_ns}'
+        if (cache.get(f['id']) or {}).get('chave') != chave:
+            cache[f['id']] = {'chave': chave, 'laco': list(audio.laco(arq))}
+        out[f['id']] = cache[f['id']]['laco']
+    gravar_json(cache_arq, cache)
+    return out
+
+
+def dados_musica(slug: str, v: int, sid: str | None = None) -> dict:
+    """O que o app precisa para tocar a música ao vivo sobre o áudio sem ela, igual à mistura do render
+    (`audio.filtros_fundo`): o nível base (dB) da faixa, as falas (o ducking), o fade e as voltas do laço de cada faixa (a
+    música entra no começo do laço, mais `continua`). Numa saída, a mistura dela: a falada tem a receita própria; a de CTA
+    é o corpo, o CTA e uma trilha só, a do corpo (`mix_da_saida`). `sem_musica: None`: sem prévia ao vivo (uma saída
+    falada de antes desta função; a próxima versão já traz)."""
+    pv = pasta(slug) / 'versoes' / f'v{v}'
+    rec = receita(pv / 'audio.json')
+    a = rec['a']
+    continua = float(a.get('desde') or 0) - (a['laco'][0] if a.get('laco') else 0.0)
+    arq = None
+    ps = pv / 'saidas' / sid if sid else None
+    info = (ler_json(ps / 'info.json', {}) or {}) if ps else {}
+    if not ps:
+        arq = sem_musica(slug, pv)
+        a = receita(pv / 'audio.json')['a']
+        duracao, ganho, falas, fade = float(rec['duracao']), a['medida']['ganho'], a.get('falas') or [], a.get('fade_fim', True)
+    elif info.get('final') == 'cta':
+        if not (ps / 'sem-musica.m4a').exists() or not info.get('musica'):  # uma prévia de antes: refeita uma vez
+            previa_cta(saida_do_projeto(ler(slug), sid), pv, ps, float((ler_json(pv / 'info.json', {}) or {}).get('duracao') or rec['duracao']))
+            info = ler_json(ps / 'info.json', {}) or {}
+        arq, duracao, ganho, falas, fade = ps / 'sem-musica.m4a', float(info['duracao']), info['musica']['ganho'], info['musica']['falas'], True
+    elif (ps / 'audio.json').exists():
+        arq = sem_musica(slug, ps)
+        rs = receita(ps / 'audio.json')
+        duracao, ganho, falas, fade = float(rs['duracao']), rs['a']['medida']['ganho'], rs['a'].get('falas') or [], rs['a'].get('fade_fim', True)
+    else:
+        duracao, ganho, falas, fade = float(info.get('duracao') or rec['duracao']), 0.0, [], True
+    au = ler(slug).get('audio') or {}
+    lacos = _lacos()
+    faixas = [{'id': f['id'], 'nome': f.get('nome') or f['id'], 'clima': f.get('clima') or '', 'laco': lacos[f['id']],
+               'url': f"/biblioteca/trilhas/{f['id']}.m4a"}
+              for f in (ler_json(BIBLIOTECA / 'trilhas' / 'catalogo.json', {}) or {}).get('faixas') or [] if f['id'] in lacos]
+    return {'sem_musica': f'/{arq.relative_to(RAIZ)}?{int(arq.stat().st_mtime)}' if arq else None, 'duracao': duracao,
+            'base_db': round(a['voz_lufs'] + audio.FUNDO_DB - audio.TRILHA_LUFS + ganho, 2), 'fade_fim': fade, 'falas': falas,
+            'ducking_db': a.get('ducking_db', audio.DUCKING_DB), 'continua': round(continua, 3), 'fundo_mudo': bool(a.get('fundo_mudo')),
+            'subida': audio.SUBIDA, 'descida': audio.DESCIDA, 'cruza': audio.CRUZA_FUNDO, 'fade': audio.FADE_FUNDO,
+            'fundo': au.get('fundo'), 'nivel': float((au.get('niveis') or {}).get('fundo') or 0), 'travada': bool(au.get('fundo_do_criador')),
+            'na_versao': Path(a['fundo']).stem if a.get('fundo') else None, 'faixas': faixas}
+
+
+def _remixar_pasta(slug: str, pv: Path, au: dict) -> None:
+    """A música de `au` (o `audio` do edicao.json) no proxy de `pv` (a vN ou uma saída falada dela): a mistura refeita da
+    receita e trocada no MP4 sem mexer no vídeo; depois o áudio sem música (o ganho mudou)."""
+    rec_arq = pv / 'audio.json'
+    rec = receita(rec_arq)
+    a, clipes, eventos, dur = _rec_partes(rec)
+    faixa = audio.arquivo_trilha(au.get('fundo'))
+    laco = list(audio.laco(faixa)) if faixa else None
+    # a faixa entra no começo do laço dela (`som`), mais o que um vídeo emendado antes já tocou (`audio.continua`)
+    continua = float(a.get('desde') or 0) - (a['laco'][0] if a.get('laco') else 0.0)
+    a.update(fundo=str(faixa) if faixa else None, laco=laco, desde=(laco[0] if laco else 0.0) + continua,
+             niveis={**a['niveis'], 'fundo': float((au.get('niveis') or {}).get('fundo') or 0)})
+    a['medida'], wav = mistura(pasta(slug), a, clipes, eventos, dur)
+    proxy, parte = pv / 'proxy.mp4', pv / 'proxy.parte.mp4'
+    ffmpeg('-i', str(proxy), '-i', str(wav), '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '320k', '-ar', '48000',
+           '-t', f'{dur:.4f}', '-movflags', '+faststart', str(parte))
+    parte.replace(proxy)
+    gravar_json(rec_arq, rec)
+    sem_musica(slug, pv)
+
+
+def remixar(slug: str, v: int) -> None:
+    """Põe a música do edicao.json (a que o criador escolheu no app) na vN: no proxy do corpo e no das saídas (a falada
+    pela receita dela; a de CTA, a prévia refeita: a trilha do corpo segue até o fim dela), só o áudio. A edição
+    guardada na versão passa a dizer essa música."""
+    edicao = ler(slug)
+    pv = pasta(slug) / 'versoes' / f'v{v}'
+    au = edicao.get('audio') or {}
+    print(f"Música v{v}: {au.get('fundo') or 'sem música'}, {float((au.get('niveis') or {}).get('fundo') or 0):+.1f} dB", flush=True)
+    _remixar_pasta(slug, pv, au)
+    ed_v = ler_json(pv / 'edicao.json', {}) or {}
+    if ed_v:
+        av = ed_v.setdefault('audio', {})
+        av['fundo'] = au.get('fundo')
+        av.setdefault('niveis', {})['fundo'] = float((au.get('niveis') or {}).get('fundo') or 0)
+        gravar_json(pv / 'edicao.json', ed_v)
+    corpo_dur = float((ler_json(pv / 'info.json', {}) or {}).get('duracao') or 0)
+    for x in [x for x in edicao.get('saidas') or [] if isinstance(x, dict) and x.get('final')]:
+        ps = pv / 'saidas' / x['id']
+        if not (ps / 'proxy.mp4').exists():
+            continue
+        if x['final'].get('tipo') == 'cta':
+            print(f"Saída {x['destino']}: a prévia com a música nova", flush=True)
+            previa_cta(x, pv, ps, corpo_dur)
+        elif (ps / 'audio.json').exists():
+            print(f"Saída {x['destino']}: a música nova", flush=True)
+            _remixar_pasta(slug, ps, au)
+        else:
+            print(f"Saída {x['destino']}: é de antes da receita do áudio; pega a música na próxima versão", flush=True)
+    print('Pronto', flush=True)
+
+
 if __name__ == '__main__':
+    if sys.argv[1:2] == ['musica']:
+        print(json.dumps(dados_musica(sys.argv[2], int(sys.argv[3]), (sys.argv[4:5] or [None])[0]), ensure_ascii=False))
+        sys.exit(0)
+    if sys.argv[1:2] == ['remixar']:
+        remixar(sys.argv[2], int(sys.argv[3]))
+        sys.exit(0)
     if sys.argv[1:2] == ['previas-motions']:
         previas_motions('--refazer' in sys.argv, [a for a in sys.argv[2:] if not a.startswith('--')])
         sys.exit(0)

@@ -52,6 +52,9 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
 - O provador de look da revisão: GET /api/projetos/<slug>/look (o look, os LUTs, as vinhetas e se há um render rodando)
   · POST …/look/amostra {t, lut, intensidade, vinheta} → {video} (3 s do ator com aquele look; render.py amostra-look)
   · PUT …/look {lut, intensidade, vinheta}: grava no edicao.json e renderiza a próxima versão em segundo plano.
+- A música da revisão: GET /api/projetos/<slug>/musica/v<N> (o áudio da vN sem a música, o nível, as falas e as faixas,
+  para o app tocar a música ao vivo; render.py musica) · PUT …/musica/v<N> {fundo, nivel}: grava a escolha do criador no
+  edicao.json (travada para o Claude) e põe a música no proxy da vN em segundo plano (render.py remixar).
 """
 import hashlib
 import json
@@ -331,6 +334,72 @@ def _aplicar_look(h, q, slug):
     threading.Thread(target=proc.wait, daemon=True).start()
     gravar_json(cache / 'render.json', {'pid': proc.pid, 'motivo': 'look'})
     return {'ok': True, 'proxima': (versoes(PROJETOS / slug) or [0])[-1] + 1}
+
+
+# ---- a música da revisão: a faixa e o volume que o criador escolhe, ouvidos ao vivo e postos no proxy (render.py)
+
+def _remixando(slug: str) -> bool:
+    pid = (ler_json(PROJETOS / slug / '.cache' / 'musica.json', {}) or {}).get('pid')
+    try:
+        return bool(pid) and os.kill(int(pid), 0) is None
+    except (ProcessLookupError, ValueError):
+        return False
+    except PermissionError:
+        return True
+
+
+@rota('GET', r'/api/projetos/([\w-]+)/musica/v(\d+)')
+def _ler_musica(h, q, slug, v):
+    _edicao(slug)
+    if not (PROJETOS / slug / 'versoes' / f'v{v}' / 'proxy.mp4').is_file():
+        raise Erro('Versão não encontrada', 404)
+    if q.get('estado'):  # só se a remistura ainda roda (o app pergunta enquanto espera)
+        return {'remixando': _remixando(slug), 'renderizando': _render_rodando(slug)}
+    sid = (q.get('saida') or [''])[0]
+    if sid and not re.fullmatch(r'[\w-]+', sid):
+        raise Erro('Saída inválida', 422)
+    r = subprocess.run([shutil.which('uv') or 'uv', 'run', '--quiet', str(Path(__file__).parent / 'render.py'), 'musica', slug, v, *([sid] if sid else [])],
+                       cwd=RAIZ, capture_output=True, text=True, timeout=300)
+    if r.returncode:
+        raise Erro(f'Não consegui preparar a música: {(r.stderr or r.stdout).strip()[-300:]}', 500)
+    return {**json.loads(r.stdout.strip().splitlines()[-1]), 'remixando': _remixando(slug), 'renderizando': _render_rodando(slug)}
+
+
+@rota('PUT', r'/api/projetos/([\w-]+)/musica/v(\d+)')
+def _gravar_musica(h, q, slug, v):
+    """A escolha do criador vai para o edicao.json (vale para as próximas versões, travada para o Claude) e, em segundo
+    plano, para o proxy da vN (só o áudio). Com um render rodando, só o edicao.json: a versão que vem já sai com ela."""
+    arq = _edicao(slug)
+    c = h.corpo()
+    fundo = c.get('fundo') or None
+    if fundo is not None and not (re.fullmatch(r'[a-z0-9][a-z0-9-]{0,40}', str(fundo)) and (BIBLIOTECA / 'trilhas' / f'{fundo}.m4a').is_file()):
+        raise Erro(f'Faixa desconhecida: {fundo}', 422)
+    try:
+        nivel = round(min(max(float(c.get('nivel') or 0), -12), 6), 1)
+    except (TypeError, ValueError):
+        raise Erro('Volume inválido', 422) from None
+    edicao = ler_json(arq, {})
+    au = edicao.setdefault('audio', {})
+    au['fundo'] = fundo
+    au.setdefault('niveis', {})['fundo'] = nivel
+    au['fundo_do_criador'] = True
+    gravar_json(arq, edicao)
+    if _render_rodando(slug):
+        return {'ok': True, 'remixando': False, 'aviso': 'Há um render rodando: a versão que vem já sai com esta música.'}
+    cache = PROJETOS / slug / '.cache'
+    cache.mkdir(parents=True, exist_ok=True)
+    antigo = (ler_json(cache / 'musica.json', {}) or {}).get('pid')
+    if antigo and _remixando(slug):  # uma escolha nova no meio da remistura da anterior: vale a nova
+        try:
+            os.killpg(int(antigo), 15)
+        except (ProcessLookupError, PermissionError):
+            pass
+    with open(cache / 'musica.log', 'w') as log:
+        proc = subprocess.Popen([shutil.which('uv') or 'uv', 'run', '--quiet', str(Path(__file__).parent / 'render.py'), 'remixar', slug, v],
+                                cwd=RAIZ, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    threading.Thread(target=proc.wait, daemon=True).start()
+    gravar_json(cache / 'musica.json', {'pid': proc.pid, 'versao': int(v)})
+    return {'ok': True, 'remixando': True}
 
 
 @rota('DELETE', r'/api/projetos/([\w-]+)')
