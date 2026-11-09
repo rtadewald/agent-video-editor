@@ -16,7 +16,7 @@ import type { Rosto } from './ator'
 export type Lugar = { modo: 'ator' | 'cheia' | 'metade' | 'atras'; f: number; rosto: Rosto | null }
 /** Um elemento no tempo do vídeo final (o plano Full ator com lettering entra como um, com o tipo do plano). `banco`: no
  *  print sobreposto, a mídia do banco (imagem ou vídeo) que vai no card; sem ela, uma etiqueta com o texto. */
-export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; largura?: number; y?: number; lugar: Lugar }
+export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; largura?: number; y?: number; entrada?: 'seco'; lugar: Lugar }
 
 /** O queixo e os olhos do ator (fração da altura): pela caixa do rosto medido (os olhos como em `ator.enquadrar`); sem
  *  medida, os das referências. */
@@ -261,7 +261,8 @@ function print(e: Elemento, rel: number, banco: Map<string, ItemBanco>): V | nul
     return {
       chave: e.id,
       classe: 'absolute overflow-hidden sombra-card',
-      estilo: { ...centrado(m.y, rel), width: `${m.w * 100}cqw`, height: `${m.h * 100}cqh`, borderRadius: '2.2cqw', background: '#111' },
+      // `entrada: 'seco'`: aparece inteiro de uma vez, sem o pop (o som continua)
+      estilo: { ...centrado(m.y, e.entrada === 'seco' ? POP.dur : rel), width: `${m.w * 100}cqw`, height: `${m.h * 100}cqh`, borderRadius: '2.2cqw', background: '#111' },
       filhos: [midia({ id: e.id, banco: item.id }, banco, Math.max(rel, 0))],
     }
   const texto = e.texto

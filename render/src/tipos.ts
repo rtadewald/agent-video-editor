@@ -26,6 +26,8 @@ export type ItemDirecaoProjeto = {
   largura?: number
   /** No print sobreposto: o centro do card (fração da altura do quadro); sem ela, a posição automática. */
   y?: number
+  /** No print sobreposto: 'seco' entra em corte seco (sem o pop). */
+  entrada?: 'seco'
 }
 export type ItemRef = {
   id: string
