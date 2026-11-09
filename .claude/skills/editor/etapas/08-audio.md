@@ -19,6 +19,8 @@ fala, em laço com crossfade e fade no fim). No final, −14 LUFS (o padrão do 
 | `cinematico` | pensativo, com tensão leve · 86 |
 | `grave-tech` | focado, escuro · 103 |
 | `piano-pulsante` | energia · 152 |
+| `sneaky-snitch` | engraçadinho, malandro (pizzicato) · 2:16 · Kevin MacLeod, CC BY 4.0: **crédito na descrição** |
+| `fluffing-a-duck` | engraçadinho, bobo (sopros) · 1:07 · Kevin MacLeod, CC BY 4.0: **crédito na descrição** |
 
   Tutorial/ferramenta → `arpejo-suave`; notícia/novidade de IA → `arpejo-suave`, `piano-pulsante` ou
   `grave-tech` (o criador achou a `pads-ambiente` tosca); opinião forte/polêmica → `cinematico`. Varie entre vídeos seguidos.

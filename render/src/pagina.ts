@@ -197,7 +197,7 @@ async function iniciar() {
       }),
     )
     const elems = await Promise.all(
-      desenhaveis.filter((e) => cai(e.inicio, e.fim)).map(async (e) => ({ t: [rel(e.inicio), rel(e.fim)], tipo: e.tipo, texto: e.texto, lugar: e.lugar, midia: await midiaDe(e.banco) })),
+      desenhaveis.filter((e) => cai(e.inicio, e.fim)).map(async (e) => ({ t: [rel(e.inicio), rel(e.fim)], tipo: e.tipo, texto: e.texto, lugar: e.lugar, largura: e.largura ?? null, y: e.y ?? null, entrada: e.entrada ?? null, midia: await midiaDe(e.banco) })),
     )
     const fundo = daqui.length ? fundoInserts : null
     return JSON.stringify({
