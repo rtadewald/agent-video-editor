@@ -24,8 +24,8 @@ export type ItemDirecaoProjeto = {
   banco?: string | null
   /** No print sobreposto: a largura do card (fração do quadro); sem ela, meia largura. */
   largura?: number
-  /** No print sobreposto na tela dividida: logo abaixo da costura, sem cobrir o insert. */
-  abaixo?: boolean
+  /** No print sobreposto: o centro do card (fração da altura do quadro); sem ela, a posição automática. */
+  y?: number
 }
 export type ItemRef = {
   id: string

@@ -31,9 +31,13 @@ from base import gravar, ler, ler_json, pasta  # noqa: E402
 
 PAUSA_NO_TEXTO = 0.3  # todas as pausas detectadas aparecem: recomeços seguidos têm pausas de ~0,4 s
 JANELA_ANTES, JANELA_DEPOIS = 0.5, 0.35  # quão longe da borda da palavra o silêncio pode estar (o ASR erra ~0,2 s)
-# pausa dentro de um trecho mantido só é cortada se passar de `pausa_max`; `folga_inicio`/`folga_fim`: o ar que fica antes
-# da primeira palavra e depois da última de cada trecho (do 18: os padrões das Configurações)
-PARAMETROS = {'pausa_max': 2.0, 'folga_inicio': 0.1, 'folga_fim': 0.1}
+# pausa dentro de um trecho mantido só fica se for menor que `pausa_max` (a articulação da fala; o criador: nada de espaço
+# depois que ele termina algo); `folga_inicio`/`folga_fim`: o ar antes da primeira palavra e depois da última de cada trecho
+PARAMETROS = {'pausa_max': 0.15, 'folga_inicio': 0.06, 'folga_fim': 0.04}
+SILENCIO_NA_BORDA = 0.1  # s abaixo do limiar para a voz ter acabado (a oclusão de um "t" final dura menos)
+ALCANCE = 0.25  # s: o quanto a voz pode ir além da borda que o transcritor deu para a palavra
+FIM_MAIS_JUSTO = 4  # dB: no fim, a cauda e o ar depois da palavra saem antes (o começo guarda o ataque da palavra)
+ABAIXO_DO_PICO = 26  # dB abaixo do pico da palavra: daí para baixo não é mais voz
 VELOCIDADE = (1.0, 1.5)
 
 
@@ -291,7 +295,7 @@ def checar_final(palavras: list[dict], mantidas: list[list[str]], manter: list[l
                          'o trecho que sai em cada final que o usa.')
 
 
-def montar_saidas(edicao: dict, ws: list[dict], sil: list[dict]) -> None:
+def montar_saidas(edicao: dict, ws: list[dict], sil: list[dict], voz: Path | None = None) -> None:
     """Refaz os cortes de cada saída falada (o corpo + o final dela, em clipes da V1): sempre que o corpo muda."""
     cortes = edicao.get('cortes') or {}
     mantidas = cortes.get('mantidas') or []
@@ -301,7 +305,10 @@ def montar_saidas(edicao: dict, ws: list[dict], sil: list[dict]) -> None:
             x.pop('V1', None)
             continue
         checar_final(ws, mantidas, x['final']['manter'], x['destino'])
-        clipes = montar_clipes(ws, mantidas_por_indice(ws, mantidas + x['final']['manter']), sil, edicao['fontes'][0]['duracao'], **parametros)
+        fica = mantidas_por_indice(ws, mantidas + x['final']['manter'])
+        clipes = montar_clipes(ws, fica, sil, edicao['fontes'][0]['duracao'], **parametros)
+        if voz:
+            clipes = colar_na_voz(clipes, ws, fica, voz, parametros['pausa_max'], parametros['folga_inicio'], parametros['folga_fim'])
         # o final pode reordenar os trechos dele (`mover` no final, como o do corpo): uma frase gravada depois que entra antes
         mover_clipes(clipes, (cortes.get('mover') or []) + (x['final'].get('mover') or []), ws)
         x['V1'] = clipes
@@ -354,7 +361,7 @@ def comando_saida(slug: str, destino: str, args: list[str]) -> None:
     else:
         raise SystemExit('Diga o final: --falado <faixas> | --cta <slug> | --nenhum')
     x = por_saida(edicao, destino, final)
-    montar_saidas(edicao, ws, silencios(slug))
+    montar_saidas(edicao, ws, silencios(slug), voz_de(slug))
     gravar(slug, edicao)
     print(f'Saída {x["id"]} ({destino}): {descrever(x)}. Ela entra no próximo render (render.py {slug}).')
 
@@ -386,39 +393,91 @@ def tirar_saida(slug: str, sid: str) -> None:
     print(f'Saída {sid} tirada.')
 
 
-def apertar_inicios(clipes: list[dict], palavras: list[dict], audio: Path) -> None:
-    """O começo de cada clipe colado na voz: o respiro antes da frase (até ~0,3 s, acima do limiar dos silêncios) saía
-    junto e soava como silêncio na emenda (claude-mods v5 c1). Mede a energia em janelas de 10 ms no `audio.wav` e põe a
-    borda 0,04 s antes da primeira janela com voz (o limiar é relativo ao volume da fala), sem passar do começo da
-    primeira palavra: uma palavra fraca na borda (o "e" a −52 dB) continua dentro. O fim não muda (a cauda é curta e o
-    "s" final fraco cairia)."""
+def colar_na_voz(clipes: list[dict], palavras: list[dict], fica: list[bool], audio: Path, pausa_max: float, folga_inicio: float = 0.06, folga_fim: float = 0.04) -> list[dict]:
+    """Os cortes colados na fala (eu-errei v6: "sem deixar qualquer espaçamento após eu terminar algo"). Mede a energia em
+    janelas de 10 ms na voz limpa, com o limiar relativo ao pico de cada palavra (o transcritor erra as bordas em ~0,2 s):
+    parte o clipe em toda pausa de pelo menos `pausa_max` entre duas palavras e põe cada borda a uma folga mínima de onde a voz
+    começa e acaba, mesmo que seja além da borda dos silêncios (numa fala baixa, o −35 dB deles comia o fim das palavras:
+    eu-errei v7). Nunca invade a palavra vizinha, e uma palavra fraca na borda (o "e" a −52 dB) continua dentro."""
     import array
     import math
     import wave
-    if not audio.exists():
-        return
+    if not audio.exists() or pausa_max >= 99:  # 99: um vídeo que já veio editado passa como está
+        return clipes
     with wave.open(str(audio)) as w:
         if w.getsampwidth() != 2:
-            return
+            return clipes
         sr, canais = w.getframerate(), w.getnchannels()
         amostras = array.array('h', w.readframes(w.getnframes()))[::canais]
     jan = sr // 100
+    cache: dict[int, float] = {}
 
-    def nivel(i: int) -> float:
-        bloco = amostras[i:i + jan]
-        return 20 * math.log10(math.sqrt(sum(x * x for x in bloco) / max(len(bloco), 1)) / 32768 + 1e-9)
+    def nivel(n: int) -> float:  # n: a janela de 10 ms
+        if n not in cache:
+            bloco = amostras[n * jan:(n + 1) * jan]
+            cache[n] = 20 * math.log10(math.sqrt(sum(x * x for x in bloco) / max(len(bloco), 1)) / 32768 + 1e-9)
+        return cache[n]
 
-    niveis = sorted(nivel(i) for i in range(0, len(amostras) - jan, jan * 50))
-    limiar = niveis[int(len(niveis) * 0.95)] - 26 if niveis else -40
-    por_id = {p['id']: p for p in palavras}
+    # o chão da gravação: numa palavra fraca, o limiar nunca desce até o ruído (senão o "fim da voz" não chega nunca)
+    amostra = sorted(nivel(n) for n in range(0, len(amostras) // jan, 50))
+    chao = (amostra[len(amostra) // 10] if amostra else -70) + 8
+
+    def limiar(p: dict) -> float:
+        pico = max((nivel(n) for n in range(int(p['inicio'] * 100), max(int(p['fim'] * 100), int(p['inicio'] * 100) + 1))), default=-40)
+        return max(pico - ABAIXO_DO_PICO, chao)
+
+    meio = lambda p: (p['inicio'] + p['fim']) / 2  # noqa: E731
+    indice = {p['id']: k for k, p in enumerate(palavras)}
+    saida = []
     for c in clipes:
-        s0, ate = int(c['inicio'] * sr), int(min(c['inicio'] + 0.5, c['fim']) * sr)
-        voz = next((i for i in range(s0, ate, jan) if nivel(i) > limiar), None)
-        if voz is None:
+        dentro = [p for p, ok in zip(palavras, fica) if ok and (c['inicio'] <= meio(p) <= c['fim'] or min(p['fim'], c['fim']) - max(p['inicio'], c['inicio']) >= 0.05)]
+        if not dentro:
             continue
-        novo = min(voz / sr - 0.04, por_id[c['palavra_ini']]['inicio'])
-        if novo > c['inicio'] + 0.02:
-            c['inicio'] = round(novo, 3)
+        pedacos = [[c['inicio'], None, dentro[0]]]
+        for p, q in zip(dentro, dentro[1:]):
+            lim = min(limiar(p), limiar(q))
+            run, melhor = None, (0, 0)  # a maior sequência de janelas sem voz entre os dois meios
+            for n in range(int(meio(p) * 100), int(meio(q) * 100) + 1):
+                if nivel(n) < lim:
+                    run = n if run is None else run
+                    if n + 1 - run > melhor[1] - melhor[0]:
+                        melhor = (run, n + 1)
+                else:
+                    run = None
+            if (melhor[1] - melhor[0]) / 100 >= pausa_max:
+                pedacos[-1][1] = (min(melhor[0] / 100 + folga_fim, q['inicio']), p)
+                pedacos.append([max(melhor[1] / 100 - folga_inicio, p['fim'] if p['fim'] < q['inicio'] else 0), None, q])
+        pedacos[-1][1] = (c['fim'], dentro[-1])
+        for _, (_, ult), pri in pedacos:
+            lim_a, lim_b = limiar(pri), limiar(ult) + FIM_MAIS_JUSTO
+            # o começo: volta do meio da primeira palavra até achar SILENCIO_NA_BORDA sem voz
+            k = indice[pri['id']]
+            limite = max(palavras[k - 1]['fim'] if k else 0.0, pri['inicio'] - ALCANCE)
+            run, a = 0, limite  # sem silêncio até a palavra vizinha: a borda fica nela
+            for n in range(int(meio(pri) * 100), int(limite * 100) - 1, -1):
+                run = run + 1 if nivel(n) < lim_a else 0
+                if run / 100 >= SILENCIO_NA_BORDA:
+                    a = max(limite, (n + run) / 100 - folga_inicio)
+                    break
+            # o fim: anda do meio da última palavra até achar SILENCIO_NA_BORDA sem voz
+            k = indice[ult['id']]
+            limite = min(palavras[k + 1]['inicio'] if k + 1 < len(palavras) else len(amostras) / sr, ult['fim'] + ALCANCE)
+            run, b = 0, limite
+            for n in range(int(meio(ult) * 100), int(limite * 100) + 1):
+                run = run + 1 if nivel(n) < lim_b else 0
+                if run / 100 >= SILENCIO_NA_BORDA:
+                    b = min(limite, (n - run + 1) / 100 + folga_fim)
+                    break
+            if b - a >= 0.05:
+                saida.append({'id': f'c{len(saida) + 1}', 'fonte': c.get('fonte', 'f1'), 'inicio': round(a, 3), 'fim': round(b, 3),
+                              'palavra_ini': pri['id'], 'palavra_fim': ult['id']})
+    return saida
+
+
+def voz_de(slug: str) -> Path:
+    """A voz limpa, se existe e é PCM de 16 bits; senão, o áudio do bruto."""
+    voz = pasta(slug) / 'midia' / 'voz' / 'f1_leve.wav'
+    return voz if voz.exists() else pasta(slug) / 'audio.wav'
 
 
 def aplicar(slug: str, arquivo: str) -> None:
@@ -441,7 +500,7 @@ def aplicar(slug: str, arquivo: str) -> None:
     parametros = {k: float(guardados.get(k, v)) for k, v in PARAMETROS.items()}
     fica = mantidas_por_indice(ws, mantidas)
     clipes = montar_clipes(ws, fica, silencios(slug), edicao['fontes'][0]['duracao'], **parametros)
-    apertar_inicios(clipes, ws, pasta(slug) / 'audio.wav')
+    clipes = colar_na_voz(clipes, ws, fica, voz_de(slug), parametros['pausa_max'], parametros['folga_inicio'], parametros['folga_fim'])
     mover = sel.get('mover') or []
     mover_clipes(clipes, mover, ws)
     edicao['cortes'] = {'mantidas': mantidas, 'duvidas': duvidas, 'parametros': parametros} | ({'mover': mover} if mover else {})
@@ -450,7 +509,7 @@ def aplicar(slug: str, arquivo: str) -> None:
     for f in sel.get('finais') or []:
         por_saida(edicao, f['destino'], {'tipo': 'falado', 'manter': validar(f.get('manter') or [], ws)}
                   | ({'mover': f['mover']} if f.get('mover') else {}))
-    montar_saidas(edicao, ws, silencios(slug))
+    montar_saidas(edicao, ws, silencios(slug), voz_de(slug))
     gravar(slug, edicao)
     print(resumo(edicao, ws, fica))
     for d in duvidas:

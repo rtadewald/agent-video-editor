@@ -44,7 +44,7 @@ projetos/<slug>/
   "timeline": {"V1": [{"id": "c1", "fonte": "f1", "inicio": 7.235, "fim": 9.045,
                        "palavra_ini": "w00004", "palavra_fim": "w00011"}]},   // s do bruto; `ordem` (s do bruto em que toca) só num trecho movido
   "cortes": {"mantidas": [["w00004", "w00011"]], "duvidas": [{"ini": "w00090", "fim": "w00095", "motivo": "…"}],
-             "parametros": {"pausa_max": 2.0, "folga_inicio": 0.1, "folga_fim": 0.1}},
+             "parametros": {"pausa_max": 0.15, "folga_inicio": 0.06, "folga_fim": 0.04}},
   "direcao": {
     "roteiro": "o roteiro dirigido em texto ([plano: marcação] + fala)",
     "itens": [{"id": "p1", "camada": "plano", "tipo": "tela_dividida_insert", "conteudo": null,

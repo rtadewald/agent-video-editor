@@ -1,9 +1,10 @@
 # 02 · Cortes
 
-Você decide **quais palavras ficam**, pelo ID. O código transforma isso em trechos, com as bordas caindo em pausas reais
-do áudio (margens de 100 ms; pausas maiores que 2 s dentro de um trecho são cortadas). Nada é reescrito nem inventado.
+Você decide **quais palavras ficam**, pelo ID. O código transforma isso em trechos **colados na voz** (medidos na voz limpa,
+com folgas de ~0,05 s; toda pausa de 0,15 s ou mais entre duas palavras sai, inclusive entre frases da mesma fala). Nada é
+reescrito nem inventado.
 Os limites ficam em `edicao.json → cortes.parametros` (`pausa_max`, `folga_inicio`, `folga_fim`), não na `selecao.json`: o
-`cortes.py aplicar` lê os guardados ali. Para mudar (num CTA, pausas de no máximo 0,35 s), edite `cortes.parametros` e
+`cortes.py aplicar` lê os guardados ali. Para mudar, edite `cortes.parametros` e
 rode `aplicar` de novo; confira no `palavras.json` da versão que as pausas caíram. _design-por-imagem v27 c2 · 2026-10-28_
 
 > **Antes de começar, leia `biblioteca/aprendizados/cortes.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/cortes.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
@@ -51,7 +52,7 @@ diferentes se o texto resultante fizer sentido. "Última" não vale se a tentati
 **Deve preservar:**
 - Sentido, coerência e ordem dos argumentos.
 - Conteúdo correto e informação que só aparece uma vez.
-- Jeito coloquial, pausas expressivas e respiros naturais.
+- Jeito coloquial. Pausa só para dar ênfase na frase final e quando o contexto pede: é exceção, à mão no `timeline.V1`.
 - Repetição usada como ênfase.
 
 **Não fazer sem pedido:** encurtar argumentos corretos para caber numa duração, reordenar ou criar nova abertura.
