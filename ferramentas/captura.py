@@ -34,7 +34,7 @@ DENSIDADE = {'9:16': 1.8}  # as outras: 2×
 FPS = 30
 ASSENTAR = 1.0  # s do começo da dobra do topo que ficam de fora: o layout ainda muda
 MAX_DOBRAS = 3
-COOKIES = ('Accept all', 'Accept', 'Allow all', 'I agree', 'Got it', 'OK', 'Aceitar', 'Aceitar todos', 'Aceitar todos os cookies', 'Accept all cookies', 'Concordo', 'Entendi', 'Ok, entendi.')
+COOKIES = ('Accept all', 'Accept All', 'Accept', 'Allow all', 'I agree', 'Got it', 'OK', 'Aceitar', 'Aceitar todos', 'Aceitar todos os cookies', 'Accept all cookies', 'Concordo', 'Entendi', 'Ok, entendi.')
 # pula até a dobra: fração da altura da página (≤ 1) ou px de CSS; devolve onde parou
 PULAR = """(y) => {
     document.documentElement.style.scrollBehavior = 'auto';
