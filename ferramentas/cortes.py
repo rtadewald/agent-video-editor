@@ -468,7 +468,9 @@ def colar_na_voz(clipes: list[dict], palavras: list[dict], fica: list[bool], aud
                 if run / 100 >= SILENCIO_NA_BORDA:
                     b = min(limite, (n - run + 1) / 100 + folga_fim)
                     break
-            if b - a >= 0.05:
+            if saida and a <= saida[-1]['fim'] + 0.02 and saida[-1]['inicio'] < a:  # encostados: a mesma voz tocaria duas vezes
+                saida[-1].update(fim=round(max(b, saida[-1]['fim']), 3), palavra_fim=ult['id'])
+            elif b - a >= 0.05:
                 saida.append({'id': f'c{len(saida) + 1}', 'fonte': c.get('fonte', 'f1'), 'inicio': round(a, 3), 'fim': round(b, 3),
                               'palavra_ini': pri['id'], 'palavra_fim': ult['id']})
     return saida
