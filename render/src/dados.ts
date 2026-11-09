@@ -108,6 +108,7 @@ export async function carregar(slug: string): Promise<Dados> {
   // a direção do final de uma saída: um item (ou ajuste de legenda) com `saida` só entra no render dela
   const daqui = (x: unknown) => !(x as { saida?: string })?.saida || (x as { saida?: string }).saida === idSaida
   if (edicao.direcao?.itens) edicao.direcao.itens = edicao.direcao.itens.filter(daqui)
+  if (edicao.inserts?.pedidos) edicao.inserts.pedidos = edicao.inserts.pedidos.filter(daqui)
   if (edicao.legenda?.ajustes) edicao.legenda.ajustes = Object.fromEntries(Object.entries(edicao.legenda.ajustes).filter(([, v]) => daqui(v))) as typeof edicao.legenda.ajustes
   const bruto = edicao.fontes.find((f) => f.papel === 'bruto')
   const [transcricao, rosto, presets, transicoes, catalogo] = await Promise.all([

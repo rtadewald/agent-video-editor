@@ -16,7 +16,7 @@ import type { Rosto } from './ator'
 export type Lugar = { modo: 'ator' | 'cheia' | 'metade' | 'atras'; f: number; rosto: Rosto | null }
 /** Um elemento no tempo do vídeo final (o plano Full ator com lettering entra como um, com o tipo do plano). `banco`: no
  *  print sobreposto, a mídia do banco (imagem ou vídeo) que vai no card; sem ela, uma etiqueta com o texto. */
-export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; lugar: Lugar }
+export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; largura?: number; abaixo?: boolean; lugar: Lugar }
 
 /** O queixo e os olhos do ator (fração da altura): pela caixa do rosto medido (os olhos como em `ator.enquadrar`); sem
  *  medida, os das referências. */
@@ -104,7 +104,7 @@ function medidasCaixinha(e: Elemento) {
 /** O print: o card da mídia (meia largura, na proporção dela, até 30% da altura) ou a etiqueta do texto. No ator, sobre
  *  o peito (logo abaixo do queixo); na tela dividida, na costura; no "ator embaixo", logo acima da janela. */
 function medidasPrint(e: Elemento, item: ItemBanco | undefined) {
-  let w = 0.5, h = 0
+  let w = e.largura ?? 0.5, h = 0
   if (item) {
     const a = item.largura && item.altura ? item.largura / item.altura : 16 / 9
     h = (w * W_H) / a
@@ -114,7 +114,7 @@ function medidasPrint(e: Elemento, item: ItemBanco | undefined) {
     }
   } else h = 0.055 // a etiqueta: uma linha de 2,6 cqh com o respiro
   const { modo, f } = e.lugar
-  const meio = modo === 'metade' ? f : modo === 'atras' ? Math.min(f, 0.72) - h / 2 - 0.02 : modo === 'ator' ? queixo(e.lugar) + 0.04 + h / 2 : 0.66
+  const meio = modo === 'metade' ? f + (e.abaixo ? h / 2 : 0) : modo === 'atras' ? Math.min(f, 0.72) - h / 2 - 0.02 : modo === 'ator' ? queixo(e.lugar) + 0.04 + h / 2 : 0.66
   return { w, h, y: Math.min(Math.max(meio, h / 2 + 0.03), 0.97 - h / 2) }
 }
 

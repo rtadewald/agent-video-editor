@@ -22,6 +22,10 @@ export type ItemDirecaoProjeto = {
   descricao: string
   /** No print sobreposto: a mídia do banco (imagem ou vídeo) que vai no card (`elementos.ts`). */
   banco?: string | null
+  /** No print sobreposto: a largura do card (fração do quadro); sem ela, meia largura. */
+  largura?: number
+  /** No print sobreposto na tela dividida: logo abaixo da costura, sem cobrir o insert. */
+  abaixo?: boolean
 }
 export type ItemRef = {
   id: string

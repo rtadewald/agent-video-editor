@@ -390,6 +390,7 @@
     }
     const daqui = (x) => !x?.saida || x.saida === idSaida;
     if (edicao.direcao?.itens) edicao.direcao.itens = edicao.direcao.itens.filter(daqui);
+    if (edicao.inserts?.pedidos) edicao.inserts.pedidos = edicao.inserts.pedidos.filter(daqui);
     if (edicao.legenda?.ajustes) edicao.legenda.ajustes = Object.fromEntries(Object.entries(edicao.legenda.ajustes).filter(([, v]) => daqui(v)));
     const bruto = edicao.fontes.find((f) => f.papel === "bruto");
     const [transcricao, rosto, presets, transicoes, catalogo] = await Promise.all([
@@ -1592,7 +1593,7 @@ ${b}` };
     return { linhas, h, y };
   }
   function medidasPrint(e, item) {
-    let w = 0.5, h = 0;
+    let w = e.largura ?? 0.5, h = 0;
     if (item) {
       const a = item.largura && item.altura ? item.largura / item.altura : 16 / 9;
       h = w * W_H2 / a;
@@ -1602,7 +1603,7 @@ ${b}` };
       }
     } else h = 0.055;
     const { modo, f } = e.lugar;
-    const meio = modo === "metade" ? f : modo === "atras" ? Math.min(f, 0.72) - h / 2 - 0.02 : modo === "ator" ? queixo(e.lugar) + 0.04 + h / 2 : 0.66;
+    const meio = modo === "metade" ? f + (e.abaixo ? h / 2 : 0) : modo === "atras" ? Math.min(f, 0.72) - h / 2 - 0.02 : modo === "ator" ? queixo(e.lugar) + 0.04 + h / 2 : 0.66;
     return { w, h, y: Math.min(Math.max(meio, h / 2 + 0.03), 0.97 - h / 2) };
   }
   var yBarra = (l) => l.modo === "metade" ? l.f : BARRA.y;
@@ -1919,7 +1920,7 @@ ${b}`, tam, n: 2, sobra };
       return m.length === ls.length ? m.reduce((a, b) => b.f < a.f ? b : a) : lugarEm(ini, fim);
     };
     const originais = new Map((edicao.direcao?.itens ?? []).map((i) => [i.id, i]));
-    const desenhaveis = [...planos.filter((p) => p.tipo === "full_ator_lettering"), ...elementos].sort((a, b) => a.inicio - b.inicio).map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === "tarja" && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, lugar: e.tipo === "caixinha_perguntas" ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }));
+    const desenhaveis = [...planos.filter((p) => p.tipo === "full_ator_lettering"), ...elementos].sort((a, b) => a.inicio - b.inicio).map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === "tarja" && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, largura: originais.get(e.id)?.largura, abaixo: originais.get(e.id)?.abaixo, lugar: e.tipo === "caixinha_perguntas" ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }));
     lista2.forEach((x, i) => {
       if (x.tipo === "comentario_insert_ator" || desenhaveis.some((e) => e.inicio < x.t.fim && e.fim > x.t.inicio)) return;
       trechos[i].geometria = geometriaDoInsert(x, banco, receitaDoInsert(x, banco, presets), divisaoDe(x, banco, presets), fundoInserts);
