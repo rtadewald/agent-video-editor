@@ -24,6 +24,10 @@ criador corrigiu num vídeo não pode se repetir no próximo.
    - Um gosto que pode se repetir ("lettering demais", "esse tipo de motion fica poluído", "música alta") é.
    - Um **defeito** técnico (palavra cortada no meio, captura com tela branca, som estourado) é aprendizado **e** pede
      correção na ferramenta, se der: corrija o script e anote "corrigido em <script>".
+   - **Escreva o princípio, não o caso.** A regra fala do tipo de situação ("quando a fala cita uma ferramenta…",
+     "quando a fala enumera itens…"), nunca deste vídeo ("quando ele fala do WordPress…", "na abertura com Claude e
+     Elementor…"). Teste: a regra serviria a um vídeo sobre outro assunto? Se não, suba um nível. O caso concreto
+     (ferramenta, site, preset usado) cabe só em *O que aconteceu* ou como exemplo de *Como*.
    - Antes, leia o `biblioteca/aprendizados/<área>.md`: se o aprendizado já existe, reforce (some a origem nova) em vez de repetir.
 4. **Mostre ao criador antes de gravar**, numa lista curta por área, com o porquê de cada erro:
    ```text
