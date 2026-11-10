@@ -147,7 +147,15 @@ def usos() -> dict[str, list[str]]:
         for plano, m in (e.get('motions') or {}).items():
             for b in sorted(ids_do_motion(m)):
                 out.setdefault(b, []).append(f'{arq.parent.name}/{plano} (motion)')
+        for el in ids_dos_elementos(e):
+            out.setdefault(el[1], []).append(f'{arq.parent.name}/{el[0]}')
     return out
+
+
+def ids_dos_elementos(e: dict) -> list[tuple[str, str]]:
+    """Os elementos da direção que mostram uma mídia do banco (o print sobreposto: `banco`), como (id, banco_id)."""
+    return [(x.get('id'), x['banco']) for x in (e.get('direcao') or {}).get('itens') or []
+            if isinstance(x.get('banco'), str) and x['banco']]
 
 
 def versao_aprovada(projeto: Path) -> int | None:
@@ -188,6 +196,8 @@ def usos_aprovados() -> tuple[dict[str, list[dict]], dict[str, list[dict]], set[
                 midias.setdefault(b, []).append(uso(plano))
             if m.get('preset'):
                 motions.setdefault(m['preset'], []).append(uso(plano))
+        for el, b in ids_dos_elementos(e):  # o print sobreposto: sem isto, virava "recusado" com o vídeo aprovado
+            midias.setdefault(b, []).append(uso(el))
     return midias, motions, aprovados
 
 
