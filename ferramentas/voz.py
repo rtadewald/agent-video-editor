@@ -71,6 +71,69 @@ def limpar(bruto: Path, destino: Path, limpeza: str = 'leve') -> Path:
     return destino
 
 
+def _amostras(arq: Path, taxa: int):
+    import numpy as np
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(arq), '-vn', '-af', para_mono(arq), '-ar', str(taxa), '-f', 'f32le', '-'],
+                       capture_output=True)
+    return np.frombuffer(r.stdout, np.float32).astype(np.float64)
+
+
+def _atraso(a, b, taxa: int, perto: float, janela: float = 0.5) -> tuple[float, float]:
+    """Quantos segundos `b` está à frente de `a` (a(t) ≈ b(t + atraso)), procurando a até `janela` s de `perto`, pela
+    GCC-PHAT (a correlação com o espectro branqueado: com dois microfones diferentes, a correlação simples acerta picos
+    vizinhos e erra até 40 ms). Devolve o atraso e a nitidez do pico (o pico sobre a mediana; < 8 = não confiável)."""
+    import numpy as np
+    n = 1 << int(np.ceil(np.log2(len(a) + len(b))))
+    r = np.fft.rfft(b, n) * np.conj(np.fft.rfft(a, n))
+    c = np.fft.irfft(r / (np.abs(r) + 1e-12), n)
+    lags = np.concatenate([np.arange(0, len(b)), np.arange(-len(a) + 1, 0)])
+    c = np.concatenate([c[:len(b)], c[n - len(a) + 1:]])
+    ok = np.abs(lags / taxa - perto) <= janela
+    c, lags = c[ok], lags[ok]
+    k = int(np.argmax(c))
+    return float(lags[k] / taxa), float(c[k] / (np.median(np.abs(c)) + 1e-12))
+
+
+def alinhar(camera: Path, externo: Path, destino: Path) -> dict:
+    """O áudio gravado à parte (um gravador, o celular, o iPad) na linha do tempo da câmera. O atraso é medido pela
+    GCC-PHAT contra o áudio da câmera em janelas de 10 s ao longo do vídeo; uma reta nos atrasos dá a deriva dos relógios
+    dos dois aparelhos, corrigida na velocidade só se passar de 20 ms no vídeo todo. Sai `destino`, 48 kHz mono, do
+    tamanho do áudio da câmera (silêncio onde o externo não cobre): a voz limpa, a transcrição e os cortes passam a vir
+    dele, com os mesmos tempos do bruto. `sobra_ms`: o pior atraso que restou no alinhado (deve ficar abaixo de ~5 ms)."""
+    import numpy as np
+    taxa = 16000
+    a, b = _amostras(camera, taxa), _amostras(externo, taxa)
+    if not len(a) or not len(b):
+        raise RuntimeError('Não deu para ler um dos áudios')
+    dur = len(a) / taxa
+    w = int(min(10, dur / 3) * taxa)
+    # o atraso aproximado: a janela do meio contra o externo inteiro
+    meio = len(a) // 2 - w // 2
+    perto = _atraso(a[meio:meio + w], b, taxa, 0, len(b) / taxa + dur)[0] - meio / taxa
+    pontos = []
+    for i in range(0, len(a) - w + 1, w):
+        d, q = _atraso(a[i:i + w], b, taxa, perto + i / taxa)
+        if q >= 8:
+            pontos.append((i / taxa + w / taxa / 2, d - i / taxa))
+    if len(pontos) < 2:
+        raise RuntimeError('Não achei a mesma fala nos dois áudios: confira se o externo é da mesma gravação')
+    t, d = np.array(pontos).T
+    k, d0 = np.polyfit(t, d, 1)  # atraso(t) = d0 + k·t
+    if abs(k) * dur < 0.02:
+        k, d0 = 0.0, float(np.median(d))
+    ritmo = 1 + k  # alinhado(t) = externo(d0 + t·ritmo)
+    filtros = [para_mono(externo), f'atrim=start={d0:.5f}' if d0 >= 0 else f'adelay={-d0 * 1000:.1f}:all=1', 'asetpts=PTS-STARTPTS']
+    if k:
+        filtros.append(f'atempo={ritmo:.6f}')
+    filtros += [f'apad=whole_dur={dur:.4f}', f'atrim=end={dur:.4f}']
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    ffmpeg('-i', str(externo), '-vn', '-af', ','.join(filtros), '-ar', '48000', str(destino))
+    c = _amostras(destino, taxa)
+    sobra = [abs(_atraso(a[i:i + w], c, taxa, i / taxa, 0.2)[0] - i / taxa) * 1000 for i in range(0, len(a) - w + 1, w)]
+    return {'atraso': round(float(d0), 4), 'deriva_ms': round(float(k * dur * 1000), 1), 'janelas': len(pontos),
+            'sobra_ms': round(max(sobra), 1)}
+
+
 def nivel_da_voz(arq: Path, ate: float = 180) -> float:
     """O nível da fala de um vídeo (dBFS): o percentil 90 da energia em janelas de 50 ms, nos primeiros `ate` s
     (do 18: sons.nivel_da_voz)."""

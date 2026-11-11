@@ -5,7 +5,12 @@
 """Etapa 1 do editor: do vídeo bruto até a matéria-prima pronta para os cortes (do 18: backend/app/pipeline.py, SPEC §6.3
 do 18, menos os cortes pela IA e os motores extras).
 
-    uv run ferramentas/preparar.py <vídeo> [--nome "Nome do projeto"] [--slug slug] [--briefing "texto ou arquivo"]
+    uv run ferramentas/preparar.py <vídeo> [--nome "Nome do projeto"] [--slug slug] [--briefing "texto ou arquivo"] [--audio <arquivo>]
+    uv run ferramentas/preparar.py --trocar-audio <slug> <arquivo>
+
+`--audio`: a fala gravada à parte (um gravador, o iPad), de melhor qualidade que a da câmera: é sincronizada com o áudio
+da câmera (`voz.alinhar`) e a transcrição, os silêncios, a voz limpa e o nível passam a vir dela. `--trocar-audio`: o
+mesmo num projeto já preparado (refaz a voz limpa e o nível; a transcrição e os cortes ficam, os tempos são os mesmos).
 
 Cria projetos/<slug>/ (contrato em .claude/skills/editor/edicao.md) com o bruto clonado e, em paralelo: o 9:16 pelo rosto
 (só num vídeo horizontal, antes do que depende dele), o proxy 720p e o rosto (numa leitura só do vídeo), o áudio e os
@@ -28,11 +33,12 @@ sys.path.insert(0, str(Path(__file__).parent))
 import enquadramento  # noqa: E402
 import rosto  # noqa: E402
 import voz  # noqa: E402
-from base import CATEGORIA_PADRAO, PROJETOS, env, gravar_json, inspecionar, preparar_biblioteca  # noqa: E402
+from base import CATEGORIA_PADRAO, PROJETOS, env, gravar_json, inspecionar, ler_json, preparar_biblioteca  # noqa: E402
 from transcricao import extrair_audio, silencios, transcrever  # noqa: E402
 
 ROTULOS = {'enquadramento': 'enquadramento 9:16', 'proxy': 'proxy 720p e rosto', 'audio': 'áudio e silêncios',
-           'transcricao': 'transcrição', 'voz': 'voz limpa (Leve)', 'nivel': 'nível da voz'}
+           'transcricao': 'transcrição', 'voz': 'voz limpa (Leve)', 'nivel': 'nível da voz',
+           'externo': 'áudio à parte (sincronia)'}
 # o que se diz quando um passo para (do 18: pipeline.FALHA); o detalhe vai junto, curto e sem caminhos
 FALHA = {
     'enquadramento': 'Não consegui enquadrar o vídeo em 9:16',
@@ -41,6 +47,7 @@ FALHA = {
     'transcricao': 'Não consegui transcrever o áudio',
     'voz': 'Não consegui limpar a voz',
     'nivel': 'Não consegui medir o nível da voz',
+    'externo': 'Não consegui sincronizar o áudio gravado à parte com o da câmera',
 }
 # os padrões do 18 para um projeto novo (look.PADRAO, audio.PADRAO, o fundo dos inserts no front)
 LOOK = {'lut': None, 'intensidade': 1, 'vinheta': 'leve', 'nitidez': 'leve'}
@@ -147,7 +154,44 @@ class Execucao:
         return r
 
 
-def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categoria: str = CATEGORIA_PADRAO) -> None:
+def audio_externo(pasta: Path, camera: Path, externo: Path) -> tuple[Path, dict]:
+    """A fala gravada à parte, clonada para `midia/` (o original intocado) e alinhada à câmera em `midia/voz/externo.wav`."""
+    copia = pasta / 'midia' / f'audio_externo{externo.suffix.lower()}'
+    if externo.resolve() != copia.resolve():
+        copia.unlink(missing_ok=True)
+        clonar(externo, copia)
+    r = voz.alinhar(camera, copia, pasta / 'midia' / 'voz' / 'externo.wav')
+    if r['sobra_ms'] > 10:
+        raise Recusa(f"O áudio à parte não alinhou bem com o da câmera (sobra de {r['sobra_ms']} ms): confira se é a mesma gravação.")
+    info = {'arquivo': str(copia.relative_to(pasta)), 'nome_original': externo.name, **r}
+    return pasta / 'midia' / 'voz' / 'externo.wav', info
+
+
+def trocar_audio(slug_: str, externo: Path) -> None:
+    """Num projeto já preparado, a voz passa a vir do áudio gravado à parte: refaz a voz limpa e o nível."""
+    pasta = PROJETOS / slug_
+    edicao = ler_json(pasta / 'edicao.json')
+    if not edicao:
+        raise SystemExit(f'Não achei o projeto: {slug_}')
+    fonte = edicao['fontes'][0]
+    camera = pasta / fonte['arquivo']  # o áudio da câmera (o 9:16 de um 16:9 leva o mesmo áudio)
+    fala, info = audio_externo(pasta, camera, externo)
+    fonte['audio_externo'] = info
+    extrair_audio(fala, pasta / 'audio.wav')
+    gravar_json(pasta / 'silencios.json', {'silencios': silencios(pasta / 'audio.wav')})
+    a = edicao.setdefault('audio', {})
+    limpeza = (a.get('voz') or {}).get('limpeza', 'leve')
+    for lp in {'leve', limpeza} - {'sem'}:
+        arq = voz.limpar(fala, pasta / 'midia' / 'voz' / f'f1_{lp}.wav', lp)
+        a.setdefault('voz_lufs', {})[f'f1_{lp}'] = round(voz.lufs(arq, como_voz=True), 1)
+    edicao['nivel_voz'] = {'fonte': 'f1', 'db': voz.nivel_da_voz(fala)}
+    gravar_json(pasta / 'edicao.json', edicao)
+    print(f"{slug_}: a voz agora vem de {externo.name} (atraso {info['atraso']} s, deriva {info['deriva_ms']} ms, "
+          f"sobra {info['sobra_ms']} ms; nível {edicao['nivel_voz']['db']} dB)", flush=True)
+
+
+def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categoria: str = CATEGORIA_PADRAO,
+             externo: Path | None = None) -> None:
     t0 = time.perf_counter()
     midia = pasta / 'midia'
     bruto = midia / f'bruto{video.suffix.lower()}'
@@ -175,6 +219,15 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
 
     ex = Execucao(pasta)
     res: dict = {'enquadramento': {'x': 0.5}}
+    fala = bruto  # de onde vêm a transcrição, os silêncios, a voz limpa e o nível
+
+    if externo:
+        def alinhar_externo():
+            nonlocal fala
+            fala, fonte['audio_externo'] = audio_externo(pasta, bruto, externo)
+            r = fonte['audio_externo']
+            return {'resumo': f"atraso {_s(r['atraso'])} s, deriva {_s(r['deriva_ms'])} ms, sobra {_s(r['sobra_ms'])} ms"}
+        ex.passo('externo', alinhar_externo)
 
     def enquadrar():  # o 9:16 passa a ser a fonte
         r = enquadramento.aplicar(pasta, bruto)
@@ -190,7 +243,7 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
 
     def cadeia_audio():  # o áudio do enviado (num 16:9, o 9:16 leva o mesmo áudio, copiado): não espera o enquadramento
         def audio():
-            extrair_audio(bruto, pasta / 'audio.wav')
+            extrair_audio(fala, pasta / 'audio.wav')
             lista = silencios(pasta / 'audio.wav')
             gravar_json(pasta / 'silencios.json', {'silencios': lista})
             return {'resumo': f'{len(lista)} silêncio' + ('s' if len(lista) != 1 else '')}
@@ -206,12 +259,12 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
         ex.passo('transcricao', transcricao)
 
     def voz_limpa():
-        arq = voz.limpar(bruto, midia / 'voz' / 'f1_leve.wav', 'leve')
+        arq = voz.limpar(fala, midia / 'voz' / 'f1_leve.wav', 'leve')
         res['voz_lufs'] = round(voz.lufs(arq, como_voz=True), 1)
         return {'resumo': f'{_s(res["voz_lufs"])} LUFS'}
 
     def nivel():
-        res['nivel_voz'] = voz.nivel_da_voz(bruto)
+        res['nivel_voz'] = voz.nivel_da_voz(fala)
         return {'resumo': f'{_s(res["nivel_voz"])} dB'}
 
     def rodar(f, *a):
@@ -252,12 +305,28 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
 
 def main() -> None:
     ap = argparse.ArgumentParser(description='Prepara um vídeo bruto para a edição (etapa 1).')
-    ap.add_argument('video', help='o vídeo bruto')
+    ap.add_argument('video', nargs='?', help='o vídeo bruto')
+    ap.add_argument('--audio', help='a fala gravada à parte, de melhor qualidade (sincronizada com a da câmera)')
+    ap.add_argument('--trocar-audio', nargs=2, metavar=('SLUG', 'ARQUIVO'), help='num projeto já preparado, a voz passa a vir do áudio à parte')
     ap.add_argument('--nome', help='o nome do projeto (padrão: o nome do arquivo)')
     ap.add_argument('--slug', help='a pasta em projetos/ (padrão: do nome)')
     ap.add_argument('--briefing', help='o briefing: o texto ou o caminho de um arquivo')
     ap.add_argument('--categoria', default=CATEGORIA_PADRAO, help='hacks, storytelling, pico, ad, cta, vsl… (calibragem.py categorias); padrão: hacks')
     a = ap.parse_args()
+    if a.trocar_audio:
+        externo = Path(a.trocar_audio[1]).expanduser().resolve()
+        if not externo.is_file():
+            raise SystemExit(f'Não achei o áudio: {a.trocar_audio[1]}')
+        try:
+            trocar_audio(a.trocar_audio[0], externo)
+        except Recusa as e:
+            raise SystemExit(str(e)) from None
+        return
+    if not a.video:
+        ap.error('falta o vídeo bruto')
+    externo = Path(a.audio).expanduser().resolve() if a.audio else None
+    if externo and not externo.is_file():
+        raise SystemExit(f'Não achei o áudio: {a.audio}')
     preparar_biblioteca()
     import calibragem
     if a.categoria not in {c['id'] for c in calibragem.categorias()}:
@@ -273,7 +342,7 @@ def main() -> None:
     pasta = pasta_livre(slug(a.slug or nome))
     pasta.mkdir(parents=True)
     try:
-        preparar(video, nome, pasta, briefing, a.categoria)
+        preparar(video, nome, pasta, briefing, a.categoria, externo)
     except (Exception, KeyboardInterrupt) as e:
         shutil.rmtree(pasta, ignore_errors=True)
         if isinstance(e, Recusa):
