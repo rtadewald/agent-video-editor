@@ -25,6 +25,11 @@ montados de novo, 4 por vez, e emendados sem recodificar. Um corte que muda a du
 1. `uv run ferramentas/folha.py projetos/<slug>/versoes/vN/proxy.mp4 --cada 1` e **olhe** a folha: inserts no lugar e
    com a mídia certa, nada vazio ou preto, legenda legível e fora do conteúdo importante, elementos com texto certo,
    abertura forte (gancho visual).
+   **E sempre** `uv run ferramentas/folha.py projetos/<slug>/versoes/vN/proxy.mp4 --entradas`: os 3 primeiros quadros
+   de cada insert e motion, um plano por trio. Nenhuma entrada pode mostrar só o fundo, um card vazio, um borrão ou uma
+   tela preta ou de carregamento: o criador já cobrou isso várias vezes ("CLÁSSICO erro do frame vazio"). Achou um,
+   troque antes de entregar: preset que entra seco (Corte seco), trecho da mídia que já começa com conteúdo, ou o
+   motion sai (a 1ª coisa dele tem que estar na tela no 1º quadro). _vsl-black v6 c26 · 2026-11-16_
 2. `uv run ferramentas/gemini.py projetos/<slug>/versoes/vN/proxy.mp4 "<pergunta>"` com:
    ```text
    Você revisa um Reels editado antes de ir para o criador. Aponte só problemas concretos, com o tempo (m:ss):
