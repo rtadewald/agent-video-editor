@@ -5,6 +5,7 @@ só no áudio (`medir`) e um limitador de pico na passada final.
 
 A voz entra na mistura em estéreo com ganho 1 nos dois canais (como o navegador toca um áudio mono), e a sonoridade
 dela é medida assim (`lufs(..., como_voz=True)`), seja a limpa (mono) ou a do bruto."""
+import json
 import math
 import re
 import subprocess
@@ -319,8 +320,13 @@ def arquivo_trilha(tid: str | None) -> Path | None:
 def laco(arq: Path) -> tuple[float, float]:
     """O trecho da faixa que se repete num vídeo mais longo que ela (s, `(ini, fim)`): sem a introdução baixa e sem o
     fade/silêncio do fim (as faixas do Lyria começam devagar e terminam sumindo). A 1ª volta toca do 0 até `fim`; as
-    outras, de `ini` a `fim`, com crossfade (`CRUZA_FUNDO`)."""
+    outras, de `ini` a `fim`, com crossfade (`CRUZA_FUNDO`). `laco` no catálogo da faixa manda (ex.: pular uma voz)."""
     import numpy as np
+
+    cat = TRILHAS_RAIZ / 'catalogo.json'
+    fixo = next((f.get('laco') for f in json.loads(cat.read_text()).get('faixas', []) if f.get('id') == arq.stem), None) if cat.exists() else None
+    if fixo:
+        return float(fixo[0]), float(fixo[1])
 
     taxa, janela = 8000, 4000  # 0,5 s
     r = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(arq), '-ac', '1', '-ar', str(taxa), '-f', 'f32le', '-'], capture_output=True)
