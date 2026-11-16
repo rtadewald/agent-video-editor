@@ -96,13 +96,6 @@ class Revisao {
     const [palavras, planos, info] = await Promise.all([json(this.dir + 'palavras.json', []), json(this.dir + 'planos.json', []), json(this.dir + 'info.json', {})])
     this.codigo = cods.projeto?.[this.slug]
     this.cods = cods
-    // o que entrou em cada plano nesta versão: as mídias do banco, o preset do enriquecimento e o motion
-    this.usado = {}
-    for (const q of edicao.inserts?.pedidos || []) this.usado[q.plano] = { midias: (q.midias || []).map((m) => m.banco).filter(Boolean), preset: q.enriquecimento?.preset }
-    for (const [pl, m] of Object.entries(edicao.motions || {})) (this.usado[pl] ||= {}).motion = m
-    for (const [pl, t] of Object.entries(edicao.transicoes || {})) if (t?.id) (this.usado[pl] ||= {}).transicao = t.id
-    this.receitas = {} // os JSONs dos presets e das transições já buscados (o nome), por 'preset:<id>' / 'transicao:<id>'
-    this.midias = {} // os itens do banco já buscados (nome, fonte, vídeo)
     this.palavras = listaDe(palavras, 'palavras').slice().sort((a, b) => a.ini - b.ini)
     this.planos = listaDe(planos, 'planos')
     this.info = info || {}
@@ -817,9 +810,7 @@ class Revisao {
         <div class="video-caixa${this.deitado ? ' deitado' : ''}"><video id="video" src="${this.dir}proxy.mp4" preload="auto" playsinline></video>
           <button class="video-tocar" data-acao="tocar" aria-label="Tocar">${ICONE.tocar}</button>
           <button class="botao-icone video-tela-cheia" data-acao="tela-cheia" title="Tela cheia (F)" aria-label="Tela cheia">${ICONE.expandir}</button></div>
-        <div class="lado lado-dir">
-          <div class="bloco" id="usado"></div>
-        </div>
+        <div class="lado lado-dir"></div>
       </section>
       <div class="controles">
         <div class="grupo">
@@ -1509,94 +1500,7 @@ class Revisao {
       $('#plano-atual').innerHTML = q
         ? `<span class="plano-linha" data-chip-copia><span class="chip-plano tipo-${esc(q.tipo)}"><b>${esc(q.id)}</b> ${esc(nomePlano(q.tipo))}</span>${cod ? `<button type="button" class="copiar-codigo" data-copiar-codigo="${esc(cod.texto)}" title="Copiar “${esc(cod.texto)}”" aria-label="Copiar o código do plano">${ICONE.copiar}</button>` : ''}</span>${q.texto ? `<p class="plano-texto">“${esc(q.texto)}”</p>` : ''}`
         : '<span class="apagado">—</span>'
-      $('#usado').innerHTML = q ? this.htmlUsado(q.id) : ''
-      this.carregarMidias(q?.id)
     }
-  }
-
-  /** O que entrou no plano: as mídias do banco (miniatura que abre o vídeo, código, fonte), o motion e o preset. */
-  htmlUsado(pl) {
-    const u = this.usado[pl]
-    if (!u) return ''
-    const c = this.cods || {}
-    const midias = (u.midias || []).map((id) => {
-      const m = this.midias[id]
-      const nome = m?.nome || ''
-      const fonte = m?.origem?.url
-      const dur = m ? (m.pai ? m.fim - m.inicio : m.duracao) : null
-      return `<div class="midia-usada">
-        <button class="midia-mini" data-ver-midia="${id}" title="Assistir">${m?.tipo === 'imagem' ? '' : `<span class="midia-play">${ICONE.tocar}</span>`}<img src="/biblioteca/banco/${id}/miniatura.jpg" alt="" loading="lazy">${dur ? `<span class="duracao">${tempo(dur)}</span>` : ''}</button>
-        <div class="midia-linha"><span class="midia-nome" title="${esc(nome)}">${esc(nome)}</span></div>
-        <div class="midia-linha">${chipCodigo(c.midia?.[id], nome || id)}${fonte ? `<a class="midia-fonte" href="${esc(fonte)}" target="_blank" rel="noopener" title="${esc(fonte)}">${esc(new URL(fonte).hostname.replace(/^www\./, ''))} ↗</a>` : ''}</div></div>`
-    }).join('')
-    const linhas = [
-      u.motion && `<div class="midia-linha"><span>Motion · ${esc(u.motion.nome || u.motion.preset || 'novo')}</span>${chipCodigo(c.motion?.[u.motion.preset], u.motion.nome || u.motion.preset)}</div>`,
-    ].filter(Boolean).join('')
-    // o preset do insert e a transição de entrada do plano: o clipe de referência de cada um, pequeno, em laço
-    const receita = (tipo, id, rotulo) => {
-      if (!id) return ''
-      const nome = this.receitas[`${tipo}:${id}`]?.nome || id
-      const clipe = `/biblioteca/${tipo === 'preset' ? 'presets' : 'transicoes'}/clipes/${id}.mp4`
-      return `<div class="receita-usada"><button class="receita-mini" data-ver-clipe="${clipe}" title="Assistir com som">
-          <video src="${clipe}" muted loop autoplay playsinline preload="metadata" onerror="this.parentNode.classList.add('sem-clipe')"></video></button>
-        <div class="receita-info"><span class="dica">${rotulo}</span><span class="midia-nome" title="${esc(nome)}">${esc(nome)}</span>${chipCodigo(c[tipo]?.[id], nome)}</div></div>`
-    }
-    const receitas = receita('preset', u.preset, 'Preset') + receita('transicao', u.transicao, 'Transição de entrada')
-    return midias || linhas || receitas ? `<span class="eyebrow">No plano</span>${midias}${linhas}${receitas}` : ''
-  }
-
-  /** A mídia do banco num modal (um trecho toca só o pedaço usado, em laço). */
-  verMidia(id) {
-    const m = this.midias[id]
-    if (!m) return
-    this.video.pause()
-    const pasta = `/biblioteca/banco/${m.pai || id}/`
-    const arq = m.proxy || m.arquivo
-    const fechar = `<button class="botao-icone anexo-fechar" data-fechar title="Fechar (Esc)">${ICONE.fechar}</button>`
-    if (m.tipo === 'imagem') return janela(`${fechar}<img class="anexo-grande" src="${pasta}${arq}" alt="">`, { classe: 'janela-anexo' })
-    // um player próprio: a barra e o tempo são só do trecho usado (o nativo mostraria o vídeo de origem inteiro)
-    const ini = m.pai ? m.inicio : 0
-    const { el } = janela(`${fechar}<video class="anexo-grande" src="${pasta}${arq}#t=${ini}" autoplay playsinline></video>
-      <div class="player-trecho"><button class="botao-icone pequeno" data-tocar-trecho title="Tocar / pausar (Espaço)">${ICONE.pausar}</button>
-        <div class="trecho-barra"><i></i></div><span class="trecho-tempo">0:00,0</span></div>`, { classe: 'janela-anexo' })
-    const v = $('video', el), bar = $('.trecho-barra', el), b = $('[data-tocar-trecho]', el)
-    const fim = () => (m.pai ? m.fim : v.duration || m.duracao || 0)
-    const dur = () => Math.max(0.01, fim() - ini)
-    const mostrar = () => {
-      const t = Math.min(Math.max(v.currentTime - ini, 0), dur())
-      $('i', bar).style.width = `${(100 * t) / dur()}%`
-      $('.trecho-tempo', el).textContent = `${tempo(t)} / ${tempo(dur())}`
-      b.innerHTML = v.paused ? ICONE.tocar : ICONE.pausar
-    }
-    v.addEventListener('timeupdate', () => {
-      if (v.currentTime >= fim() - 0.02) v.currentTime = ini // em laço
-      mostrar()
-    })
-    for (const ev of ['play', 'pause', 'loadedmetadata']) v.addEventListener(ev, mostrar)
-    const alternar = () => (v.paused ? v.play() : v.pause())
-    b.addEventListener('click', alternar)
-    v.addEventListener('click', alternar)
-    bar.addEventListener('click', (e) => {
-      const r = bar.getBoundingClientRect()
-      v.currentTime = ini + ((e.clientX - r.left) / r.width) * dur()
-    })
-    el.addEventListener('keydown', (e) => e.key === ' ' && (e.preventDefault(), alternar()))
-    b.focus()
-  }
-
-  /** Busca no banco o nome e a fonte das mídias do plano (uma vez cada) e redesenha o bloco. */
-  async carregarMidias(pl) {
-    const u = this.usado[pl] || {}
-    const faltam = (u.midias || []).filter((id) => !(id in this.midias))
-    const receitas = [['preset', u.preset], ['transicao', u.transicao]].filter(([t, id]) => id && !(`${t}:${id}` in this.receitas))
-    if (!faltam.length && !receitas.length) return
-    await Promise.all([
-      ...faltam.map(async (id) => (this.midias[id] = (await json(`/api/banco/${id}`, null))?.item || null)),
-      ...receitas.map(async ([t, id]) => (this.receitas[`${t}:${id}`] = await json(`/biblioteca/${t === 'preset' ? 'presets' : 'transicoes'}/${id}.json`, null))),
-    ])
-    if (this.fechado || this.planos[this.iPlano]?.id !== pl) return
-    this.iPlano = -2 // força o redesenho do plano atual
-    this.atualizar()
   }
 
   laco() {
@@ -2126,11 +2030,6 @@ class Revisao {
       return
     }
     if (d.ampliar) return this.ampliar(d.ampliar)
-    if (d.verMidia) return this.verMidia(d.verMidia)
-    if (d.verClipe) {
-      this.video.pause()
-      return janela(`<button class="botao-icone anexo-fechar" data-fechar title="Fechar (Esc)">${ICONE.fechar}</button><video class="anexo-grande" src="${d.verClipe}" autoplay loop playsinline controls></video>`, { classe: 'janela-anexo' })
-    }
     if (d.tirarAnexo) {
       const k = d.tirarAnexo.indexOf('|')
       return this.tirarAnexo(d.tirarAnexo.slice(0, k), d.tirarAnexo.slice(k + 1))
