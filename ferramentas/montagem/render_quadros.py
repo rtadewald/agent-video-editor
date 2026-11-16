@@ -92,7 +92,8 @@ def _janela(w: int, h: int) -> tuple[bool, bool]:
     """(a janela tem o tamanho do quadro, o zoom da página foi medido nesse tamanho)."""
     iw, ih, zoom = _pagina.evaluate('() => [innerWidth, innerHeight, document.documentElement.style.zoom]')
     # o navegador devolve o zoom arredondado em 5 casas (720 px: '1.33333'), daí a folga
-    return (iw, ih) == (w, h), not zoom or abs(float(zoom) - w / 540) < 1e-4
+    # a página desenha como uma prévia de 540 px de largura (deitada, 960: `pagina.ts`)
+    return (iw, ih) == (w, h), not zoom or abs(float(zoom) - w / (960 if w > h else 540)) < 1e-4
 
 
 def _foto(t: float, w: int, h: int, so: str | int | None = None) -> bytes:

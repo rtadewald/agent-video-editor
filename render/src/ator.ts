@@ -2,6 +2,7 @@
 // sem o hook useRosto)
 import type { Divisao } from './divisao'
 import type { Sequencia } from './sequencia'
+import { QUADRO } from './quadro'
 
 /** O ator nas áreas que sobram quando um insert divide a tela (SPEC §8.7; docs/rosto.md, a P5). Tudo vira uma
  *  **geometria**: o quadro do ator (do tamanho do vídeo) com o canto de cima à esquerda em (`tx`, `ty`) e a escala `s`,
@@ -52,14 +53,28 @@ function enquadrar(f: number, r: Rosto | null): { s: number; tx: number; ty: num
   return { s, tx, ty: limite(ty, 1 - s, f) }
 }
 
+/** Deitado, lado a lado: o ator cobre a área da direita (de `f` a 1 na largura, a altura toda), o centro do rosto no
+ *  meio dela, os olhos a 40% da altura e o rosto com ~28% da altura, ampliado até 1,6× se preciso. */
+const LADO_ROSTO = 0.28
+function enquadrarLado(f: number, r: Rosto | null): { s: number; tx: number; ty: number } {
+  const meio = f + (1 - f) / 2
+  if (!r || r.h <= 0) return { s: 1, tx: f / 2, ty: 0 } // sem rosto medido: o meio do vídeo no meio da área
+  const s = limite(LADO_ROSTO / r.h, 1, REGRA.zoomMax)
+  const olhos = r.cy - 0.15 * r.h
+  const tx = limite(meio - s * r.cx, 1 - s, f)
+  let ty = REGRA.olhos - s * olhos
+  ty = Math.max(ty, REGRA.folga - s * (r.cy - 0.6 * r.h))
+  return { s, tx, ty: limite(ty, 1 - s, 0) }
+}
+
 /** A tela dividida antes do deslocamento manual: a escala (o automático vezes o zoom, de 1 — cobrir a área — a 1,6×; o
  *  zoom pode ficar abaixo de 1 para voltar de um automático ampliado) e onde o canto do ator fica sem `dx`/`dy`. */
 function metadeSemDeslocamento(d: Divisao, aj: AjusteAtor | null | undefined, rosto: Rosto | null) {
-  const auto = enquadrar(d.f, rosto)
+  const auto = QUADRO.deitado ? enquadrarLado(d.f, rosto) : enquadrar(d.f, rosto)
   const s = limite(auto.s * (aj?.zoom ?? 1), 1, REGRA.zoomMax)
   // o zoom manual cresce em volta do centro da área
-  const cx = 0.5
-  const cy = d.f + (1 - d.f) / 2
+  const cx = QUADRO.deitado ? d.f + (1 - d.f) / 2 : 0.5
+  const cy = QUADRO.deitado ? 0.5 : d.f + (1 - d.f) / 2
   return { auto, s, tx: cx - ((cx - auto.tx) * s) / auto.s, ty: cy - ((cy - auto.ty) * s) / auto.s }
 }
 
@@ -68,7 +83,9 @@ export function geometriaDoAtor(d: Divisao | null, aj: AjusteAtor | null | undef
   if (!d) return null
   if (d.modo === 'metade') {
     const m = metadeSemDeslocamento(d, aj, rosto)
-    return { modo: 'metade', s: m.s, tx: limite(m.tx + (aj?.dx ?? 0), 1 - m.s, 0), ty: limite(m.ty + (aj?.dy ?? 0), 1 - m.s, d.f) }
+    // o ator sempre cobre a área dele: embaixo (de f a 1 na altura) ou, deitado, à direita (de f a 1 na largura)
+    const [xMax, yMax] = QUADRO.deitado ? [d.f, 0] : [0, d.f]
+    return { modo: 'metade', s: m.s, tx: limite(m.tx + (aj?.dx ?? 0), 1 - m.s, xMax), ty: limite(m.ty + (aj?.dy ?? 0), 1 - m.s, yMax) }
   }
   const modo = aj?.modo ?? 'janela'
   const p = PADRAO_MODO[modo]
@@ -123,7 +140,7 @@ export function rostoDoArquivo(arq: ArquivoRosto | null, seq: Sequencia | null, 
   // a medida num quadro deitado: o recorte 9:16 tem `rw` da largura e começa em (1 − rw)·ex
   const L = arq.largura ?? 0
   const A = arq.altura ?? 0
-  const rw = L > A && A > 0 ? (A * 9) / 16 / L : 1
+  const rw = L > A && A > 0 && !QUADRO.deitado ? (A * 9) / 16 / L : 1 // deitado: o quadro é o próprio 16:9
   const noRecorte = (r: Rosto): Rosto => (rw >= 1 ? r : { ...r, cx: (r.cx - (1 - rw) * ex) / rw, w: r.w / rw })
   return (ini: number, fim: number) => {
     // num plano curto (o "do GPT," de 0,6 s entre dois divididos), poucas amostras: um movimento da cabeça mudava o

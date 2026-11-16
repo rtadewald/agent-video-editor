@@ -2,7 +2,7 @@
 
 O detector de rosto do MediaPipe (BlazeFace de curta distância, local) roda a 6 quadros por segundo e dá, para cada
 instante, a caixa do rosto (centro, largura e altura, em fração do quadro) e a confiança; com mais de um rosto, vale o
-maior (o mais perto da câmera); os buracos (rosto não achado, virado) recebem a medida vizinha com confiança 0. O arquivo:
+mais confiável (o maior pegava objetos do cenário num plano aberto); os buracos (rosto não achado, virado) recebem a medida vizinha com confiança 0. O arquivo:
 `{por_segundo, largura, altura, amostras: [{t, cx, cy, w, h, conf}]}`. Serve ao enquadramento 16:9 → 9:16 (medido no
 original reduzido, `midia/rosto/original.json`) e ao ator nas áreas que sobram da tela (medido no proxy,
 `midia/rosto/f1.json`, que a página de render lê). Importado por preparar.py (o mediapipe vem das dependências dele).
@@ -109,7 +109,7 @@ def _quadros(video: Path, por_segundo: int, junto: list[str]):
 
 def medir(video: Path, por_segundo: int = POR_SEGUNDO, junto: list[str] = ()) -> dict:
     """Mede o rosto em `video`: `{por_segundo, largura, altura, amostras: [{t, cx, cy, w, h, conf}]}` (posição e tamanho em
-    fração do quadro; com mais de um rosto, vale o maior). Sem rosto nenhum, `amostras` fica vazia. `junto`: os
+    fração do quadro; com mais de um rosto, vale o mais confiável). Sem rosto nenhum, `amostras` fica vazia. `junto`: os
     argumentos de uma outra saída do ffmpeg, gerada na mesma leitura do vídeo (ver `_quadros`)."""
     amostras: list[dict] = []
     largura = altura = 0
@@ -119,7 +119,9 @@ def medir(video: Path, por_segundo: int = POR_SEGUNDO, junto: list[str] = ()) ->
             t = k / por_segundo
             rostos = detectar(rgb, round(t * 1000))
             if rostos:
-                x, y, rw, rh, conf = max(rostos, key=lambda r: r[2] * r[3])
+                # o mais confiável: no plano aberto (16:9), a luminária e a planta do cenário viravam um "rosto" maior que o
+                # do ator (confiança ~0,55 contra ~0,8 do ator), e o maior ganhava em 3 de cada 4 amostras (vsl-black)
+                x, y, rw, rh, conf = max(rostos, key=lambda r: r[4])
                 amostras.append({'t': round(t, 3), 'cx': round((x + rw / 2) / w, 4), 'cy': round((y + rh / 2) / h, 4),
                                  'w': round(rw / w, 4), 'h': round(rh / h, 4), 'conf': round(float(conf), 3)})
             else:

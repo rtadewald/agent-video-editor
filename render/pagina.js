@@ -511,6 +511,11 @@
     return { visiveis, orfaos };
   }
 
+  // src/quadro.ts
+  var QUADRO = { deitado: false };
+  var LADO = 9 / 8 * (9 / 16);
+  var COLUNA = 9 / 16 / (16 / 9);
+
   // src/ator.ts
   var PADRAO_MODO = {
     janela: { x: 0.5, y: 1 - 0.55 / 2, escala: 0.55 },
@@ -535,18 +540,30 @@
     ty = Math.max(ty, f + REGRA.folga * area - s * (r.cy - 0.6 * r.h));
     return { s, tx, ty: limite2(ty, 1 - s, f) };
   }
+  var LADO_ROSTO = 0.28;
+  function enquadrarLado(f, r) {
+    const meio = f + (1 - f) / 2;
+    if (!r || r.h <= 0) return { s: 1, tx: f / 2, ty: 0 };
+    const s = limite2(LADO_ROSTO / r.h, 1, REGRA.zoomMax);
+    const olhos2 = r.cy - 0.15 * r.h;
+    const tx = limite2(meio - s * r.cx, 1 - s, f);
+    let ty = REGRA.olhos - s * olhos2;
+    ty = Math.max(ty, REGRA.folga - s * (r.cy - 0.6 * r.h));
+    return { s, tx, ty: limite2(ty, 1 - s, 0) };
+  }
   function metadeSemDeslocamento(d, aj, rosto) {
-    const auto = enquadrar(d.f, rosto);
+    const auto = QUADRO.deitado ? enquadrarLado(d.f, rosto) : enquadrar(d.f, rosto);
     const s = limite2(auto.s * (aj?.zoom ?? 1), 1, REGRA.zoomMax);
-    const cx = 0.5;
-    const cy = d.f + (1 - d.f) / 2;
+    const cx = QUADRO.deitado ? d.f + (1 - d.f) / 2 : 0.5;
+    const cy = QUADRO.deitado ? 0.5 : d.f + (1 - d.f) / 2;
     return { auto, s, tx: cx - (cx - auto.tx) * s / auto.s, ty: cy - (cy - auto.ty) * s / auto.s };
   }
   function geometriaDoAtor(d, aj, rosto) {
     if (!d) return null;
     if (d.modo === "metade") {
       const m = metadeSemDeslocamento(d, aj, rosto);
-      return { modo: "metade", s: m.s, tx: limite2(m.tx + (aj?.dx ?? 0), 1 - m.s, 0), ty: limite2(m.ty + (aj?.dy ?? 0), 1 - m.s, d.f) };
+      const [xMax, yMax] = QUADRO.deitado ? [d.f, 0] : [0, d.f];
+      return { modo: "metade", s: m.s, tx: limite2(m.tx + (aj?.dx ?? 0), 1 - m.s, xMax), ty: limite2(m.ty + (aj?.dy ?? 0), 1 - m.s, yMax) };
     }
     const modo = aj?.modo ?? "janela";
     const p = PADRAO_MODO[modo];
@@ -581,7 +598,7 @@
     const a = arq.amostras;
     const L = arq.largura ?? 0;
     const A = arq.altura ?? 0;
-    const rw = L > A && A > 0 ? A * 9 / 16 / L : 1;
+    const rw = L > A && A > 0 && !QUADRO.deitado ? A * 9 / 16 / L : 1;
     const noRecorte = (r) => rw >= 1 ? r : { ...r, cx: (r.cx - (1 - rw) * ex) / rw, w: r.w / rw };
     return (ini, fim) => {
       if (fim - ini < JANELA_ROSTO) {
@@ -792,13 +809,26 @@
   var TOPO_CABECA = 100 - JANELA.escala * 100 + JANELA.escala * 10;
   var MARGEM = 0.06;
   var W_H = 9 / 16;
-  var telaTodaPermitida = (formato, atras, aspectos) => formato === "dividida" && !atras ? aspectos.some((a) => a >= 0.8) : aspectos.some((a) => a < 0.8);
+  var QUADRO_DEITADO = 16 / 9;
+  var AREA_LADO = QUADRO_DEITADO * LADO;
+  var telaTodaPermitida = (formato, atras, aspectos) => QUADRO.deitado ? aspectos.some((a) => cabeDeitado(a, formato)) : formato === "dividida" && !atras ? aspectos.some((a) => a >= 0.8) : aspectos.some((a) => a < 0.8);
+  var cabeDeitado = (a, formato) => formato === "dividida" ? Math.abs(a / AREA_LADO - 1) < 0.1 : a >= 1.5;
+  function divisaoDeitada(tipo, a, varios) {
+    if (tipo === "area" || varios) return { modo: "metade", tipo: tipo === "area" ? "area" : "card", f: LADO };
+    let w = 90;
+    let h = w * AREA_LADO / a;
+    if (h > 84) {
+      h = 84;
+      w = h * a / AREA_LADO;
+    }
+    return { modo: "metade", tipo: "card", f: LADO, card: { w, h } };
+  }
   var tipoDoPreset = (p) => p?.divisao_tipo ?? (p && p.receita.cards.every((c) => c.repouso.w >= 99 && c.repouso.h >= 99) ? "area" : "card");
   function divisaoDe(x, banco, presets) {
     if (x.formato !== "dividida") return null;
     const preset = x.enriquecimento?.preset ? presets?.find((p) => p.id === x.enriquecimento?.preset) : null;
     const forma = ajustesEfetivos(preset, x.enriquecimento?.ajustes, aspectosDe(x.midias, banco))?.forma;
-    const atras = x.enriquecimento?.divisao === "atras";
+    const atras = !QUADRO.deitado && x.enriquecimento?.divisao === "atras";
     const aspectos = aspectosDe(x.midias, banco);
     let base = forma === "Tela toda" ? "area" : forma === "Card" ? "card" : preset ? tipoDoPreset(preset) : "card";
     if (base === "area" && !telaTodaPermitida("dividida", atras, aspectos)) base = "card";
@@ -808,6 +838,7 @@
     const i = x.midias[0] && banco?.get(x.midias[0].banco);
     const a = i?.largura && i?.altura ? i.largura / i.altura : 16 / 9;
     const varios = !!preset && (preset.receita.repete || preset.receita.cards.length > 1);
+    if (QUADRO.deitado) return divisaoDeitada(tipo, a, varios);
     if (varios && tipo !== "area") return { modo: tipo === "atras" ? "atras" : "metade", tipo, f: tipo === "atras" ? JANELA.y0 / 100 : 0.56 };
     if (tipo === "area") return { modo: "metade", tipo, f: a < 1 ? 0.5 : Math.min(Math.max(W_H / a, 0.28), 0.5625) };
     const livre = tipo === "atras" ? JANELA.y0 / 100 : 0.62;
@@ -821,12 +852,12 @@
     return { modo: tipo === "atras" ? "atras" : "metade", tipo, f, card: { w: cw * 100, h: ch / f * 100 } };
   }
   function receitaParaInsert(r, d, aspectos, formato) {
-    const areaAsp = formato === "dividida" ? W_H / (d?.f ?? 0.5) : W_H;
+    const areaAsp = QUADRO.deitado ? formato === "dividida" ? QUADRO_DEITADO * (d?.f ?? LADO) : QUADRO_DEITADO : formato === "dividida" ? W_H / (d?.f ?? 0.5) : W_H;
     const cards2 = r.cards.map((c, k) => {
       if (c.quadros?.length) return c;
       const cheio2 = c.repouso.w >= 99 && c.repouso.h >= 99;
       const a0 = aspectos[c.midia ?? k] ?? aspectos[0];
-      const cabe = a0 ? formato === "dividida" && d?.modo !== "atras" ? a0 >= 0.8 : a0 < 0.8 : true;
+      const cabe = !a0 ? true : QUADRO.deitado ? cabeDeitado(a0, formato) : formato === "dividida" && d?.modo !== "atras" ? a0 >= 0.8 : a0 < 0.8;
       if (cheio2 && !cabe && a0) {
         let w2 = 90;
         let h2 = w2 * areaAsp / a0;
@@ -909,9 +940,10 @@
     const i = banco?.get(m.banco);
     return i?.largura && i?.altura ? i.largura / i.altura : 16 / 9;
   });
-  var areaDoInsert = (d) => !d ? { inset: 0 } : { left: 0, right: 0, top: 0, height: `${d.f * 100}%` };
+  var areaDoInsert = (d) => !d ? { inset: 0 } : QUADRO.deitado ? { left: 0, top: 0, bottom: 0, width: `${d.f * 100}%` } : { left: 0, right: 0, top: 0, height: `${d.f * 100}%` };
   function posicaoDoComentario(d, g, h = 0) {
     if (!d) return { x: 50, y: 50 };
+    if (QUADRO.deitado) return { x: d.f * 50, y: 50 };
     const cabeca = g && g.modo !== "metade" ? topoDoAtor(g) * 100 : TOPO_CABECA;
     if (d.modo === "atras") return { x: 50, y: Math.min(cabeca - Math.max(6, h * 100 / 2 + 1.5), d.card ? (d.f / 2 + d.card.h / 100 * (d.f / 2)) * 100 : 100) };
     return { x: 50, y: d.f * 100 };
@@ -1492,7 +1524,8 @@
     }
     cards2.sort((a, b) => r.cards[a.k].repouso.z - r.cards[b.k].repouso.z || a.k - b.k);
     const f = FUNDOS.find((x) => x.id === fundoId) ?? FUNDOS[4];
-    return { area: { y: 0, h: divisao ? divisao.f : 1 }, fundo: r.fundo === "proprio" ? f.id : null, cards: cards2 };
+    const area = !divisao ? { y: 0, h: 1 } : QUADRO.deitado ? { x: 0, w: divisao.f, y: 0, h: 1 } : { y: 0, h: divisao.f };
+    return { area, fundo: r.fundo === "proprio" ? f.id : null, cards: cards2 };
   }
   var PALCO = { vertical: { w: 1080, h: 1920 }, dividida: { w: 1080, h: 960 } };
   var pinturas = 0;
@@ -1506,10 +1539,12 @@
     });
   }
   function motionNoLugar(p) {
-    const palco = PALCO[p.formato];
+    const palco = PALCO[QUADRO.deitado ? "dividida" : p.formato];
+    const lugar = p.formato === "vertical" ? "inset-0" : QUADRO.deitado ? "top-0 left-0" : "inset-x-0 top-0 h-1-2";
     return {
       chave: "motion",
-      classe: `pointer-events-none overflow-hidden absolute ${p.formato === "vertical" ? "inset-0" : "inset-x-0 top-0 h-1-2"}`,
+      classe: `pointer-events-none overflow-hidden absolute ${lugar}`,
+      estilo: p.formato === "dividida" && QUADRO.deitado ? { bottom: 0, width: `${palco.w * p.escala}px` } : void 0,
       filhos: [
         p.fundo ? fundo(p.fundo) : null,
         p.escala > 0 && {
@@ -1517,7 +1552,7 @@
           tag: "iframe",
           classe: "absolute top-0 left-0 origin-top-left border-0",
           atributos: { title: "motion" },
-          estilo: { width: `${palco.w}px`, height: `${palco.h}px`, transform: `scale(${p.escala})` },
+          estilo: { width: `${palco.w}px`, height: `${palco.h}px`, transform: `${p.x ? `translateX(${p.x}px) ` : ""}scale(${p.escala})` },
           criar: (el) => {
             const f = el;
             f.dataset.pronto = "0";
@@ -1636,7 +1671,7 @@ ${b}` };
         {
           chave: "desfoque",
           classe: "absolute",
-          estilo: { ...modo === "metade" ? { left: 0, right: 0, top: 0, height: `${f * 100}%` } : { inset: 0 }, backdropFilter: `blur(${(DESFOQUE.raio * p).toFixed(3)}cqw) brightness(${1 - DESFOQUE.escurece * p})` }
+          estilo: { ...modo === "metade" ? { left: 0, right: 0, top: 0, height: `${f * 100}%` } : e.lugar.coluna ? { top: 0, bottom: 0, left: `${-(e.lugar.coluna.area - 1) / 2 * 100}%`, right: `${-(e.lugar.coluna.area - 1) / 2 * 100}%` } : { inset: 0 }, backdropFilter: `blur(${(DESFOQUE.raio * p).toFixed(3)}cqw) brightness(${1 - DESFOQUE.escurece * p})` }
         },
         { chave: "texto", classe: "absolute", estilo: { ...centrado(y, rel), ...estiloLettering(tam) }, texto }
       ]
@@ -1812,7 +1847,9 @@ ${b}`, tam, n: 2, sobra };
       if (e.tipo === "tarja") return tarja(e);
       return null;
     });
-    const vs = [{ chave: "elementos", classe: "pointer-events-none absolute inset-0 select-none", estilo: { containerType: "size", zIndex: 20 }, filhos }];
+    const c = (e) => e.lugar.coluna;
+    const deitados = agora.some(c) ? filhos.map((v, i) => v && { chave: `col:${agora[i].id}`, classe: "absolute top-0", estilo: { height: "100%", aspectRatio: "9 / 16", left: `${c(agora[i]).x * 100}%`, transform: "translateX(-50%)", containerType: "size" }, filhos: [v] }) : null;
+    const vs = [{ chave: "elementos", classe: "pointer-events-none absolute inset-0 select-none", estilo: { containerType: "size", zIndex: 20 }, filhos: deitados ?? filhos }];
     return { vs, chave: parado ? `e:${agora.map((e) => e.id).join(",")}` : null };
   }
   var intervalosDeLettering = (elementos) => elementos.filter((e) => (e.tipo === "full_ator_lettering" || e.tipo === "lettering") && e.texto).map((e) => ({ ini: e.inicio, fim: e.fim }));
@@ -1878,10 +1915,12 @@ ${b}`, tam, n: 2, sobra };
   }
   async function iniciar() {
     const slug = new URLSearchParams(location.search).get("projeto") ?? "";
-    document.documentElement.style.zoom = String(window.innerWidth / 540);
     const raiz = document.getElementById("camada");
     const d = await carregar(slug);
     const { edicao, banco, presets } = d;
+    QUADRO.deitado = (edicao.saida?.largura ?? 0) > (edicao.saida?.altura ?? 0);
+    document.documentElement.style.zoom = String(window.innerWidth / (QUADRO.deitado ? 960 : 540));
+    const noPalco = (mp) => QUADRO.deitado ? { ...mp, formato: "dividida" } : mp;
     const ins = edicao.inserts ?? {};
     const motions = edicao.motions ?? {};
     const seq = montarSequencia(edicao.timeline ?? { V1: [] }, d.palavras, edicao.velocidade ?? 1);
@@ -1901,19 +1940,25 @@ ${b}`, tam, n: 2, sobra };
         return { ini: x.t.inicio, fim: x.t.fim, dividida: x.formato === "dividida", divisao: divisao && { ...divisao, ator } };
       }),
       ...comMotion.map((m) => {
-        const divisao = m.dividida ? { modo: "metade", tipo: "area", f: 0.5 } : null;
+        const divisao = m.dividida ? { modo: "metade", tipo: "area", f: QUADRO.deitado ? LADO : 0.5 } : null;
         return { ini: m.ini, fim: m.fim, dividida: m.dividida, divisao: divisao && { ...divisao, ator: geometriaDoAtor(divisao, null, rostoEm?.(m.ini, m.fim) ?? null) } };
       })
     ];
     const lugarEm = (ini, fim, t = (ini + fim) / 2) => {
       const x = lista2.find((x2) => t >= x2.t.inicio && t < x2.t.fim);
+      const m = !x && comMotion.find((m2) => t >= m2.ini && t < m2.fim);
+      const rosto = !x && !m ? rostoEm?.(ini, fim) ?? null : null;
+      if (QUADRO.deitado) {
+        const lado = x ? !!divisaoDe(x, banco, presets) : !!m && m.dividida;
+        const cx = lado ? LADO / 2 : rosto ? Math.min(Math.max(rosto.cx, COLUNA / 2), 1 - COLUNA / 2) : 0.5;
+        return { modo: x || m ? "cheia" : "ator", f: 1, rosto, coluna: { x: cx, area: (lado ? LADO : 1) / COLUNA } };
+      }
       if (x) {
         const d2 = divisaoDe(x, banco, presets);
         return { modo: d2?.modo ?? "cheia", f: d2?.f ?? 1, rosto: null };
       }
-      const m = comMotion.find((m2) => t >= m2.ini && t < m2.fim);
       if (m) return { modo: m.dividida ? "metade" : "cheia", f: m.dividida ? 0.5 : 1, rosto: null };
-      return { modo: "ator", f: 1, rosto: rostoEm?.(ini, fim) ?? null };
+      return { modo: "ator", f: 1, rosto };
     };
     const caixinhaEm = (ini, fim) => {
       const ls = [0.05, 0.25, 0.5, 0.75, 0.95].map((k) => lugarEm(ini, fim, ini + (fim - ini) * k));
@@ -1967,7 +2012,7 @@ ${b}`, tam, n: 2, sobra };
             preset: mp.tipo === "preset" ? mp.preset : null,
             formato: mp.formato,
             fundo: fundoDoMotion(mp) ?? null,
-            src: urlPaginaMotion(mp, m.fim - m.ini, m.fala, true),
+            src: urlPaginaMotion(noPalco(mp), m.fim - m.ini, m.fala, true),
             midias: await Promise.all(ids.map(midiaDe))
           };
         })
@@ -2001,9 +2046,10 @@ ${b}`, tam, n: 2, sobra };
       const elems = el.vs;
       if (motion && motions[motion.plano]) {
         const mp = motions[motion.plano];
-        const src = urlPaginaMotion(mp, motion.fim - motion.ini, motion.fala, true);
-        const escala = raiz.clientWidth / 1080;
-        desenhar(raiz, [motionNoLugar({ src, formato: mp.formato, fundo: fundoDoMotion(mp), rel: tempo - motion.ini, escala }), ...elems]);
+        const src = urlPaginaMotion(noPalco(mp), motion.fim - motion.ini, motion.fala, true);
+        const escala = QUADRO.deitado ? raiz.clientHeight / 960 : raiz.clientWidth / 1080;
+        const x = QUADRO.deitado && mp.formato === "vertical" ? (raiz.clientWidth - 1080 * escala) / 2 : 0;
+        desenhar(raiz, [motionNoLugar({ src, formato: mp.formato, fundo: fundoDoMotion(mp), rel: tempo - motion.ini, escala, x }), ...elems]);
         return null;
       }
       if (!atual) {
@@ -2049,7 +2095,7 @@ ${b}`, tam, n: 2, sobra };
           comMotion.map(async (m) => {
             const mp = motions[m.plano];
             if (mp.tipo !== "preset") return [];
-            const marcas = await marcasDaPagina(urlPaginaMotion(mp, m.fim - m.ini, m.fala, true), mp.formato);
+            const marcas = await marcasDaPagina(urlPaginaMotion(noPalco(mp), m.fim - m.ini, m.fala, true), noPalco(mp).formato);
             return eventosDoMotion(marcas, escolhasDeSom(d.sonsMotion[mp.preset], mp), cat).filter((e) => e.t < m.fim - m.ini).map((e) => ({ ...e, t: e.t + m.ini }));
           })
         );

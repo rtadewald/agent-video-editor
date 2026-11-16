@@ -89,6 +89,7 @@ class Revisao {
       this.saidas.push({ id: x.id, destino: x.destino, tipo: x.final.tipo, cta: x.final.cta, aprovado: !!x.aprovado, info })
     }
     this.corpoDur = infoCorpo?.duracao || 0
+    this.deitado = (edicao.saida?.largura || 0) > (edicao.saida?.altura || 0) // o vídeo 16:9 (as VSLs horizontais)
     const pedida = preferencia(`saida.${this.slug}`, null)
     this.saidaId = this.saidas.find((x) => x.id === pedida)?.id ?? this.saidas.find((x) => x.info)?.id ?? null
     this.dir = this.saidaAtual()?.info ? `${this.base}saidas/${this.saidaId}/` : this.base // a sem final é o próprio corpo
@@ -808,12 +809,12 @@ class Revisao {
     $('#barra-versao').innerHTML = '<div class="seletor-versao" id="versoes"></div><span class="aviso-versao" id="aviso-versao"></span>'
     this.tela.className = 'pagina-revisao'
     this.tela.innerHTML = `<div class="revisao">
-      <section class="palco">
+      <section class="palco${this.deitado ? ' palco-deitado' : ''}">
         <div class="lado lado-esq">
           <div class="bloco"><span class="eyebrow">Plano agora</span><div id="plano-atual" class="plano-atual"></div></div>
           <div class="bloco"><span class="eyebrow">Fala</span><p id="fala-atual" class="fala-atual"></p></div>
         </div>
-        <div class="video-caixa"><video id="video" src="${this.dir}proxy.mp4" preload="auto" playsinline></video>
+        <div class="video-caixa${this.deitado ? ' deitado' : ''}"><video id="video" src="${this.dir}proxy.mp4" preload="auto" playsinline></video>
           <button class="video-tocar" data-acao="tocar" aria-label="Tocar">${ICONE.tocar}</button>
           <button class="botao-icone video-tela-cheia" data-acao="tela-cheia" title="Tela cheia (F)" aria-label="Tela cheia">${ICONE.expandir}</button></div>
         <div class="lado lado-dir">

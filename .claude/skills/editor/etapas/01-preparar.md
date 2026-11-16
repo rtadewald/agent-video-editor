@@ -21,6 +21,11 @@ uv run ferramentas/preparar.py "<caminho do bruto>" --nome "<nome curto do víde
   mesma gravação). Num projeto já preparado: `preparar.py --trocar-audio <slug> "<arquivo>"` (refaz a voz limpa e o
   nível; a transcrição e os cortes ficam). Não confunda com briefing em áudio: o briefing fala *sobre* o vídeo, o áudio à
   parte repete a fala dele. _ads Últimos dias (Black) · 2026-11-11_
+- **Vídeo deitado (16:9)**: quando o criador pede o vídeo na horizontal (as VSLs horizontais), prepare com `--deitado`:
+  o ator é o próprio bruto 16:9 (sem o 9:16 pelo rosto), `saida` 1920×1080 e a legenda desligada. Um projeto já
+  preparado em pé vira deitado com `preparar.py --deitar <slug>` (refaz o proxy e o rosto do original; os cortes e a
+  direção ficam). Deitado, a tela dividida é **lado a lado**: o insert à esquerda (63% da largura, área 9:8), o ator à
+  direita, enquadrado pelo rosto. _vsl-black · 2026-11-16_
 - Materiais de apoio que o criador citou: copie para `projetos/<slug>/apoio/` logo depois (com `cp -c`).
 - Briefing em áudio: transcreva com o próprio preparar num projeto à parte ou com `gemini.py` e use o texto.
 

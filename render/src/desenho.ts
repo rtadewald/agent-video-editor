@@ -5,6 +5,7 @@ import type { Estilo, ItemBanco, MidiaLigada } from './tipos'
 import { cantosNoTempo, estadoCard, janela, matrizDosCantos, noTempo, zoomMidia, type Receita } from './presets'
 import { areaDoInsert, type Divisao } from './divisao'
 import { corteSimples, ESTILO_SIMPLES, estiloSimples, type PedidoNoTempo } from './inserts'
+import { QUADRO } from './quadro'
 
 /** Um elemento descrito: `chave` única entre os irmãos; `antes`/`depois` rodam ao criar e a cada quadro (os vídeos). */
 export type V = {
@@ -327,7 +328,8 @@ export function insertNoLugar(p: {
  *  (o arquivo que a página toca). `fundo`: o id do fundo da área (null: preto, a receita sem fundo). Os cards vêm na
  *  ordem em que são pintados. null: o insert anima de verdade e vai para a foto. */
 export type Geometria = {
-  area: { y: number; h: number }
+  /** frações do quadro; deitado, lado a lado, a área vai à esquerda (`x`, `w`) */
+  area: { x?: number; w?: number; y: number; h: number }
   fundo: string | null
   cards: {
     k: number
@@ -364,7 +366,8 @@ export function geometriaDoInsert(pedido: PedidoNoTempo, banco: Map<string, Item
   // a ordem de pintura: o z-index de cada card e, no empate, a ordem deles
   cards.sort((a, b) => r.cards[a.k].repouso.z - r.cards[b.k].repouso.z || a.k - b.k)
   const f = FUNDOS.find((x) => x.id === fundoId) ?? FUNDOS[4]
-  return { area: { y: 0, h: divisao ? divisao.f : 1 }, fundo: r.fundo === 'proprio' ? f.id : null, cards }
+  const area = !divisao ? { y: 0, h: 1 } : QUADRO.deitado ? { x: 0, w: divisao.f, y: 0, h: 1 } : { y: 0, h: divisao.f }
+  return { area, fundo: r.fundo === 'proprio' ? f.id : null, cards }
 }
 
 // ---------------------------------------------------------------- um motion tocando (do 18: motions/MotionNoLugar.tsx)
@@ -386,12 +389,16 @@ function pintar(f: HTMLIFrameElement, rel: number) {
 
 /** Um motion tocando (SPEC §8.5): a página dele num iframe do tamanho do palco, escalada para caber na área do plano (a
  *  tela toda ou a metade de cima), com o fundo escolhido atrás. A cada instante, `__ir(rel)` leva a cena até lá.
- *  `escala`: a largura da área ÷ a do palco (0 antes de medir: sem iframe ainda). */
-export function motionNoLugar(p: { src: string; formato: 'vertical' | 'dividida'; rel: number; fundo?: string; escala: number }): V {
-  const palco = PALCO[p.formato]
+ *  `escala`: a largura da área ÷ a do palco (0 antes de medir: sem iframe ainda). Deitado, os dois formatos tocam no
+ *  palco da dividida (1080×960, que os presets já sabem desenhar): na tela cheia, centrado na altura toda, com o fundo
+ *  no quadro inteiro (`x`: o deslocamento do palco, px); lado a lado, ocupando a área do insert, à esquerda. */
+export function motionNoLugar(p: { src: string; formato: 'vertical' | 'dividida'; rel: number; fundo?: string; escala: number; x?: number }): V {
+  const palco = PALCO[QUADRO.deitado ? 'dividida' : p.formato]
+  const lugar = p.formato === 'vertical' ? 'inset-0' : QUADRO.deitado ? 'top-0 left-0' : 'inset-x-0 top-0 h-1-2'
   return {
     chave: 'motion',
-    classe: `pointer-events-none overflow-hidden absolute ${p.formato === 'vertical' ? 'inset-0' : 'inset-x-0 top-0 h-1-2'}`,
+    classe: `pointer-events-none overflow-hidden absolute ${lugar}`,
+    estilo: p.formato === 'dividida' && QUADRO.deitado ? { bottom: 0, width: `${palco.w * p.escala}px` } : undefined,
     filhos: [
       p.fundo ? fundo(p.fundo) : null,
       p.escala > 0 && {
@@ -399,7 +406,7 @@ export function motionNoLugar(p: { src: string; formato: 'vertical' | 'dividida'
         tag: 'iframe',
         classe: 'absolute top-0 left-0 origin-top-left border-0',
         atributos: { title: 'motion' },
-        estilo: { width: `${palco.w}px`, height: `${palco.h}px`, transform: `scale(${p.escala})` },
+        estilo: { width: `${palco.w}px`, height: `${palco.h}px`, transform: `${p.x ? `translateX(${p.x}px) ` : ''}scale(${p.escala})` },
         criar: (el) => {
           const f = el as HTMLIFrameElement
           f.dataset.pronto = '0'

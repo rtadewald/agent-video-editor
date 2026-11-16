@@ -7,6 +7,12 @@ do 18, menos os cortes pela IA e os motores extras).
 
     uv run ferramentas/preparar.py <vídeo> [--nome "Nome do projeto"] [--slug slug] [--briefing "texto ou arquivo"] [--audio <arquivo>]
     uv run ferramentas/preparar.py --trocar-audio <slug> <arquivo>
+    uv run ferramentas/preparar.py <vídeo 16:9> --deitado …   (o vídeo final sai deitado, 16:9: sem o 9:16 pelo rosto)
+    uv run ferramentas/preparar.py --deitar <slug>             (um projeto já preparado passa a sair deitado)
+
+`--deitado`: num bruto horizontal, o vídeo final sai deitado (16:9, as VSLs horizontais): o ator é o próprio bruto, sem o
+recorte 9:16; o proxy e o rosto são os do 16:9, `edicao.saida` 1920×1080 e a legenda desligada. `--deitar`: o mesmo num
+projeto já preparado em pé (refaz o proxy e o rosto a partir do original; os cortes e a direção ficam).
 
 `--audio`: a fala gravada à parte (um gravador, o iPad), de melhor qualidade que a da câmera: é sincronizada com o áudio
 da câmera (`voz.alinhar`) e a transcrição, os silêncios, a voz limpa e o nível passam a vir dela. `--trocar-audio`: o
@@ -190,8 +196,37 @@ def trocar_audio(slug_: str, externo: Path) -> None:
           f"sobra {info['sobra_ms']} ms; nível {edicao['nivel_voz']['db']} dB)", flush=True)
 
 
+SAIDA_DEITADA = {'largura': 1920, 'altura': 1080}
+
+
+def deitar(slug_: str) -> None:
+    """Um projeto já preparado em pé passa a sair deitado (16:9): a fonte volta a ser o original horizontal
+    (`midia/original/`), com o proxy e o rosto refeitos dele; `saida` 1920×1080 e a legenda desligada. Grava só essas
+    chaves (lidas de novo na hora: os cortes e a direção, que outra sessão pode estar mexendo, ficam como estão)."""
+    pasta = PROJETOS / slug_
+    edicao = ler_json(pasta / 'edicao.json')
+    if not edicao:
+        raise SystemExit(f'Não achei o projeto: {slug_}')
+    fonte = next(f for f in edicao['fontes'] if f['papel'] == 'bruto')
+    rel = (edicao.get('enquadramento') or {}).get('original') or fonte['arquivo']
+    original = pasta / rel
+    info = inspecionar(original)
+    if info['largura'] <= info['altura']:
+        raise SystemExit(f'O bruto de {slug_} não é horizontal ({info["largura"]}×{info["altura"]}): não dá para deitar.')
+    t0 = time.perf_counter()
+    r = proxy_e_rosto(original, pasta)
+    edicao = ler_json(pasta / 'edicao.json')
+    fonte = next(f for f in edicao['fontes'] if f['papel'] == 'bruto')
+    fonte.update({'arquivo': rel, **info, 'proxy': 'midia/proxy/f1.mp4'})
+    edicao['saida'] = dict(SAIDA_DEITADA)
+    edicao['enquadramento'] = {'x': 0.5}
+    edicao.setdefault('legenda', {})['ligada'] = False
+    gravar_json(pasta / 'edicao.json', edicao)
+    print(f'{slug_}: deitado (16:9) em {_s(time.perf_counter() - t0)} s; a fonte é {rel} ({info["largura"]}×{info["altura"]}), {r["resumo"]}', flush=True)
+
+
 def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categoria: str = CATEGORIA_PADRAO,
-             externo: Path | None = None) -> None:
+             externo: Path | None = None, deitado: bool = False) -> None:
     t0 = time.perf_counter()
     midia = pasta / 'midia'
     bruto = midia / f'bruto{video.suffix.lower()}'
@@ -207,6 +242,8 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
     if briefing:
         (pasta / 'briefing.md').write_text(briefing.strip() + '\n', encoding='utf-8')
     horizontal = info['largura'] > info['altura']
+    if deitado and not horizontal:
+        raise Recusa('--deitado é para um bruto horizontal (16:9): este é em pé.')
     if horizontal:  # do 18: enquadramento._aplicar — o enviado vai para midia/original/ (intocado)
         original = midia / 'original' / bruto.name
         original.parent.mkdir(parents=True, exist_ok=True)
@@ -215,7 +252,7 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
     fonte = {'id': 'f1', 'papel': 'bruto', 'arquivo': str(bruto.relative_to(pasta)), 'nome_original': video.name, **info}
     m, s = divmod(round(info['duracao']), 60)
     print(f'Preparando "{nome}" em projetos/{pasta.name}/ ({m}:{s:02d}, {info["largura"]}×{info["altura"]}'
-          f'{", horizontal: vira 9:16 pelo rosto" if horizontal else ""})', flush=True)
+          f'{", horizontal: sai deitado, 16:9" if deitado else ", horizontal: vira 9:16 pelo rosto" if horizontal else ""})', flush=True)
 
     ex = Execucao(pasta)
     res: dict = {'enquadramento': {'x': 0.5}}
@@ -236,7 +273,7 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
         return {'resumo': f'recorte de {r["recorte"]} px, rosto em {r["rostos"]} amostras' + (f' ({r["aviso"]})' if r.get('aviso') else '')}
 
     def cadeia_video():  # o 9:16 antes do que depende dele (o proxy e o rosto)
-        if horizontal:
+        if horizontal and not deitado:
             ex.passo('enquadramento', enquadrar)
         ex.passo('proxy', proxy_e_rosto, pasta / fonte['arquivo'], pasta)
         fonte['proxy'] = 'midia/proxy/f1.mp4'
@@ -281,7 +318,7 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
 
     edicao = {
         'id': pasta.name, 'nome': nome, 'criado_em': datetime.now().isoformat(timespec='seconds'),
-        'formato': categoria, 'saida': {'largura': 1080, 'altura': 1920},  # formato: a categoria (Reels, Ad…; calibragem.py)
+        'formato': categoria, 'saida': dict(SAIDA_DEITADA) if deitado else {'largura': 1080, 'altura': 1920},  # formato: a categoria (Reels, Ad…; calibragem.py)
         'fontes': [fonte],
         'enquadramento': res['enquadramento'],
         'look': LOOK,
@@ -295,7 +332,7 @@ def preparar(video: Path, nome: str, pasta: Path, briefing: str | None, categori
         'transicoes': {},
         'audio': {'voz': {'limpeza': 'leve', 'timbre': 'encorpada'}, 'fundo': None, 'fundo_mudo': False,
                   'niveis': {'ator': 0.0, 'presets': 0.0, 'transicoes': 0.0, 'fundo': 0.0}, 'voz_lufs': {'f1_leve': res['voz_lufs']}},
-        'legenda': {'ligada': True, 'modo': 'palavra', 'ajustes': {}},
+        'legenda': {'ligada': not deitado, 'modo': 'palavra', 'ajustes': {}},  # deitado (as VSLs horizontais): sem legenda
     }
     gravar_json(pasta / 'edicao.json', edicao)
     f = edicao['fontes'][0]
@@ -311,8 +348,13 @@ def main() -> None:
     ap.add_argument('--nome', help='o nome do projeto (padrão: o nome do arquivo)')
     ap.add_argument('--slug', help='a pasta em projetos/ (padrão: do nome)')
     ap.add_argument('--briefing', help='o briefing: o texto ou o caminho de um arquivo')
+    ap.add_argument('--deitado', action='store_true', help='bruto horizontal: o vídeo final sai deitado (16:9), sem o 9:16 pelo rosto')
+    ap.add_argument('--deitar', metavar='SLUG', help='um projeto já preparado em pé passa a sair deitado (16:9)')
     ap.add_argument('--categoria', default=CATEGORIA_PADRAO, help='hacks, storytelling, pico, ad, cta, vsl… (calibragem.py categorias); padrão: hacks')
     a = ap.parse_args()
+    if a.deitar:
+        deitar(a.deitar)
+        return
     if a.trocar_audio:
         externo = Path(a.trocar_audio[1]).expanduser().resolve()
         if not externo.is_file():
@@ -342,7 +384,7 @@ def main() -> None:
     pasta = pasta_livre(slug(a.slug or nome))
     pasta.mkdir(parents=True)
     try:
-        preparar(video, nome, pasta, briefing, a.categoria, externo)
+        preparar(video, nome, pasta, briefing, a.categoria, externo, a.deitado)
     except (Exception, KeyboardInterrupt) as e:
         shutil.rmtree(pasta, ignore_errors=True)
         if isinstance(e, Recusa):

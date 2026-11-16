@@ -4,6 +4,11 @@ Como as mídias de cada insert aparecem (onde fica cada card, como entra, se mex
 movimento de câmera nos planos de Full ator. Tudo vem de **presets aprovados** pelo criador (`biblioteca/presets/`):
 receitas genéricas que se adaptam ao nº de mídias, à proporção delas e à divisão da tela.
 
+**Vídeo deitado (16:9)**: os mesmos presets. Lado a lado, a mídia que não tem a proporção da área (9:8) vai num card
+centrado, inteira, sobre o fundo dos inserts (use `chuva`, o oficial); na tela cheia, a mídia horizontal (até 3:2) ocupa a
+tela e a em pé vira card. O "ator embaixo" (`divisao: atras`) não existe deitado. Os motions tocam no palco da dividida
+(1080×960): lado a lado, na área do insert; na tela cheia, centrados na altura toda, com o fundo do motion nas laterais.
+
 > **Antes de começar, leia `biblioteca/aprendizados/enriquecimento.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/enriquecimento.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
 
 ## Rodar

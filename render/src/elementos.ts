@@ -13,7 +13,11 @@ import type { Rosto } from './ator'
 /** Onde o elemento cai: sobre o ator em tela cheia, sobre um insert ou motion na tela toda, na tela dividida (o insert
  *  em cima até `f`) ou no "ator embaixo" (o insert na tela toda e a janela do ator a partir de `f`). `rosto`: o rosto do
  *  ator no trecho (`ator.rostoDoArquivo`), no ator em tela cheia. */
-export type Lugar = { modo: 'ator' | 'cheia' | 'metade' | 'atras'; f: number; rosto: Rosto | null }
+export type Lugar = { modo: 'ator' | 'cheia' | 'metade' | 'atras'; f: number; rosto: Rosto | null; coluna?: Coluna }
+/** Deitado (`quadro.ts`): o elemento vai numa coluna 9:16 da altura do quadro (as medidas abaixo valem nela), com o
+ *  centro em `x` (fração da largura do quadro); `area`: a largura do insert ou motion embaixo, em colunas (o desfoque do
+ *  lettering cobre a área inteira, não só a coluna). */
+export type Coluna = { x: number; area: number }
 /** Um elemento no tempo do vídeo final (o plano Full ator com lettering entra como um, com o tipo do plano). `banco`: no
  *  print sobreposto, a mídia do banco (imagem ou vídeo) que vai no card; sem ela, uma etiqueta com o texto. */
 export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; largura?: number; y?: number; entrada?: 'seco'; lugar: Lugar }
@@ -160,7 +164,7 @@ function letteringNoInsert(e: Elemento, rel: number): V {
       {
         chave: 'desfoque',
         classe: 'absolute',
-        estilo: { ...(modo === 'metade' ? { left: 0, right: 0, top: 0, height: `${f * 100}%` } : { inset: 0 }), backdropFilter: `blur(${(DESFOQUE.raio * p).toFixed(3)}cqw) brightness(${1 - DESFOQUE.escurece * p})` },
+        estilo: { ...(modo === 'metade' ? { left: 0, right: 0, top: 0, height: `${f * 100}%` } : e.lugar.coluna ? { top: 0, bottom: 0, left: `${(-(e.lugar.coluna.area - 1) / 2) * 100}%`, right: `${(-(e.lugar.coluna.area - 1) / 2) * 100}%` } : { inset: 0 }), backdropFilter: `blur(${(DESFOQUE.raio * p).toFixed(3)}cqw) brightness(${1 - DESFOQUE.escurece * p})` },
       },
       { chave: 'texto', classe: 'absolute', estilo: { ...centrado(y, rel), ...estiloLettering(tam) }, texto },
     ],
@@ -357,7 +361,12 @@ export function desenharElementos(t: number, elementos: Elemento[], banco: Map<s
     if (e.tipo === 'tarja') return tarja(e)
     return null
   })
-  const vs: V[] = [{ chave: 'elementos', classe: 'pointer-events-none absolute inset-0 select-none', estilo: { containerType: 'size', zIndex: 20 }, filhos }]
+  const c = (e: Elemento) => e.lugar.coluna
+  // deitado: cada elemento na sua coluna 9:16 (as medidas em cqw/cqh são dela)
+  const deitados = agora.some(c)
+    ? filhos.map((v, i) => v && { chave: `col:${agora[i].id}`, classe: 'absolute top-0', estilo: { height: '100%', aspectRatio: '9 / 16', left: `${c(agora[i])!.x * 100}%`, transform: 'translateX(-50%)', containerType: 'size' }, filhos: [v] })
+    : null
+  const vs: V[] = [{ chave: 'elementos', classe: 'pointer-events-none absolute inset-0 select-none', estilo: { containerType: 'size', zIndex: 20 }, filhos: deitados ?? filhos }]
   return { vs, chave: parado ? `e:${agora.map((e) => e.id).join(',')}` : null }
 }
 

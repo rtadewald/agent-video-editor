@@ -3,6 +3,7 @@ import type { Estilo, ItemBanco } from './tipos'
 import { comRepouso, type CardReceita, type Preset, type Propriedade, type Receita } from './presets'
 import { ajustesEfetivos } from './ajustes'
 import { topoDoAtor, type Geometria } from './ator'
+import { LADO, QUADRO } from './quadro'
 
 /** A divisão da tela num insert de tela dividida (SPEC §8.4), automática: o tipo vem do preset escolhido e as medidas,
  *  da proporção da 1ª mídia.
@@ -20,13 +21,34 @@ const JANELA = { escala: 0.55, y0: 72, raio: 7 }
  *  cabeça costuma estar a ~10% do topo do quadro dele. */
 const TOPO_CABECA = 100 - JANELA.escala * 100 + JANELA.escala * 10
 const MARGEM = 0.06 // em cima e embaixo do card, em fração do quadro
-const W_H = 9 / 16 // largura ÷ altura do quadro
+const W_H = 9 / 16 // largura ÷ altura do quadro em pé (deitado, as contas são as de `divisaoDeitada`)
+/** Deitado: largura ÷ altura do quadro e da área do insert lado a lado (9:8). */
+const QUADRO_DEITADO = 16 / 9
+const AREA_LADO = QUADRO_DEITADO * LADO
 
 /** Alguma mídia pode ocupar a área toda sem ser cortada? Na tela dividida, as horizontais (a área é larga); na tela
  *  cheia e no "ator embaixo", as em pé (9:16). Decidido mídia a mídia (receitaParaInsert): as que seriam cortadas ficam
  *  em card, as outras ocupam a área. */
 export const telaTodaPermitida = (formato: string, atras: boolean, aspectos: number[]) =>
-  formato === 'dividida' && !atras ? aspectos.some((a) => a >= 0.8) : aspectos.some((a) => a < 0.8)
+  QUADRO.deitado ? aspectos.some((a) => cabeDeitado(a, formato))
+  : formato === 'dividida' && !atras ? aspectos.some((a) => a >= 0.8) : aspectos.some((a) => a < 0.8)
+
+/** Deitado, a mídia ocupa a área sem ser cortada: na tela cheia, as horizontais (até o 3:2); lado a lado, só as de
+ *  proporção perto da área (9:8). As outras vão num card centrado, inteiras (nada cortado). */
+const cabeDeitado = (a: number, formato: string) => (formato === 'dividida' ? Math.abs(a / AREA_LADO - 1) < 0.1 : a >= 1.5)
+
+/** A divisão lado a lado (deitado): o insert à esquerda, em `LADO` da largura e na altura toda; a mídia que não tem a
+ *  proporção da área vai num card centrado, inteira, com margem (o "ator embaixo" não existe deitado). */
+function divisaoDeitada(tipo: TipoDivisao, a: number, varios: boolean): Divisao {
+  if (tipo === 'area' || varios) return { modo: 'metade', tipo: tipo === 'area' ? 'area' : 'card', f: LADO }
+  let w = 90 // largura do card, % da área
+  let h = (w * AREA_LADO) / a // altura do card, % da área
+  if (h > 84) {
+    h = 84
+    w = (h * a) / AREA_LADO
+  }
+  return { modo: 'metade', tipo: 'card', f: LADO, card: { w, h } }
+}
 
 /** O tipo de divisão do preset: o marcado nele ou, sem marca, "área" se o card ocupa a área toda, senão "card". */
 export const tipoDoPreset = (p: Preset | null | undefined): TipoDivisao =>
@@ -42,7 +64,7 @@ export function divisaoDe(
   // "ator embaixo" pode ser ligado no próprio insert, por cima do tipo do preset
   // a forma escolhida no insert (ajuste rápido) manda: "tela toda" ocupa a área, "card" é card
   const forma = ajustesEfetivos(preset, (x.enriquecimento as { ajustes?: Record<string, string> } | undefined)?.ajustes, aspectosDe(x.midias, banco))?.forma
-  const atras = x.enriquecimento?.divisao === 'atras'
+  const atras = !QUADRO.deitado && x.enriquecimento?.divisao === 'atras'
   const aspectos = aspectosDe(x.midias, banco)
   let base: TipoDivisao = forma === 'Tela toda' ? 'area' : forma === 'Card' ? 'card' : preset ? tipoDoPreset(preset) : 'card'
   // ocupar a área só quando a mídia cabe sem cortar: na tela dividida, as horizontais; no "ator embaixo", as em pé
@@ -57,6 +79,7 @@ export function divisaoDe(
   const a = i?.largura && i?.altura ? i.largura / i.altura : 16 / 9 // largura ÷ altura da mídia
   // vários cards (empilhados, em sequência, mosaico): a área fica fixa e cada card se ajusta à sua mídia (receitaParaInsert)
   const varios = !!preset && (preset.receita.repete || preset.receita.cards.length > 1)
+  if (QUADRO.deitado) return divisaoDeitada(tipo, a, varios)
   if (varios && tipo !== 'area') return { modo: tipo === 'atras' ? 'atras' : 'metade', tipo, f: tipo === 'atras' ? JANELA.y0 / 100 : 0.56 }
   if (tipo === 'area') return { modo: 'metade', tipo, f: a < 1 ? 0.5 : Math.min(Math.max(W_H / a, 0.28), 0.5625) }
   const livre = tipo === 'atras' ? JANELA.y0 / 100 : 0.62 // a altura máxima da área do insert
@@ -77,14 +100,16 @@ export function divisaoDe(
  *  - os outros: o card fica no lugar e no tamanho do preset, mas com a proporção da mídia, cabendo na caixa dele (e na
  *    área). Os guiados por cantos medidos ficam como estão. */
 export function receitaParaInsert(r: Receita, d: Divisao | null, aspectos: number[], formato: string): Receita {
-  const areaAsp = formato === 'dividida' ? W_H / (d?.f ?? 0.5) : W_H // largura ÷ altura da área do insert
+  // largura ÷ altura da área do insert (deitado, lado a lado: a área à esquerda, na altura toda)
+  const areaAsp = QUADRO.deitado ? (formato === 'dividida' ? QUADRO_DEITADO * (d?.f ?? LADO) : QUADRO_DEITADO)
+    : formato === 'dividida' ? W_H / (d?.f ?? 0.5) : W_H
   const cards = r.cards.map((c, k) => {
     if (c.quadros?.length) return c
     const cheio = c.repouso.w >= 99 && c.repouso.h >= 99
     const a0 = aspectos[c.midia ?? k] ?? aspectos[0]
     // na tela cheia, ocupar a tela só se a mídia é em pé (9:16); 1:1, 4:3, 16:9 viram um card centrado (90% da largura)
     // ocupando a área, só se a mídia cabe sem cortar (telaTodaPermitida); senão, um card centrado na proporção dela
-    const cabe = a0 ? (formato === 'dividida' && d?.modo !== 'atras' ? a0 >= 0.8 : a0 < 0.8) : true
+    const cabe = !a0 ? true : QUADRO.deitado ? cabeDeitado(a0, formato) : formato === 'dividida' && d?.modo !== 'atras' ? a0 >= 0.8 : a0 < 0.8
     if (cheio && !cabe && a0) {
       let w = 90
       let h = (w * areaAsp) / a0
@@ -207,13 +232,15 @@ export const aspectosDe = (midias: { banco: string }[], banco?: Map<string, Item
   })
 
 /** A área do insert no quadro (estilo CSS em %). */
-export const areaDoInsert = (d: Divisao | null): Estilo => (!d ? { inset: 0 } : { left: 0, right: 0, top: 0, height: `${d.f * 100}%` })
+export const areaDoInsert = (d: Divisao | null): Estilo =>
+  !d ? { inset: 0 } : QUADRO.deitado ? { left: 0, top: 0, bottom: 0, width: `${d.f * 100}%` } : { left: 0, right: 0, top: 0, height: `${d.f * 100}%` }
 
 /** Onde a caixinha do comentário fica sozinha (centro, % do quadro): na costura do insert com o ator. `g`: a geometria
  *  do ator (`ator.geometriaDoAtor`, a P5), para desviar dele no modo e na posição em que estiver; `h`: a altura do card
  *  (fração do quadro, `alturaDoComentario`), para a borda de baixo dele, e não só o centro, ficar acima do ator. */
 function posicaoDoComentario(d: Divisao | null, g?: Geometria | null, h = 0): { x: number; y: number } {
   if (!d) return { x: 50, y: 50 }
+  if (QUADRO.deitado) return { x: d.f * 50, y: 50 } // lado a lado: no meio do insert
   // no "ator embaixo", acima da cabeça (que sai da janela, ou do recortado; no canto, acima da caixa), ou na borda de
   // baixo do card se ela estiver mais acima. Na exportação, o ator vai por cima do card: aqui ele não cobre o texto
   const cabeca = g && g.modo !== 'metade' ? topoDoAtor(g) * 100 : TOPO_CABECA

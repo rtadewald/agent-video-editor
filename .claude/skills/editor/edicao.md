@@ -16,7 +16,7 @@ projetos/<slug>/
 ├── transcricao.json       {"motor": "elevenlabs", "palavras": [{"id": "w00000", "texto", "inicio", "fim"}]}  (s do bruto)
 ├── midia/
 │   ├── bruto.<ext>        o vídeo como veio (nunca alterado)
-│   ├── original/          num 16:9: o enviado; bruto_9x16.mp4 vira a fonte
+│   ├── original/          num 16:9: o enviado; bruto_9x16.mp4 vira a fonte (deitado: ele mesmo é a fonte)
 │   ├── bruto_9x16.mp4     num 16:9: o 9:16 seguindo o rosto
 │   ├── proxy/f1.mp4       720p, H.264, quadro-chave a cada 0,5 s
 │   ├── rosto/f1.json      o rosto ao longo do vídeo (formato do 18, rosto.py)
@@ -38,6 +38,9 @@ projetos/<slug>/
   "fontes": [{"id": "f1", "papel": "bruto", "arquivo": "midia/bruto.mov", "nome_original": "…", "duracao": 122.0,
               "largura": 2160, "altura": 3840, "fps": "24/1", "tem_audio": true, "proxy": "midia/proxy/f1.mp4"}],
   "enquadramento": {"x": 0.5},                    // num 16:9, os campos do 18 (original, feito, versao…)
+  // `saida` mais larga que alta (1920×1080) = o vídeo DEITADO (16:9): o ator é o bruto 16:9, a tela dividida é lado a
+  // lado (insert à esquerda, ator à direita), os motions tocam no palco da dividida e os elementos numa coluna 9:16 da
+  // altura do quadro; proxy 1280×720, final 3840×2160 (preparar.py --deitado / --deitar)
   "look": {"lut": "casa", "intensidade": 1, "vinheta": "normal"},
   "velocidade": 1.0,                              // 1 a 1,5
   "nivel_voz": {"fonte": "f1", "db": -23.3},      // a fala do bruto (sons.nivel_da_voz)

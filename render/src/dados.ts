@@ -14,6 +14,8 @@ export type Edicao = {
   id: string
   fontes: { id: string; papel: string }[]
   enquadramento?: { x?: number }
+  /** O tamanho do vídeo final: mais largo que alto, o quadro é deitado (16:9; `quadro.ts`). */
+  saida?: { largura?: number; altura?: number }
   velocidade?: number
   timeline?: Timeline
   cortes?: { mantidas: [string, string][] }

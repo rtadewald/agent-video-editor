@@ -8,7 +8,8 @@
 uv run ferramentas/render.py <slug>
 ```
 
-Gera `projetos/<slug>/versoes/vN/` (N = a próxima): `proxy.mp4` (720p, 24 fps, tudo queimado), uma cópia do
+Gera `projetos/<slug>/versoes/vN/` (N = a próxima): `proxy.mp4` (720p, 24 fps, tudo queimado; 720×1280, ou 1280×720 num
+vídeo deitado), uma cópia do
 `edicao.json`, `palavras.json` e `planos.json` (no tempo do vídeo final, para o app) e `info.json` (tempos e avisos). Leia os avisos impressos (ex.: voz limpa ausente).
 
 Como funciona: a página `render/?projeto=<slug>` desenha a camada dos inserts, motions e elementos; Chromes escondidos a

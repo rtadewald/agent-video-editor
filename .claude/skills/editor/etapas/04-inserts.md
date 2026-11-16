@@ -22,7 +22,8 @@ uv run ferramentas/inserts.py juntar <slug>      # liga as mídias achadas a cad
    as **★ usado em vídeo aprovado** e as **✓ aprovado** (o criador já gostou delas); evite as **✗ recusado** (ficaram de
    fora de um vídeo aprovado).
 3. **Captura do site real** (`captura.py <url>`), quando a fala cita um site, ferramenta, produto ou repositório: grava
-   a página rolando/carregando, como ela é. 16:9 para tela dividida; 9:16 (um computador em pé) para tela cheia.
+   a página rolando/carregando, como ela é. 16:9 para tela dividida; 9:16 (um computador em pé) para tela cheia. Num
+   vídeo **deitado** (16:9), tudo em 16:9 (o brief já diz).
 4. **Web, fontes oficiais**: o site, o blog, o changelog, o X ou o YouTube **do próprio produto** (vídeo: `yt-dlp` só do
    trecho útil; imagem: o arquivo original). Nunca o rosto de outro criador de conteúdo; nunca vídeo de outro criador.
    Registre a URL de cada mídia.

@@ -63,10 +63,32 @@ from montagem.exportacao import dur_saida  # noqa: E402
 FPS = 24
 PROXY = (720, 1280, 'h264')
 FINAL = (2160, 3840, 'hevc')
+# o quadro deitado (16:9, `edicao.saida` mais larga que alta: as VSLs horizontais)
+PROXY_DEITADO = (1280, 720, 'h264')
+FINAL_DEITADO = (3840, 2160, 'hevc')
 VELOCIDADE = (1.0, 1.5)
 # o código que desenha a camada: se muda, as fotos guardadas não valem mais
 CODIGO_CAMADA = [RAIZ / 'render' / x for x in ('index.html', 'pagina.js', 'motion.html')] + [BIBLIOTECA / 'motions' / 'runtime.js']
 GUARDA = 3  # o cache da camada guarda os clipes usados nos últimos N renders do projeto
+
+
+def deitado(edicao: dict) -> bool:
+    """O vídeo final é deitado (16:9)? `edicao.saida` mais larga que alta."""
+    s = edicao.get('saida') or {}
+    return (s.get('largura') or 0) > (s.get('altura') or 0)
+
+
+def tamanho(edicao: dict, final: bool) -> tuple[int, int, str]:
+    """(largura, altura, codec) do render: o proxy ou o final, em pé ou deitado."""
+    if deitado(edicao):
+        return FINAL_DEITADO if final else PROXY_DEITADO
+    return FINAL if final else PROXY
+
+
+def recorta_9x16(edicao: dict, fonte: dict) -> bool:
+    """O ator sai do bruto recortado em 9:16? Só um bruto horizontal num vídeo em pé (projeto de antes do
+    enquadramento); deitado, o ator é o próprio 16:9."""
+    return (fonte.get('largura') or 0) > (fonte.get('altura') or 0) and not deitado(edicao)
 
 
 def pagina(slug: str, porta: int) -> str:
@@ -565,8 +587,8 @@ def render(slug: str, final: bool = False, saida: str | None = None, pasta_saida
         raise SystemExit(f'O projeto {slug} ainda não tem cortes (timeline.V1 vazia).')
     fonte = next(f for f in edicao['fontes'] if f['papel'] == 'bruto')
     duracao = sum(dur_saida(c) for c in clipes)
-    w, h, codec = FINAL if final else PROXY
-    horizontal = (fonte.get('largura') or 0) > (fonte.get('altura') or 0)
+    w, h, codec = tamanho(edicao, final)
+    horizontal = recorta_9x16(edicao, fonte)
     transcricao = (ler_json(p / 'transcricao.json') or {}).get('palavras', [])
     fases: dict[str, float] = {}
     avisos: list[str] = []
@@ -606,7 +628,7 @@ def render(slug: str, final: bool = False, saida: str | None = None, pasta_saida
     destino.parent.mkdir(parents=True, exist_ok=True)
     tmp = Path(tempfile.mkdtemp(prefix='.render-', dir=p))
     srv = servidor.servir(0)
-    print(f'Render de {slug}: {"final 2160×3840 HEVC" if final else f"prévia da saída {saida}" if pasta_saida else f"proxy v{versao} 720×1280 H.264"}, {duracao:.1f} s de vídeo', flush=True)
+    print(f'Render de {slug}: {f"final {w}×{h} HEVC" if final else f"prévia da saída {saida}" if pasta_saida else f"proxy v{versao} {w}×{h} H.264"}, {duracao:.1f} s de vídeo', flush=True)
     try:
         print('[1/5] Banco: cópias de exportação dos vídeos', flush=True)
         n = copias_do_banco(edicao)
@@ -1008,7 +1030,7 @@ def pre_render(slug: str, final: bool = False) -> None:
     edicao = ler(slug)
     if not v1_tocada(edicao):
         raise SystemExit(f'O projeto {slug} ainda não tem cortes.')
-    w, h, _ = FINAL if final else PROXY
+    w, h, _ = tamanho(edicao, final)
     with _cadeado_camadas(p, esperar=False) as livre:
         if not livre:
             print('Já há um pré-render deste projeto rodando: nada a fazer (o próximo pega o que mudou).')
@@ -1059,10 +1081,9 @@ def amostra_look(slug: str, t: float, lk: dict) -> Path:
     if destino.exists():
         return destino
     fonte = next(f for f in edicao['fontes'] if f['papel'] == 'bruto')
-    w, h = PROXY[:2]
-    horizontal = (fonte.get('largura') or 0) > (fonte.get('altura') or 0)
+    w, h = tamanho(edicao, False)[:2]
     x = (edicao.get('enquadramento') or {}).get('x', 0.5)
-    recorte = f'crop=w=trunc(ih*9/16/2)*2:h=ih:x=(iw-ow)*{x:.4f},' if horizontal else ''
+    recorte = f'crop=w=trunc(ih*9/16/2)*2:h=ih:x=(iw-ow)*{x:.4f},' if recorta_9x16(edicao, fonte) else ''
     destino.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         entradas = ['-ss', f'{src:.3f}', '-t', f'{AMOSTRA}', '-i', str(p / fonte['arquivo'])]

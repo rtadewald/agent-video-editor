@@ -16,6 +16,8 @@ import { escolhasDeSom, eventosDoMotion, falaDoPlano, fundoDoMotion, marcasDaPag
 import { comentarioDe, cardComentario } from './comentario'
 import { definirRelogio, desenhar, geometriaDoInsert, insertNoLugar, motionNoLugar, type Geometria, type V } from './desenho'
 import { desenharElementos, intervalosDeLettering, sonsDosElementos, zonasDosElementos, type Elemento, type Lugar } from './elementos'
+import { COLUNA, LADO, QUADRO } from './quadro'
+import type { MotionPlano } from './motions'
 
 /** `divisao`: como a tela se divide no trecho (o ator: onde fica, e se a pessoa recortada sai por cima do insert).
  *  `assinatura`: tudo o que o trecho desenha (o render.py guarda a foto dele por ela). `geometria`: o insert parado que
@@ -95,12 +97,17 @@ function semSobrepor(intervalos: { ini: number; fim: number }[], ocupados: { ini
 
 async function iniciar() {
   const slug = new URLSearchParams(location.search).get('projeto') ?? ''
-  // a tela tem o tamanho do vídeo final e o conteúdo é desenhado como numa prévia de 540 px de largura, ampliado pelo
-  // zoom (não pela densidade de pixels: com ela, o Chrome desenhava os vídeos com perspectiva 3D em baixa resolução)
-  document.documentElement.style.zoom = String(window.innerWidth / 540)
   const raiz = document.getElementById('camada')!
   const d = await carregar(slug)
   const { edicao, banco, presets } = d
+  // o quadro deitado (16:9) antes de qualquer conta
+  QUADRO.deitado = (edicao.saida?.largura ?? 0) > (edicao.saida?.altura ?? 0)
+  // a tela tem o tamanho do vídeo final e o conteúdo é desenhado como numa prévia de 540 px de largura (deitado, 960),
+  // ampliado pelo zoom (não pela densidade de pixels: com ela, o Chrome desenhava os vídeos com perspectiva 3D em baixa
+  // resolução)
+  document.documentElement.style.zoom = String(window.innerWidth / (QUADRO.deitado ? 960 : 540))
+  // deitado, todo motion toca no palco da dividida (`desenho.motionNoLugar`): a página dele é pedida nesse formato
+  const noPalco = (mp: MotionPlano): MotionPlano => (QUADRO.deitado ? { ...mp, formato: 'dividida' } : mp)
   const ins = edicao.inserts ?? {}
   const motions = edicao.motions ?? {}
 
@@ -126,7 +133,7 @@ async function iniciar() {
       return { ini: x.t.inicio, fim: x.t.fim, dividida: x.formato === 'dividida', divisao: divisao && { ...divisao, ator } }
     }),
     ...comMotion.map((m) => {
-      const divisao: Divisao | null = m.dividida ? { modo: 'metade', tipo: 'area', f: 0.5 } : null
+      const divisao: Divisao | null = m.dividida ? { modo: 'metade', tipo: 'area', f: QUADRO.deitado ? LADO : 0.5 } : null
       return { ini: m.ini, fim: m.fim, dividida: m.dividida, divisao: divisao && { ...divisao, ator: geometriaDoAtor(divisao, null, rostoEm?.(m.ini, m.fim) ?? null) } }
     }),
   ]
@@ -134,13 +141,20 @@ async function iniciar() {
   // (pelo meio dele): o ator em tela cheia, o insert ou motion na tela toda ou a tela dividida
   const lugarEm = (ini: number, fim: number, t = (ini + fim) / 2): Lugar => {
     const x = lista.find((x) => t >= x.t.inicio && t < x.t.fim)
+    const m = !x && comMotion.find((m) => t >= m.ini && t < m.fim)
+    const rosto = !x && !m ? rostoEm?.(ini, fim) ?? null : null
+    // deitado: a coluna do elemento no meio do insert (lado a lado, a área da esquerda) ou no rosto do ator, na tela toda
+    if (QUADRO.deitado) {
+      const lado = x ? !!divisaoDe(x, banco, presets) : !!m && m.dividida
+      const cx = lado ? LADO / 2 : rosto ? Math.min(Math.max(rosto.cx, COLUNA / 2), 1 - COLUNA / 2) : 0.5
+      return { modo: x || m ? 'cheia' : 'ator', f: 1, rosto, coluna: { x: cx, area: (lado ? LADO : 1) / COLUNA } }
+    }
     if (x) {
       const d = divisaoDe(x, banco, presets)
       return { modo: d?.modo ?? 'cheia', f: d?.f ?? 1, rosto: null }
     }
-    const m = comMotion.find((m) => t >= m.ini && t < m.fim)
     if (m) return { modo: m.dividida ? 'metade' : 'cheia', f: m.dividida ? 0.5 : 1, rosto: null }
-    return { modo: 'ator', f: 1, rosto: rostoEm?.(ini, fim) ?? null }
+    return { modo: 'ator', f: 1, rosto }
   }
   // a caixinha fica a pergunta inteira, com as telas trocando embaixo: na tela dividida, a costura mais alta do trecho
   // (no meio dele, a de um card em pé descia a caixinha sobre o rosto quando a tela seguinte era um insert deitado)
@@ -193,7 +207,7 @@ async function iniciar() {
         // as mídias do motion: o vídeo do banco, ou os campos de imagem do preset (um id do banco nos valores)
         const ids = mp.tipo === 'video' ? [mp.banco] : Object.values(mp.valores ?? {}).filter((v) => typeof v === 'string' && /^[0-9a-f]{10}$/.test(v))
         return { t: [rel(m.ini), rel(m.fim)], preset: mp.tipo === 'preset' ? mp.preset : null, formato: mp.formato, fundo: fundoDoMotion(mp) ?? null,
-                 src: urlPaginaMotion(mp, m.fim - m.ini, m.fala, true), midias: await Promise.all(ids.map(midiaDe)) }
+                 src: urlPaginaMotion(noPalco(mp), m.fim - m.ini, m.fala, true), midias: await Promise.all(ids.map(midiaDe)) }
       }),
     )
     const elems = await Promise.all(
@@ -226,10 +240,12 @@ async function iniciar() {
     const elems = el.vs
     if (motion && motions[motion.plano]) {
       const mp = motions[motion.plano]
-      const src = urlPaginaMotion(mp, motion.fim - motion.ini, motion.fala, true)
-      // o palco escalado para a largura da área (a tela toda ou a metade de cima: as duas na largura do vídeo)
-      const escala = raiz.clientWidth / 1080
-      desenhar(raiz, [motionNoLugar({ src, formato: mp.formato, fundo: fundoDoMotion(mp), rel: tempo - motion.ini, escala }), ...elems])
+      const src = urlPaginaMotion(noPalco(mp), motion.fim - motion.ini, motion.fala, true)
+      // o palco escalado para a largura da área (a tela toda ou a metade de cima: as duas na largura do vídeo); deitado, o
+      // palco da dividida na altura do quadro (na tela cheia, centrado)
+      const escala = QUADRO.deitado ? raiz.clientHeight / 960 : raiz.clientWidth / 1080
+      const x = QUADRO.deitado && mp.formato === 'vertical' ? (raiz.clientWidth - 1080 * escala) / 2 : 0
+      desenhar(raiz, [motionNoLugar({ src, formato: mp.formato, fundo: fundoDoMotion(mp), rel: tempo - motion.ini, escala, x }), ...elems])
       return null
     }
     if (!atual) {
@@ -279,7 +295,7 @@ async function iniciar() {
         comMotion.map(async (m) => {
           const mp = motions[m.plano]
           if (mp.tipo !== 'preset') return []
-          const marcas = await marcasDaPagina(urlPaginaMotion(mp, m.fim - m.ini, m.fala, true), mp.formato)
+          const marcas = await marcasDaPagina(urlPaginaMotion(noPalco(mp), m.fim - m.ini, m.fala, true), noPalco(mp).formato)
           return eventosDoMotion(marcas, escolhasDeSom(d.sonsMotion[mp.preset], mp), cat)
             .filter((e) => e.t < m.fim - m.ini)
             .map((e) => ({ ...e, t: e.t + m.ini }))

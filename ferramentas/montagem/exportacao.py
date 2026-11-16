@@ -429,7 +429,9 @@ def camada_do_insert(t: dict, w: int, h: int, fps: int, saida: Path, fixas: dict
     g = t['geometria']
     n = len(fotos(t, fps))
     rel = [(t['ini'] + j / fps) - t['ini'] for j in range(n)]  # a mesma conta da página (`ir(t)` − início do insert)
-    aw, ah = w, round(g['area']['h'] * h)
+    # a área do insert no quadro (deitado, lado a lado: à esquerda, na altura toda)
+    ax, ay = round((g['area'].get('x') or 0) * w), round(g['area']['y'] * h)
+    aw, ah = round((g['area'].get('w') or 1) * w), round(g['area']['h'] * h)
     entradas: list[str] = []
     f: list[str] = []
 
@@ -449,7 +451,7 @@ def camada_do_insert(t: dict, w: int, h: int, fps: int, saida: Path, fixas: dict
         f.append(f'[{i}:v]setpts=PTS-{s0 - ss:.6f}/TB,fps={fps}:round=up:start_time=0,trim=end_frame={n},'
                  f'scale={sw}:{sh}:{_midia(CHUVA)[1]},crop={aw}:{ah}:{(sw - aw) // 2}:{(sh - ah) // 2},format=rgba[f0]')
     elif fixas.get('fundo'):
-        f.append(_parado(entrada('-i', str(fixas['fundo'])), fps, n, f'crop={aw}:{ah}:0:0,format=rgba') + '[f0]')
+        f.append(_parado(entrada('-i', str(fixas['fundo'])), fps, n, f'crop={aw}:{ah}:{ax}:{ay},format=rgba') + '[f0]')
     else:  # a receita sem fundo: a área em preto
         f.append(f'color=c=black:s={aw}x{ah}:r={fps},format=rgba,trim=end_frame={n}[f0]')
     atual = 'f0'
@@ -504,7 +506,7 @@ def camada_do_insert(t: dict, w: int, h: int, fps: int, saida: Path, fixas: dict
         sombra = (fixas.get('sombras') or {}).get(k) if c['sombra'] else None
         if sombra:
             png, (sx0, sy0, sx1, sy1) = sombra
-            sy1 = min(sy1, ah)
+            sx1, sy1 = min(sx1, ax + aw), min(sy1, ay + ah)
             if sx1 > sx0 and sy1 > sy0:
                 f.append(_parado(entrada('-i', str(png)), fps, q, f'crop={sx1 - sx0}:{sy1 - sy0}:{sx0}:{sy0},format=rgba') + f'[sb{k}]')
                 caixa = (sx0, sy0, sx1 - sx0, sy1 - sy0)
@@ -544,7 +546,7 @@ def camada_do_insert(t: dict, w: int, h: int, fps: int, saida: Path, fixas: dict
         colocar(f'mc{k}', (bx, by, base[0], base[1]), f'co{k}')
 
     # fora da área, transparente; a cor sem marca, como nas fotos (o mesmo caminho até o ProRes)
-    f.append(f'[{atual}]pad={w}:{h}:0:{round(g["area"]["y"] * h)}:color=black@0,format=rgba,'
+    f.append(f'[{atual}]pad={w}:{h}:{ax}:{ay}:color=black@0,format=rgba,'
              f'setparams=color_primaries=unknown:color_trc=unknown:colorspace=unknown:range=unknown[v]')
     return ['ffmpeg', '-y', '-loglevel', 'error', *entradas, '-filter_complex', ';'.join(f), '-map', '[v]', '-frames:v', str(n),
             '-r', str(fps), '-c:v', 'prores_videotoolbox', '-profile:v', '4444', str(saida)]

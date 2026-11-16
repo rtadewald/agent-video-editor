@@ -443,6 +443,10 @@ article h3, a h3 { margin-top: 12px; font-size: 15px; font-weight: 600; letter-s
 .palco { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 32px; padding: 24px 24px 16px; min-height: 0; }
 .video-caixa { position: relative; height: 100%; aspect-ratio: 9 / 16; border-radius: var(--radius-xl); overflow: hidden; background: #000; box-shadow: 0 0 0 1px var(--color-line-dark); }
 .video-caixa video { width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer; }
+/* o vídeo deitado (16:9, as VSLs horizontais): ocupa o meio na largura, inteiro (contain), e as colunas dos lados encolhem */
+.palco-deitado { grid-template-columns: minmax(0, 190px) minmax(0, 1fr) minmax(0, max-content); gap: 20px; }
+.palco-deitado .lado-dir { max-width: 220px; }
+.video-caixa.deitado { width: 100%; aspect-ratio: auto; background: transparent; box-shadow: none; border-radius: 0; }
 .video-caixa .video-tocar { pointer-events: none; opacity: 0; }
 /* a tela cheia: o botão no canto de cima, com o mouse em cima do vídeo */
 .video-tela-cheia { position: absolute; top: 10px; right: 10px; z-index: 3; width: 32px; height: 32px; border-radius: var(--radius-full);
