@@ -140,7 +140,9 @@ export function receitaParaInsert(r: Receita, d: Divisao | null, aspectos: numbe
     const desliza = deslizeTransbordando(c, a, areaAsp, atras)
     if (desliza) return desliza
     const bw = atras ? 96 : Math.min(c.repouso.w, 96)
-    const bh = emPe ? Math.max(Math.min(c.repouso.h, 96), 84) : Math.min(c.repouso.h, 96)
+    // deitado, na tela cheia, a caixa do preset (desenhada num quadro em pé: a altura de um card horizontal ali é ~35%)
+    // não limita a altura: o card vai até 90% da largura ou da altura, o que vier antes
+    const bh = QUADRO.deitado && formato !== 'dividida' ? 90 : emPe ? Math.max(Math.min(c.repouso.h, 96), 84) : Math.min(c.repouso.h, 96)
     let w = bw
     let h = (w * areaAsp) / a
     if (h > bh) {
