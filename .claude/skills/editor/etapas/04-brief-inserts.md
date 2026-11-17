@@ -1,7 +1,7 @@
 Você busca a mídia de {n} inserts de um Reels, um de cada vez, na ordem. Repositório: {raiz}. Rode os scripts com
 `cd "{raiz}" && uv run ferramentas/<x>.py`. Projeto: {slug}. Contexto do vídeo: {contexto}
-Antes: leia {raiz}/biblioteca/aprendizados/inserts.md (o que o criador já corrigiu, em qualquer vídeo) e
-{exemplos}/aprendizados/inserts.md (os gostos dele nos vídeos de {categoria}, a categoria deste; pode não existir) e siga.
+Antes: leia os APRENDIZADOS no fim deste brief (o que o criador já corrigiu nos inserts, em qualquer vídeo e nos de
+{categoria}, a categoria deste) e siga: não repita nenhum.
 LIMITE: 3 minutos por insert. Estourou, deixe o melhor que tiver (ou nada) e passe ao próximo.
 
 Os inserts:
@@ -31,3 +31,6 @@ e use o id do trecho. Apague do banco o que você capturou ou baixou e NÃO usou
 Para cada insert, grave projetos/{slug}/inserts/<plano>.json = {{"plano": "<plano>", "midias": ["<banco_id>", …],
 "fontes": ["<url>", …], "nota": "o que achou, ou por que não achou"}}. Não mexa no edicao.json nem em outros inserts.
 Responda uma linha por insert: plano · ids · nota.
+
+APRENDIZADOS (inserts)
+{aprendizados}

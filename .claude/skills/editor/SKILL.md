@@ -79,7 +79,12 @@ reescrito para ler); você escreve e busca a mídia, o criador escolhe o preset 
   área dela (a etapa diz qual): o geral, `biblioteca/aprendizados/<área>.md` (vale para qualquer vídeo), e o da
   categoria do vídeo, `biblioteca/exemplos/<categoria>/aprendizados/<área>.md` (se existir; a categoria:
   `calibragem.py exemplos <slug>`). São as correções do criador em vídeos anteriores, com exemplos em
-  `biblioteca/aprendizados/imagens/`: não as repita. Subagentes também.
+  `biblioteca/aprendizados/imagens/`: não as repita.
+- **Todo subagente sai de um brief gerado**, com os aprendizados dentro (o prompt é só `Leia <arquivo> e siga.`):
+  inserts com `inserts.py briefs`, motion novo com `motion-brief` e **qualquer outro** (revisor de um trecho, busca de
+  uma mídia, captura, pesquisa) com `inserts.py brief <slug> <nome> --tarefa <arquivo.md> --areas <as da tarefa>`. Nunca
+  escreva o prompt de um subagente à mão: o de cabeça leva um resumo seu do gosto do criador, e o resumo perde coisa.
+  _vsl-black · 2026-11-17_
 - **Paralelize** o que não depende do resto (subagentes em segundo plano para inserts e motions; comandos independentes
   no mesmo turno). Não espere à toa: enquanto um subagente busca, faça outra etapa.
 - **Códigos**: quando o criador citar um código (`PRE-07`, `BAN-012.2`, `REF-03·p7`, `PRJ-02·v3`…), resolva com

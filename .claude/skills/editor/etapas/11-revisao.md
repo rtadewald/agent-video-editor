@@ -69,7 +69,8 @@ em que algo mudou, e sai em ~1 min. Por isso:
    - fala (corta/volta palavra, repetição) → `02-cortes.md` (edite a `selecao.json` e `cortes.py aplicar`);
    - plano, tipo, o que aparece, lettering, elementos → `03-direcao.md` (edite o `roteiro.md` e `direcao.py aplicar`:
      os inserts que continuam no mesmo plano mantêm as mídias);
-   - mídia errada/faltando → `04-inserts.md` (um subagente para cada insert a refazer, em paralelo);
+   - mídia errada/faltando → `04-inserts.md` (um subagente para cada insert a refazer, em paralelo,
+     pelo `inserts.py briefs <slug> --grupo 1`, ou pelo `inserts.py brief` se a tarefa for outra: nunca à mão);
    - preset, zoom, card → `05-enriquecimento.md`; motion → `06-…`; transição → `07-…`; música/volume → `08-…`;
      legenda → `09-…`.
 2. Os comentários são presos ao **tempo da versão revisada** e à palavra falada ali: use a palavra (id) como âncora,
