@@ -52,6 +52,13 @@ Dispare o subagente com o prompt **só**: `Leia <caminho> e siga.` (o modelo é 
 manda ler os recusados e os aprendizados). Ele leva ~7 min: **nunca espere por ele na v1**. Ligue já ao plano o preset
 mais próximo (`inserts.py motion`); se o novo ficar pronto antes do render da entrega, troque; senão, ele entra na v2 e
 você diz isso na entrega.
+**Motion em 3D** (objetos de vidro e metal, chão que reflete, bloom, câmera andando): o Three.js está em
+`render/motion/three/` (com os addons de bloom, espelho e caixa arredondada); o modelo aprovado é o
+`entrada-saida-3d`. O preset traz o `<script type="importmap">` e um `<script type="module">`, desenha a cena inteira
+dentro do `motion.aCada` (câmera, objetos e `composer.render()` a partir de `t`, sem estado entre quadros) e cria o
+renderer com `preserveDrawingBuffer: true`. Texto em HTML por cima, projetado da cena depois de
+`cam.updateMatrixWorld()`. O enquadramento é calculado pela largura do grupo e pelo fov, e a névoa acompanha a
+distância da câmera.
 Depois ligue com `inserts.py motion`. Animação mais elaborada que isso: troque o plano (insert real ou Full ator) e
 diga a ideia ao criador na entrega.
 
