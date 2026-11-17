@@ -52,7 +52,8 @@ Dispare o subagente com o prompt **só**: `Leia <caminho> e siga.` (o modelo é 
 manda ler os recusados e os aprendizados). Ele leva ~7 min: **nunca espere por ele na v1**. Ligue já ao plano o preset
 mais próximo (`inserts.py motion`); se o novo ficar pronto antes do render da entrega, troque; senão, ele entra na v2 e
 você diz isso na entrega.
-**Motion em 3D** (objetos de vidro e metal, chão que reflete, bloom, câmera andando): o Three.js está em
+**Motion novo é em 3D** (o estilo do criador desde 2026-11-17: objetos de vidro e metal, chão que reflete, bloom,
+câmera andando; em 2D só a janela de um app real). O Three.js está em
 `render/motion/three/` (com os addons de bloom, espelho e caixa arredondada); o modelo aprovado é o
 `entrada-saida-3d`. O preset traz o `<script type="importmap">` e um `<script type="module">`, desenha a cena inteira
 dentro do `motion.aCada` (câmera, objetos e `composer.render()` a partir de `t`, sem estado entre quadros) e cria o

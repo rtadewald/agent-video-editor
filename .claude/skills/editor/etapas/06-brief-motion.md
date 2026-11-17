@@ -9,6 +9,9 @@ pausada entregue com motion.pronto(tl); motion.som/motion.digitar/motion.curva/m
 Pedido: {pedido}
 Formato: {formato} ({palco}) · duração ~{duracao} s · fala: "{fala}"
 {extra}
+Estilo: 3D, na linha de {raiz}/biblioteca/motions/presets/entrada-saida-3d.html (leia-o inteiro e copie a estrutura:
+importmap do Three.js em /render/motion/three/, a cena desenhada no motion.aCada, bloom, chão que reflete, vidro e
+metal, câmera sempre andando); só faça em 2D se o pedido for uma janela de app real.
 Regras: poucos elementos; quase nenhum texto além de rótulos curtos (campos editáveis com esses padrões); entrada curta
 e suave, chegada longa (curva perto de 0.25,0.1,0.1,1 em 0,8–1 s), nunca linear; a cena nunca para até o corte; fontes
 Inter, Instrument Serif ou SF Pro; sons só da biblioteca (biblioteca/sons/catalogo.json). Texto legível num celular (não
