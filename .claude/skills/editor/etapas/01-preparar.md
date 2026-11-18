@@ -26,6 +26,10 @@ uv run ferramentas/preparar.py "<caminho do bruto>" --nome "<nome curto do víde
   preparado em pé vira deitado com `preparar.py --deitar <slug>` (refaz o proxy e o rosto do original; os cortes e a
   direção ficam). Deitado, a tela dividida é **lado a lado**: o insert à esquerda (63% da largura, área 9:8), o ator à
   direita, enquadrado pelo rosto. _vsl-black · 2026-11-16_
+- **Dois ou mais vídeos no mesmo bruto** (ex.: "são dois anúncios"): prepare uma vez, leia a transcrição, renomeie a
+  pasta para o assunto do 1º (`mv`, e `id`/`nome` no `edicao.json`) e clone-a para cada outro com `cp -cR` (clone do
+  APFS: não ocupa espaço nem transcreve de novo), com `id` = a pasta e o `nome` dele. Cada projeto escolhe nos cortes
+  só as palavras do seu vídeo. _bf26-ad2/ad3 · obrigado-black · 2026-11-17_
 - Materiais de apoio que o criador citou: copie para `projetos/<slug>/apoio/` logo depois (com `cp -c`).
 - Briefing em áudio: transcreva com o próprio preparar num projeto à parte ou com `gemini.py` e use o texto.
 
