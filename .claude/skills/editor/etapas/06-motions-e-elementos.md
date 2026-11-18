@@ -11,8 +11,8 @@ até o corte); curvas suaves, nunca lineares.
 
 ### Os presets (`biblioteca/motions/presets/<id>.html`)
 
-A grade da página Motions toca uma prévia em vídeo de cada um (`biblioteca/motions/previas/<id>.mp4`); a animação ao
-vivo fica só no modal. Mexeu num preset (ou criou um)? `uv run ferramentas/render.py previas-motions` refaz só o que
+A grade da página Motions toca uma prévia em vídeo de cada um (`biblioteca/motions/previas/<id>.mp4`), e o modal também
+(um motion em 3D ao vivo travava ali): só sem a prévia os dois caem na animação ao vivo. Mexeu num preset (ou criou um)? `uv run ferramentas/render.py previas-motions` refaz só o que
 mudou (sem a prévia, o card cai na animação ao vivo, mais pesada).
 
 Na página Banco › Motions do app, os que entraram em vídeos aprovados têm o selo **Usado em vídeo** e o chip do projeto e

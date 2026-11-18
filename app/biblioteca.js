@@ -1466,7 +1466,7 @@ function detalheMotion(m, estado, usos, cods, recarregar) {
       <h2>${esc(m.nome || m.id)}</h2>${chipCodigo(cods.motion?.[m.id], m.nome || m.id)}<span class="dica">${esc(m.id)}</span>
       <button class="botao-icone" data-fechar title="Fechar (Esc)">${ICONE.fechar}</button></header>
     <div class="banco-detalhe">
-      <div class="banco-midia motion-midia fundo-${esc(m.fundo || 'escuro')}"><iframe src="/render/motion.html?preset=${encodeURIComponent(m.id)}&formato=vertical&tocar=1" title="${esc(m.nome || m.id)}"></iframe></div>
+      <div class="banco-midia motion-midia fundo-${esc(m.fundo || 'escuro')}"><video class="previa-motion" autoplay muted loop playsinline src="/biblioteca/motions/previas/${encodeURIComponent(m.id)}.mp4?v=${Date.now()}"></video></div>
       <div class="banco-campos">
         ${m.descricao ? `<p>${esc(m.descricao)}</p>` : ''}
         <dl class="dados">${m.duracao ? `<dt>Duração</dt><dd>${seg(m.duracao)} (estica até o fim do plano)</dd>` : ''}
@@ -1481,6 +1481,10 @@ function detalheMotion(m, estado, usos, cods, recarregar) {
           ${usos?.length ? `<div class="estado-banco">${chipsDeUso(usos, cods)}</div>` : ''}</div>
       </div>
     </div>`, { classe: 'janela-banco' })
+  // o modal toca a prévia gravada (um motion em 3D ao vivo trava aqui); sem prévia, a animação ao vivo
+  $('video.previa-motion', el)?.addEventListener('error', (ev) => {
+    ev.target.outerHTML = `<iframe src="/render/motion.html?preset=${encodeURIComponent(m.id)}&formato=vertical&tocar=1" title="${esc(m.nome || m.id)}"></iframe>`
+  })
   $('[data-aprovar]', el)?.addEventListener('click', async () => {
     try {
       await enviar('PUT', `/api/motions/${encodeURIComponent(m.id)}/estado`, { estado: 'aprovado' })
