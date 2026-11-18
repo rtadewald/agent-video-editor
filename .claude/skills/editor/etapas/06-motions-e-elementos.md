@@ -60,7 +60,9 @@ dentro do `motion.aCada` (câmera, objetos e `composer.render()` a partir de `t`
 renderer com `preserveDrawingBuffer: true`. O `EffectComposer` recebe um alvo com MSAA
 (`new THREE.WebGLRenderTarget(W * pr, H * pr, { type: THREE.HalfFloatType, samples: 4 })`): sem ele, o bloom ignora
 o `antialias` do renderer e as arestas finas saem serrilhadas (o criador reclamou na onda 1 dos motions em 3D,
-2026-11-17). Texto em HTML por cima, projetado da cena depois de
+2026-11-17). O pixel ratio é `MOTION.pr || Math.min(2, devicePixelRatio)`: na galeria do app o `motion.html` passa
+o `pr` do tamanho em que o palco aparece (sem ele, o modal desenhava 2160×3840 a cada quadro e travava); no render vale o
+do navegador. Texto em HTML por cima, projetado da cena depois de
 `cam.updateMatrixWorld()`. O enquadramento é calculado pela largura do grupo e pelo fov, e a névoa acompanha a
 distância da câmera.
 Depois ligue com `inserts.py motion`. Animação mais elaborada que isso: troque o plano (insert real ou Full ator) e

@@ -100,8 +100,11 @@
   fala = (Array.isArray(fala) ? fala : []).slice(0, 200).filter(function (x) { return x && 'texto' in x && 'ini' in x && 'fim' in x })
     .map(function (x) { return { texto: String(x.texto).slice(0, 80), ini: parseFloat(x.ini), fim: parseFloat(x.fim) } })
 
-  var dados = JSON.stringify({ duracao: duracao, largura: w, altura: h, campos: campos, fala: fala }).replace(/<\//g, '<\\/')
   var tocar = q.get('tocar') === '1'
+  // na galeria, o palco encolhe para caber: um motion em 3D desenha só na resolução que aparece (`pr`), senão o modal
+  // calcula 2160×3840 a cada quadro e trava; no render, sem `pr`, vale a do navegador
+  var pr = tocar ? Math.max(0.5, Math.min(2, (window.devicePixelRatio || 1) * Math.min(innerWidth / w, innerHeight / h) || 1)) : undefined
+  var dados = JSON.stringify({ duracao: duracao, largura: w, altura: h, campos: campos, fala: fala, pr: pr }).replace(/<\//g, '<\\/')
   var fundo = FUNDOS[q.get('fundo')] ? q.get('fundo') : FUNDOS[info.fundo] ? info.fundo : 'gradiente'
   document.write(
     '<link rel="icon" href="data:,"><link rel="stylesheet" href="/render/motion/fonts.css">' +
