@@ -18,7 +18,7 @@ uv run ferramentas/presets.py listar              # os aprovados: nome, onde val
 uv run ferramentas/presets.py escolher <slug>     # cada insert com mídia e sem preset recebe o 1º favorito da situação
 ```
 
-**A cada leva de inserts que fica pronta** (um subagente voltou): `inserts.py juntar <slug>`, os presets desses inserts e,
+**A cada leva de inserts que fica pronta** (4–6 ligados): os presets e o zoom desses inserts e,
 em segundo plano, o pré-render (fotografa a camada do que já está pronto para o cache; se um já está rodando, sai sem
 fazer nada e o próximo pega o resto):
 ```bash
@@ -41,6 +41,19 @@ presets sem sentido. Para cada insert com refs:
    entrega os inserts que ficaram simples por falta de preset (são candidatos a preset novo, `13-presets-novos.md`).
 
 Os inserts sem refs ficam com a escolha do `escolher` (o favorito da situação).
+
+## O zoom: decidido olhando o quadro
+
+O criador cobrou zoom "sem noção" em quase todo vídeo (aproximando lugar nenhum, cortando texto, na cara dele na tela
+dividida). Regra geral em `biblioteca/aprendizados/enriquecimento.md` (*Zoom só onde faz sentido*). Na prática:
+- **Sem alvo, sem zoom dirigido.** Tela dividida: `camera: Parado`. Site, página ou print em tela cheia: `camera: Leve`
+  (o zoom in leve e constante). Vídeo de banco: sem zoom.
+- **Zoom dirigido (Mergulho, `zoom: Mais`, `zona`) só quando a fala aponta um detalhe** (um número, um nome, uma linha).
+  Antes de escolher, abra o quadro da mídia no instante do plano, ache a região do detalhe e escolha a `zona` e o `zoom`
+  que deixam o detalhe **inteiro, centrado e legível**, sem cortar a linha ou a palavra. Precisa de dois pontos ou de
+  círculo/destaque: motion `imagem-circulos` (foco e círculos medidos em fração da imagem).
+- **Confira no último quadro do plano** (`folha.py --planos`, colunas fim-1 e fim): o detalhe citado está inteiro e
+  legível? Texto cortado na borda, zoom no vazio ou no lugar errado: tire o zoom ou mude a zona antes de entregar.
 
 ## Quando trocar à mão
 

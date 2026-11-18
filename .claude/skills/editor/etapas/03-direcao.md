@@ -60,7 +60,9 @@ refs: REF-12·p4, REF-07·p31
 - **Na marcação de um insert**, conte o que acontece, em ordem: qual material aparece (o site, a página, a ferramenta,
   concretos), como entra, zooms (em quê), destaques, trocas de um material para outro. Não descreva o layout que o nome
   do plano já diz (tela dividida, apresentador embaixo). Fala que cita mais de uma coisa ("esses dois sites"): mostre
-  cada uma e diga quando troca.
+  cada uma e diga quando troca. **Seja concreto:** quando já sabe, diga o material exato (a URL, o id do banco, o
+  arquivo do apoio, o instante do vídeo, a região que importa: "o recorte do nome do repositório", "a linha 10 do
+  SKILL.md"). Marcação vaga ("uma notícia sobre…") vira busca no escuro e insert fraco.
 - **`refs:` as refs para modelar o plano** (todo plano com insert ou motion; no Full ator, só se o exemplo tiver algo
   que valha copiar). Cada corte dos roteiros de exemplo e dos favoritos traz a `ref:` dele (`REF-12·p4`: o plano da
   Calibragem, que o criador aprovou). Para cada plano seu, escolha **1 a 3 refs** dos exemplos cuja **fala** e **tipo**
