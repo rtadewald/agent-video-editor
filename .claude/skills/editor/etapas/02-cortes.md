@@ -84,6 +84,11 @@ deles: separe.
   houver, manda. Liste as saídas na entrega da v1 para o criador conferir. Um final que ele pedir depois do vídeo fechado:
   `cortes.py saida <slug> "<Destino>" --falado w…..w…`. Um CTA gravado à parte (outro projeto, página CTAs):
   `--cta <slug do CTA>` — **plugue o CTA pré-exportado**: procure na página CTAs um aprovado com o final em dia (`final/` do projeto dele) e use-o como está, sem abrir nem renderizar o projeto do CTA; só se o criador pedir para mudar aquele final é que você abre o projeto dele, edita, e ao aprovar ele é exportado de novo (`12-final.md`); o corpo puro (o vídeo que fecha sozinho), só se pedido ou se ele fecha bem: `--nenhum`.
+- **"Versão de link na descrição" / final de TikTok-Shorts (sem ManyChat), sem final gravado para isso:** plugue o CTA
+  coringa `mvi-0723-cta-vsl-isca` ("É só clicar no link aqui embaixo", com o motion «Clica no link aqui embaixo»):
+  `cortes.py saida <slug> "Link na descrição" --cta mvi-0723-cta-vsl-isca`. O corpo vai até a parte comum da chamada
+  ("e pra ter acesso a essa skill,") e o ManyChat fica só com o "é só comentar…". Nunca invente um final com lettering
+  sobre a fala cortada: o criador chamou de "finalização tosca". _claude-vende v8 · 2026-11-20_
 - Se um final novo começa **antes** do fim do corpo, o ponto comum recua: aplique de novo com o `manter` mais curto e o
   trecho que saiu do corpo dentro de cada final que o usa (o bloco do fim do corpo reabre; avise o criador).
 
