@@ -139,8 +139,7 @@ era `🧑🏼‍🔧📱💰 Quizz Descubra teu nível de IA`). Ao fechar o víd
   edição); funil `ad-lp`, `ad-vsl`, `reels-vsl` (Reels com CTA para a VSL) ou `isca` (ex.: `🤖fia/ad-vsl`). Black Friday tem
   a tag da fase no lugar: **`💰bf26/captura`** ou **`💰bf26/carrinho`** (inclusive o Reels com CTA da captura). A antiga
   `💰pico/black26` não se usa mais.
-- **👁️ na frente do nome de toda nota que você criar ou editar** (ex.: `👁️📱 3 níveis de IA`): o criador confere e
-  tira o 👁️. Uma nota em que você só trocou um `[[link]]` não ganha 👁️ (renomeá-la quebraria os links para ela).
+- **Sem 👁️ no nome** (desde 2026-11-20): a nota fica só com o emoji do formato (ex.: `📱 3 níveis de IA`).
 - **Renomear pelo shell não atualiza os links** (só o Obsidian faz isso): antes de `mv`, confira que o destino não
   existe; depois, `grep -rl "<nome antigo>]]"` no vault (fora de `.obsidian/`) e troque cada `[[link]]`.
 - **`scheduled`** = o **Prazo** do card correspondente no Notion (a data de publicação), entre aspas: `"2026-10-16"`.
@@ -179,7 +178,7 @@ hora (`TZ=America/Sao_Paulo date`) antes de propor o horário.
 data** e **Status ✔️ Aguardando Publicação**; baixe o final da pasta do Drive (`rclone copy`), transcreva
 (`ferramentas/transcricao.py`: `extrair_audio` + `transcrever`) e troque o Roteiro do card pela **fala real**; gere a
 descrição (`roteiro-to-descricao`) e ponha nos dois (card: `## Descrição`; nota: `# Corpo` e `# Descrição`); a nota
-vai para `1 Priorizar` com o nome do card e 👁️. Sem CTA "comente X", segue o "Sem ManyChat".
+vai para `1 Priorizar` com o nome do card. Sem CTA "comente X", segue o "Sem ManyChat".
 
 **Sem ManyChat:** tudo pelo Metricool, na data do Prazo, numa postagem só com as redes.
 
@@ -205,7 +204,7 @@ complementar aos slides (`roteiro-to-descricao`). As redes aceitam coisas difere
 
 ## 7. Entrega
 
-Mande ao criador **todos os links do Notion criados/preenchidos** (para conferência), os das pastas do Drive, a lista das notas 👁️ do Obsidian para conferir e o que ficou agendado (Metricool, com o link do planner, e a automação do ManyChat). Depois,
+Mande ao criador **todos os links do Notion criados/preenchidos** (para conferência), os das pastas do Drive, a lista das notas do Obsidian criadas ou editadas e o que ficou agendado (Metricool, com o link do planner, e a automação do ManyChat). Depois,
 os vídeos seguem a etapa de conclusão do editor (Calibragem e aprendizados).
 
 ## Aprendizados (manter atualizado)
