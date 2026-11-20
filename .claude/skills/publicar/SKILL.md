@@ -207,3 +207,10 @@ Mande ao criador **todos os links do Notion criados/preenchidos** (para conferê
 os vídeos seguem a etapa de conclusão do editor (Calibragem e aprendizados).
 
 ## Aprendizados (manter atualizado)
+
+- **Material do "comente X" é um arquivo (PDF, guia)** (2026-11-20): suba na pasta do Reels no Drive, compartilhe como
+  "qualquer pessoa com o link" (leitor; o MCP do Drive `share_file` com `anyoneWithLink`) e use o link
+  `drive.google.com/file/d/<id>/view` no botão da DM. Liberar o arquivo é público: entra no plano do "sim".
+- **ManyChat (modelo "Enviar links automaticamente por DM")**: ao marcar "próxima publicação ou Reel" a página se
+  reorganiza; clique de novo no campo da palavra-chave antes de digitar (o texto já caiu na resposta pública). Texto
+  longo digitado de uma vez perde letras: digite em pedaços e confira com zoom antes de ativar.
