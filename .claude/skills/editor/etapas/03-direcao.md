@@ -101,6 +101,8 @@ refs: REF-12·p4, REF-07·p31
   concretos — é o que o subagente vai buscar), como entra, zooms (em quê), destaques, trocas. Se a fala cita duas coisas
   ("esses dois sites"), mostre as duas e diga quando troca.
 - Não invente fatos que a fala não sustenta; se a fala cita uma ferramenta, mostre a ferramenta.
+- **Fala que descreve algo que dá para ver mostra a coisa** ("aquele resultado padrão", "esses aqui"): nunca Full ator
+  ali. O ator fica com o que é dele (opinião, virada, chamada). _guia-de-estilos v4 c4 · 2026-11-20_
 - **Lettering** (aprendizado do editor, não regra do criador): sobre o ator (Full ator com lettering) ou sobre um insert
   real, nunca sobre um **motion** que já tem texto (os dois textos se atropelam). Uma palavra ou expressão curta — o nome
   da ferramenta, o número —, não a frase. Enquanto o lettering está na tela, a legenda daquelas palavras some.
