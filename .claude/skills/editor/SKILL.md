@@ -76,6 +76,10 @@ reescrito para ler); você escreve e busca a mídia, o criador escolhe o preset 
 
 ## Sempre
 
+- **O nome da conversa diz o vídeo:** ao começar um vídeo, ou ao trocar de vídeo numa revisão, num aprovado ou numa
+  conclusão, renomeie a conversa (`mcp__ccd_session_mgmt__set_session_title`, session_id `self`) sem perguntar, no
+  padrão `🧑🏼‍🔧 <Reels|VSL|Ad>: <nome do vídeo>`. Exemplo: `🧑🏼‍🔧 Reels: Marketplace Facebook`. O nome é o `nome` do
+  projeto no edicao.json.
 - **Aprenda com o passado:** antes de cada etapa, e antes de aplicar um comentário de revisão, leia os aprendizados da
   área dela (a etapa diz qual): o geral, `biblioteca/aprendizados/<área>.md` (vale para qualquer vídeo), e o da
   categoria do vídeo, `biblioteca/exemplos/<categoria>/aprendizados/<área>.md` (se existir; a categoria:
