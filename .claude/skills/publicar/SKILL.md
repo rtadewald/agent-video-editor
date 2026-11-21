@@ -188,6 +188,8 @@ vai para `1 Priorizar` com o nome do card. Sem CTA "comente X", segue o "Sem Man
    Reel"**, a palavra-chave, as respostas públicas no comentário e a DM com o link. Antes, confira no Metricool que nada
    (outro post, carrossel, outro Reels) sai antes deste: a automação se prende ao **próximo** post publicado. Modelo:
    Automação → "Auto-DM de links dos comentários" (conta `fb3802114`). Mostre a automação e só publique com o "sim".
+   Depois de publicar, **renomeie a automação com o nome da nota** (ex.: "Claude Marketplace"; ela nasce com o nome do
+   modelo): na lista, ⋮ da linha → Renomear (o ⋮ de dentro da automação só tem Apagar).
 3. **TikTok e YouTube Shorts (versão "acesse o link da descrição")**: pelo Metricool, numa postagem à parte, com a
    descrição dizendo **onde está o link** em cada rede, e o **link também no primeiro comentário**
    (`firstCommentText`: "A skill está aqui 👉 <link>"). Se o post já saiu sem ele, comente pelo navegador: no YouTube,
