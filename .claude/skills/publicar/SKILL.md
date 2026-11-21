@@ -189,7 +189,10 @@ vai para `1 Priorizar` com o nome do card. Sem CTA "comente X", segue o "Sem Man
    (outro post, carrossel, outro Reels) sai antes deste: a automação se prende ao **próximo** post publicado. Modelo:
    Automação → "Auto-DM de links dos comentários" (conta `fb3802114`). Mostre a automação e só publique com o "sim".
 3. **TikTok e YouTube Shorts (versão "acesse o link da descrição")**: pelo Metricool, numa postagem à parte, com a
-   descrição dizendo **onde está o link** em cada rede.
+   descrição dizendo **onde está o link** em cada rede, e o **link também no primeiro comentário**
+   (`firstCommentText`: "A skill está aqui 👉 <link>"). Se o post já saiu sem ele, comente pelo navegador: no YouTube,
+   fixe o comentário (⋮ → Pin); no TikTok web não há fixar, e o editor de comentário perde o texto quando há emoji
+   (digite sem emoji e confira o `innerText` do campo antes de postar).
 
 Depois que sair, confira que a automação ficou presa no Reels certo (ManyChat → a automação → o post do gatilho).
 
