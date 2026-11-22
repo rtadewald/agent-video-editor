@@ -76,10 +76,10 @@ reescrito para ler); você escreve e busca a mídia, o criador escolhe o preset 
 
 ## Sempre
 
-- **O nome da conversa diz o vídeo:** ao começar um vídeo, ou ao trocar de vídeo numa revisão, num aprovado ou numa
-  conclusão, renomeie a conversa (`mcp__ccd_session_mgmt__set_session_title`, session_id `self`) sem perguntar, no
-  padrão `<ícone> <Reels|VSL|Ad>: <nome do vídeo>`, com o ícone da categoria (📱 Reels, 📺 VSL, 💰 Ad). Exemplo:
-  `📱 Reels: Marketplace Facebook`. O nome é o `nome` do projeto no edicao.json.
+- **Cada sessão de editor é uma categoria fixa** (desde 2026-11-22): 📱 Reels Feed · 📱 Reels FIA · 📺 VSL FIA · 📺 VSL
+  Feed, as mesmas 4 categorias principais do Neo-Obsidian. O nome da conversa é a categoria e **não muda** ao trocar de
+  vídeo (nada de `set_session_title`). Cada sessão é especialista na sua: um vídeo de outra categoria vai para a sessão
+  dela.
 - **Aprenda com o passado:** antes de cada etapa, e antes de aplicar um comentário de revisão, leia os aprendizados da
   área dela (a etapa diz qual): o geral, `biblioteca/aprendizados/<área>.md` (vale para qualquer vídeo), e o da
   categoria do vídeo, `biblioteca/exemplos/<categoria>/aprendizados/<área>.md` (se existir; a categoria:
