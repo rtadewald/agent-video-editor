@@ -76,8 +76,8 @@ reescrito para ler); você escreve e busca a mídia, o criador escolhe o preset 
 
 ## Sempre
 
-- **Cada sessão de editor é uma categoria fixa** (desde 2026-11-22): 📱 Reels Feed · 📱 Reels FIA · 📺 VSL FIA · 📺 VSL
-  Feed, as mesmas 4 categorias principais do Neo-Obsidian. O nome da conversa é a categoria e **não muda** ao trocar de
+- **Cada sessão de editor é uma categoria fixa** (desde 2026-11-22): 📱 Reels FID · 📱 Reels FIA · 📺 VSL FIA · 📺 VSL FID
+  as mesmas 4 categorias principais do Neo-Obsidian. O nome da conversa é a categoria e **não muda** ao trocar de
   vídeo (nada de `set_session_title`). Cada sessão é especialista na sua: um vídeo de outra categoria vai para a sessão
   dela.
 - **Aprenda com o passado:** antes de cada etapa, e antes de aplicar um comentário de revisão, leia os aprendizados da
