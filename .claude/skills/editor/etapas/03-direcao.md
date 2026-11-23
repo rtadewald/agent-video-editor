@@ -3,29 +3,14 @@
 Você escreve o **roteiro dirigido** do vídeo já cortado: o que aparece na tela em cada momento da fala, do jeito que o
 criador dirige. Não mexe em mídia: só a "partitura visual". Inserts, motions, transições e legenda partem dela.
 
-> **Antes de começar, leia `biblioteca/aprendizados/direcao.md` e `biblioteca/aprendizados/elementos.md` (+ os `exemplos/<categoria>/aprendizados/` dos dois, do quadro do vídeo)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros. Os princípios (poucos) estão nas Regras do criador, `exemplos/<categoria>/regras.md`.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
-## Antes de escrever: aprenda o estilo
+## Antes de escrever
 
-A direção vem **sempre e só da categoria do vídeo em edição** (o quadro: 📱 Storytelling Projects, 📱 Hacks & Tips, 💰 Pico, 💰 Ad VSL, 💰 CTA, 📺 VSL…): nunca misture exemplos de outra
-categoria. Descubra qual é e onde estão os exemplos dela:
-
-```bash
-uv run ferramentas/calibragem.py exemplos <slug>    # a categoria do projeto, a pasta e quantos vídeos estão em uso
-```
-Os exemplos são os vídeos da categoria que o criador não ocultou na Calibragem: ele decide quais servem, então leia todos. Sem
-nenhum vídeo da categoria em uso, dirija pelas regras dela e avise o criador na entrega.
-
-1. Leia `biblioteca/exemplos/criador.md` (quem grava e do que o canal fala) e `biblioteca/exemplos/<categoria>/regras.md` inteiro. As **Regras do
-   criador** são obrigatórias; as sugeridas são guia.
-2. Leia `biblioteca/exemplos/<categoria>/favoritos.md`: os planos que o criador marcou com ★ na galeria de Referências do app. São os melhores
-   exemplos dele: quando um momento do vídeo novo se parece com um deles, siga aquele padrão.
-3. Leia **todos** os roteiros de `biblioteca/exemplos/<categoria>/roteiros/` como um editor novo lê os roteiros anotados
-   do chefe: entenda, pela fala, por que cada coisa aparece onde aparece. O que está sendo dito manda. Os marcados
-   "(revisado)" foram corrigidos pelo criador e valem mais que os outros.
-
-Esses arquivos são gerados pela Calibragem do app (`calibragem.py roteiros`): quando o criador oculta ou mostra um vídeo,
-revisa uma referência ou favorita um plano, eles mudam. Não os edite à mão (as regras, sim: `regras.md`).
+Leia o guia (`guias/padrao.md`) e pense o vídeo inteiro antes de dividir em planos: o que prova cada frase, onde o
+material é real e onde é conceito (motion), onde ele fala direto com a câmera, qual o ritmo. Os vídeos aprovados da
+categoria ficam na Calibragem (`calibragem.py exemplos <slug>` dá a pasta: `regras.md`, `favoritos.md`, `roteiros/`):
+consulte quando quiser ver como um momento parecido foi resolvido, sem obrigação de copiar.
 
 ## Rodar
 
@@ -63,8 +48,7 @@ refs: REF-12·p4, REF-07·p31
   cada uma e diga quando troca. **Seja concreto:** quando já sabe, diga o material exato (a URL, o id do banco, o
   arquivo do apoio, o instante do vídeo, a região que importa: "o recorte do nome do repositório", "a linha 10 do
   SKILL.md"). Marcação vaga ("uma notícia sobre…") vira busca no escuro e insert fraco.
-- **`refs:` as refs para modelar o plano** (todo plano com insert ou motion; no Full ator, só se o exemplo tiver algo
-  que valha copiar). Cada corte dos roteiros de exemplo e dos favoritos traz a `ref:` dele (`REF-12·p4`: o plano da
+- **`refs:` (opcional) as refs para modelar o plano**, quando um plano aprovado da Calibragem mostra bem o que você quer. Cada corte dos roteiros de exemplo e dos favoritos traz a `ref:` dele (`REF-12·p4`: o plano da
   Calibragem, que o criador aprovou). Para cada plano seu, escolha **1 a 3 refs** dos exemplos cuja **fala** e **tipo**
   mais se parecem com os dele: os favoritos primeiro, depois os vídeos "(revisado)". É por essas refs que a execução
   (inserts, enriquecimento, motions) vai modelar o plano, em vez de escolher um preset ao acaso: escolha as que mostram
@@ -92,32 +76,14 @@ refs: REF-12·p4, REF-07·p31
 
 - Copie a fala **exatamente** como está, na ordem, sem pular, resumir ou corrigir nada. Você só divide em blocos,
   escreve a marcação e marca os letterings.
-- Dirija no ritmo dos exemplos: blocos **curtos** (de meia frase a uma frase, poucos segundos). Um bloco novo a cada
-  mudança do que aparece (uma nova tela, ação, ideia, ferramenta citada). Na dúvida, divida. As linhas da fala não são
-  blocos.
-- A marcação diz o que mostrar e o que acontece, ligado à fala, concreta e acionável, em 1 a 3 frases. Nunca descreva o
-  layout que o nome do plano já diz. Num Full ator sem nada especial: "—".
-- **Inserts**: a marcação conta o que acontece no insert, em ordem: qual material (o site, a página, a ferramenta,
-  concretos — é o que o subagente vai buscar), como entra, zooms (em quê), destaques, trocas. Se a fala cita duas coisas
-  ("esses dois sites"), mostre as duas e diga quando troca.
-- Não invente fatos que a fala não sustenta; se a fala cita uma ferramenta, mostre a ferramenta.
-- **Fala que descreve algo que dá para ver mostra a coisa** ("aquele resultado padrão", "esses aqui"): nunca Full ator
-  ali. O ator fica com o que é dele (opinião, virada, chamada). _guia-de-estilos v4 c4 · 2026-11-20_
-- **Lettering** (aprendizado do editor, não regra do criador): sobre o ator (Full ator com lettering) ou sobre um insert
-  real, nunca sobre um **motion** que já tem texto (os dois textos se atropelam). Uma palavra ou expressão curta — o nome
-  da ferramenta, o número —, não a frase. Enquanto o lettering está na tela, a legenda daquelas palavras some.
-- Pense já no que é **achável**: um site, um produto, um repositório, um print de anúncio oficial. Ideias abstratas
-  ("o conceito de produtividade") pedem motion ou Full ator, não insert.
+- Um bloco novo a cada mudança do que aparece (uma nova tela, ação, ideia, ferramenta citada); as linhas da fala não são
+  blocos. A marcação diz o que mostrar e o que acontece, concreta (o material exato quando você já sabe); num Full ator
+  sem nada especial: "—".
+- Os tipos de plano são ferramentas, não um molde: um plano de motion pode ser qualquer composição (o palco contínuo, a
+  tela dividida padrão do guia, um 3D com vídeo real dentro). Escolha o que serve à frase.
 
 ## Depois de aplicar
 
 - Dúvidas suas sobre a direção (ex.: "não sei se é pergunta retórica ou leitura de comentário"): anote para dizer
   no chat, na entrega.
-- Confira as Regras do criador contra o resultado (abertura, máximo de 3–4 s de Full ator seguido etc.). Se violou,
-  reescreva o trecho e aplique de novo.
-- As três que mais escaparam (claude-mods: voltaram em três revisões), confira uma a uma no roteiro:
-  - **lista na fala → um plano por item**, cada um na sua palavra ("Skills, MCPs e mods"; "painéis, botões, alertas");
-  - **lançamento de produto → a página do anúncio em tela cheia primeiro**, depois os vídeos do produto em uso;
-  - **nome de ferramenta ou mod → `card-nome`** em tela dividida, nunca a página do repositório.
-
-Tempo esperado: ~2 min.
+- Releia o roteiro contra o guia (a abertura, o ritmo, o que cada frase prova) e reescreva o que não passar.

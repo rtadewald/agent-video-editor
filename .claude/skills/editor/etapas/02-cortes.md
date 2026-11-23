@@ -7,7 +7,7 @@ Os limites ficam em `edicao.json → cortes.parametros` (`pausa_max`, `folga_ini
 `cortes.py aplicar` lê os guardados ali. Para mudar, edite `cortes.parametros` e
 rode `aplicar` de novo; confira no `palavras.json` da versão que as pausas caíram. _design-por-imagem v27 c2 · 2026-10-28_
 
-> **Antes de começar, leia `biblioteca/aprendizados/cortes.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/cortes.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## Rodar
 

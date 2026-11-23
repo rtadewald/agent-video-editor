@@ -245,15 +245,13 @@ AREAS = ('cortes', 'direcao', 'elementos', 'inserts', 'enriquecimento', 'motions
 
 
 def _aprendizados(edicao: dict, areas: list[str] | tuple[str, ...]) -> str:
-    """O texto dos aprendizados das áreas (o geral e o da categoria do vídeo), para ir DENTRO do brief: o subagente não
-    depende de lembrar de abrir os arquivos."""
-    partes = []
-    for ar in areas:
-        for arq, vale in ((BIBLIOTECA / 'aprendizados' / f'{ar}.md', 'qualquer vídeo'),
-                          (_exemplos(edicao) / 'aprendizados' / f'{ar}.md', f'vídeos de {_categoria(edicao)}')):
-            if arq.is_file() and (t := arq.read_text(encoding='utf-8').strip()):
-                partes.append(f'<<< {arq.relative_to(RAIZ)} (vale para {vale}) >>>\n{t}')
-    return '\n\n'.join(partes) or '(nenhum ainda)'
+    """O gosto do criador, para ir DENTRO do brief: o guia de estilo inteiro (`.claude/skills/editor/guias/padrao.md`,
+    desde 2026-11-23 o único lugar do gosto; os `aprendizados/` por área ficaram para trás). As `areas` só dizem ao
+    subagente em que parte do guia prestar mais atenção."""
+    guia = RAIZ / '.claude' / 'skills' / 'editor' / 'guias' / 'padrao.md'
+    t = guia.read_text(encoding='utf-8').strip() if guia.is_file() else ''
+    foco = f'(foco desta tarefa: {", ".join(areas)})\n' if areas else ''
+    return f'<<< {guia.relative_to(RAIZ)} (o guia de estilo do criador) >>>\n{foco}{t}' if t else '(sem guia)'
 
 
 def _deitado(edicao: dict) -> bool:

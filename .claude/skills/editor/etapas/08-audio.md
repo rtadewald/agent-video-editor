@@ -4,7 +4,7 @@ Quatro trilhas, iguais na prévia e no MP4: a **voz** (limpeza → passa-altas 8
 **sons dos presets**, os **sons das transições** e o **fundo** (música 11 dB abaixo da voz, abaixando 3 dB enquanto o ator
 fala, em laço com crossfade e fade no fim). No final, −14 LUFS (o padrão do Instagram), pico abaixo de −1,5 dBTP.
 
-> **Antes de começar, leia `biblioteca/aprendizados/audio.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/audio.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## O que você decide (em `edicao.audio`)
 

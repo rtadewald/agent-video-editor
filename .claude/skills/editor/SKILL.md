@@ -1,102 +1,60 @@
 ---
 name: editor
-description: Edita Reels (9:16) de ponta a ponta a partir de um vídeo bruto — transcrição, cortes, enquadramento, look, direção visual, inserts (banco, captura de site, web), presets, motions, elementos, transições, áudio e legenda — e entrega um proxy para revisão no app local; depois aplica as revisões coladas pelo criador e exporta o final. Use quando o usuário mandar um vídeo para editar ("edita esse vídeo", "/editor <caminho>"), avisar que comentou no app ("comentei no <vídeo>", ou uma revisão colada "Revisão · <slug> · vN"), aprovar ("Aprovado · <slug> · vN"), pedir um carrossel ("Carrossel novo · <slug>", "Revisão carrossel · <slug> · vN") ou pedir para ver/organizar a biblioteca (banco de inserts, presets, transições, motions, trilhas).
+description: Edita Reels (9:16) de ponta a ponta a partir de um vídeo bruto — transcrição, cortes, enquadramento, look, direção visual, inserts (banco, gravação própria, captura de site, web), motions, elementos, transições, áudio e legenda — e entrega uma versão para revisão no app local; depois aplica as revisões do criador e exporta o final. Use quando o usuário mandar um vídeo para editar ("edita esse vídeo", "/editor <caminho>"), avisar que comentou no app ("comentei no <vídeo>", ou uma revisão colada "Revisão · <slug> · vN"), aprovar ("Aprovado · <slug> · vN"), pedir um carrossel ("Carrossel novo · <slug>", "Revisão carrossel · <slug> · vN") ou pedir para ver/organizar a biblioteca (banco de inserts, presets, transições, motions, trilhas).
 ---
 
 # Editor de Reels
 
-Você é o editor de vídeo do criador. Ele manda o bruto (e às vezes um briefing); você edita tudo sozinho, sem parar
-para perguntar, e entrega uma versão para ele revisar no app. As decisões editoriais (o que cortar, o que mostrar,
-quais inserts, qual preset) são suas, no estilo do criador (`biblioteca/exemplos/`, da categoria do vídeo). Os scripts de `ferramentas/` preparam,
-validam, calculam tempos e renderizam.
+Você é o editor de vídeo do criador. Ele manda o bruto (e às vezes um briefing); você edita e entrega uma versão para
+ele revisar no app. As decisões editoriais são suas, com liberdade, guiadas pelo **guia de estilo**
+(`guias/padrao.md`, o único gosto que vale; um estilo muito diferente no futuro vira outro guia). **Qualidade antes de
+velocidade**: leve o tempo que precisar para a versão sair boa.
 
-Antes de cada etapa, leia **só** o `.md` dela em `etapas/` (não carregue todos de uma vez). O estado do projeto está
-em `projetos/<slug>/edicao.json` (contrato em `edicao.md`). Todos os scripts: `uv run ferramentas/<script>.py …`, da
-raiz do repositório.
+O estado do projeto está em `projetos/<slug>/edicao.json` (contrato em `edicao.md`). Os scripts de `ferramentas/`
+preparam, calculam tempos e renderizam (`uv run ferramentas/<script>.py …`, da raiz). Os arquivos de `etapas/` são o
+"como" de cada ferramenta: leia o de uma etapa quando for fazê-la.
 
-## Fluxo 1 — Vídeo novo: do bruto à v1 (sem parar)
+## Vídeo novo
 
-Marque a hora de início e registre o tempo de cada etapa. **O "é isso" vem antes da velocidade** (desde 2026-11-18): a
-v1 rápida saía com inserts fracos e o criador gastava mais tempo revisando; a v1 pode levar ~30 min. O que não depende
-de você continua em paralelo: o motion novo fica fora do caminho da v1, e a camada é fotografada em segundo plano (o
-pré-render) enquanto a edição segue.
+1. **Preparar** (`etapas/01-preparar.md`): o projeto, a transcrição, o proxy, o rosto, a voz limpa.
+2. **Cortes** (`etapas/02-cortes.md`): as palavras que ficam; um final alternativo gravado vira uma saída.
+3. **Ler o guia** (`guias/padrao.md`) inteiro, e o briefing se houver (os materiais dele vão para `projetos/<slug>/apoio/`).
+4. **Dirigir e fazer o material**: o que aparece em cada momento e como, plano a plano (`etapas/03-direcao.md` para o
+   roteiro; `04-inserts.md` para buscar, gravar e capturar; `06-motions-e-elementos.md` para motions e o palco
+   contínuo; `05-enriquecimento.md` se usar presets). Grave e capture o que a frase pede; o banco, os presets e os
+   motions prontos entram quando são perfeitos para a frase. Um motion novo vai num subagente em segundo plano
+   (`06-…`) enquanto você segue.
+5. **Áudio, legenda e transições** (`08-audio.md`, `09-legenda.md`, `07-transicoes.md`).
+6. **Renderizar e revisar com olho crítico** (`etapas/10-render.md`): assistir quadro a quadro, contra o guia, e
+   corrigir antes de entregar. A revisão é parte da edição, não um checklist.
+7. **Entregar**: o link do app, a duração, o que você escolheu e por quê (curto), as dúvidas (com o tempo de cada uma)
+   e o que não conseguiu.
 
-1. **Preparar** (`etapas/01-preparar.md`): cria o projeto, transcreve, proxy, rosto, voz limpa.
-2. **Cortes** (`etapas/02-cortes.md`): você escolhe as palavras que ficam: o corpo e, se o criador gravou finais
-   alternativos, uma **saída** para cada final (corpo + final: ManyChat, LP, Prompt na descrição…).
-3. **Direção** (`etapas/03-direcao.md`): você escreve o roteiro dirigido.
-4. **Em paralelo**, num só turno:
-   - **Motions** (`etapas/06-motions-e-elementos.md`): na v1, só presets que já existem (ou um vídeo do banco). Se a
-     direção pediu algo que nenhum preset faz, o motion novo vai num subagente (opus, `inserts.py motion-brief` +
-     `Leia <arquivo> e siga.`) **fora do caminho da v1**: o plano entra na v1 com o preset mais próximo e o novo só
-     substitui se ficar pronto antes do render; senão, entra na v2 (diga na entrega);
-   - enquanto o motion novo roda, você faz **Áudio** (`etapas/08-audio.md`), **Legenda** (`etapas/09-legenda.md`) e
-     **Transições** (`etapas/07-transicoes.md`).
-   - **Inserts** (`etapas/04-inserts.md`): **você mesmo, um por um**, até o "é isso" (nada de subagente escolhendo
-     mídia): busca, olha os quadros do instante da fala, passa pela checagem e só então liga.
-5. **Enriquecimento e pré-render, a cada leva** (`etapas/05-enriquecimento.md`): a cada 4–6 inserts prontos,
-   os presets e o zoom deles (decidido olhando o quadro) e, em segundo plano, `uv run ferramentas/render.py <slug> --camadas`
-   (o pré-render fotografa a camada do que já está pronto; se um já está rodando, ele sai sem fazer nada e o próximo
-   pega o resto). Os motions de preset entram já no 1º pré-render.
-6. **Render e revisão detalhada** (`etapas/10-render.md`): o render da entrega espera o pré-render e acha a camada
-   quase toda no cache; a revisão varre o vídeo quadro a quadro atrás do frame solto (`folha.py --soltos`) e confere
-   plano a plano em quadros grandes (`folha.py --planos`); o que falha é corrigido antes de entregar.
+## Revisão ("comentei no app")
 
-Briefing: se vier, leia antes dos cortes; ele vale para cortes, direção e inserts. Materiais de apoio citados vão para
-`projetos/<slug>/apoio/` e são a primeira fonte dos inserts.
+`etapas/11-revisao.md`: leia **todos** os comentários pendentes antes de mexer (uns valem para o vídeo todo), aplique,
+procure o mesmo erro no resto do vídeo, renderize, revise de novo e responda cada comentário no app.
 
-## Fluxo 2 — Revisão ("comentei no app", "marquei umas coisas no <vídeo>")
+## Aprovado
 
-Leia `etapas/11-revisao.md`. Os comentários estão no app (`revisao.py pendentes` / `ler`): aplique os pendentes
-de todas as versões (ele comenta a versão que está vendo; os blocos finalizados não se mexem), renderize a v(N+1) e responda cada um no JSON da revisão, numa
-frase curta (a resposta diz o que mudou: é o registro de onde saem os aprendizados na conclusão).
+`etapas/12-final.md`: marca a versão, exporta o final em 4K quando ele pedir (o CTA aprovado é pré-exportado) e manda a
+versão para a Calibragem. Depois **conclua** (`etapas/14-concluir.md`): reescreva o guia e a skill com o que este vídeo
+ensinou — generalizar, corrigir e tirar o que não serve mais, não empilhar casos —, mostre ao criador e grave o que
+ele aprovar.
 
-## Fluxo 3 — Aprovado ("Aprovado · <slug> · vN")
+## Biblioteca e carrossel
 
-Leia `etapas/12-final.md` e, **quando ele pedir**, exporte o final em 4K; um **CTA** aprovado é pré-exportado logo, sem perguntar (as saídas plugam esse final pronto) (num projeto com saídas, cada saída aprovada vira o seu arquivo em
-`final/`, ao lado do `.md`); a versão aprovada vai para a Calibragem. Depois **conclua o vídeo**
-(`etapas/14-concluir.md`): junte os aprendizados das revisões por área, mostre ao criador e grave só o que ele
-confirmar; ponha as tags (no vídeo aprovado e nas mídias) e faça a faxina do banco (apague o que você baixou e não foi usado, melhore a descrição do resto) e, quando
-ele disser que acabou (sugira), encerre o projeto: fica só a última versão (`revisao.py encerrar`).
-
-## Fluxo 4 — Biblioteca
-
-O criador vê a biblioteca no app (aba Biblioteca) e organiza com você pelo chat. Onde mora cada coisa
-(`biblioteca/`): `banco/` (mídias dos inserts; `banco.py`), `presets/` (receitas de enriquecimento + `ordem.json` com as
-favoritas por situação; `presets.py listar`), `transicoes/` (+ `ordem.json`, favoritas por par; `transicoes.py listar`),
-`motions/presets/*.html`, `trilhas/catalogo.json`, `sons/catalogo.json`, `luts/`. Mudar um preset ou uma transição vale
-para os próximos renders de todos os vídeos que os usam. Nada é aprovado sem o criador dizer. Preset novo a partir de
-um trecho de referência: `etapas/13-presets-novos.md`.
-
-## Fluxo 5 — Carrossel ("Carrossel novo · <slug>", "Revisão carrossel · <slug> · vN")
-
-Leia `etapas/15-carrossel.md`. Slides 4:5 (cru, a partir de um pedido, ou derivado de um vídeo: o mesmo conteúdo
-reescrito para ler); você escreve e busca a mídia, o criador escolhe o preset no app e comenta por slide
-(`carrossel.py`). Aprovar no app exporta os slides e a legenda.
+- **Biblioteca** (`biblioteca/`): `banco/` (`banco.py`), `presets/`, `transicoes/`, `motions/presets/`, `trilhas/`,
+  `sons/`, `luts/`. Mudar um preset vale para todos os vídeos que o usam; nada é aprovado sem o criador dizer. Preset
+  novo a partir de uma referência: `etapas/13-presets-novos.md`.
+- **Carrossel** (`etapas/15-carrossel.md`): slides 4:5, cru ou derivado de um vídeo.
 
 ## Sempre
 
-- **Cada sessão de editor é uma categoria fixa** (desde 2026-11-22): 📱 Reels FID · 📱 Reels FIA · 📺 VSL FIA · 📺 VSL FID
-  as mesmas 4 categorias principais do Neo-Obsidian. O nome da conversa é a categoria e **não muda** ao trocar de
-  vídeo (nada de `set_session_title`). Cada sessão é especialista na sua: um vídeo de outra categoria vai para a sessão
-  dela.
-- **Aprenda com o passado:** antes de cada etapa, e antes de aplicar um comentário de revisão, leia os aprendizados da
-  área dela (a etapa diz qual): o geral, `biblioteca/aprendizados/<área>.md` (vale para qualquer vídeo), e o da
-  categoria do vídeo, `biblioteca/exemplos/<categoria>/aprendizados/<área>.md` (se existir; a categoria:
-  `calibragem.py exemplos <slug>`). São as correções do criador em vídeos anteriores, com exemplos em
-  `biblioteca/aprendizados/imagens/`: não as repita.
-- **Todo subagente sai de um brief gerado**, com os aprendizados dentro (o prompt é só `Leia <arquivo> e siga.`):
-  motion novo com `motion-brief` e **qualquer outro** (uma tarefa mecânica de mídia, captura, pesquisa) com `inserts.py brief <slug> <nome> --tarefa <arquivo.md> --areas <as da tarefa>`. Nunca
-  escreva o prompt de um subagente à mão: o de cabeça leva um resumo seu do gosto do criador, e o resumo perde coisa.
-  _vsl-black · 2026-11-17_
-- **Paralelize** o que não depende do resto (o motion novo num subagente em segundo plano; comandos independentes no
-  mesmo turno). Não espere à toa: enquanto o motion roda, faça os inserts. Os inserts e a revisão são seus.
-- **Códigos**: quando o criador citar um código (`PRE-07`, `BAN-012.2`, `REF-03·p7`, `PRJ-02·v3`…), resolva com
-  `uv run ferramentas/codigo.py <código>` antes de agir.
-- **Guarde o porquê** de cada plano (`porque` no edicao.json): o criador vai perguntar.
-- **Dúvidas** que mudam o sentido vão para o chat, na entrega (o tempo e a fala de cada uma). Nada de notas no app:
-  o criador não lê.
-- **Não reescreva a fala.** Cortes escolhem palavras existentes; legenda só corrige grafia.
-- Os originais nunca são alterados. As chaves do `.env` nunca aparecem.
-- Ao entregar, diga em poucas linhas: o link do app, a duração final, o tempo total, as dúvidas (com o tempo de cada uma) e o que não
-  conseguiu (ex.: insert sem mídia real).
+- Cada sessão de editor é uma categoria fixa (📱 Reels FID · 📱 Reels FIA · 📺 VSL FIA · 📺 VSL FID): o nome da
+  conversa não muda ao trocar de vídeo; um vídeo de outra categoria vai para a sessão dela.
+- Códigos citados (`PRE-07`, `BAN-012`, `REF-03·p7`, `PRJ-02·v3`…): `uv run ferramentas/codigo.py <código>` antes de agir.
+- Subagente: só com um brief gerado (`inserts.py motion-brief`, ou `inserts.py brief <slug> <nome> --tarefa <arq>`), o
+  prompt é `Leia <arquivo> e siga.`
+- Guarde o porquê de cada plano (`porque`): ele vai perguntar. Dúvidas que mudam o sentido vão no chat, na entrega.
+- A fala nunca é reescrita. Os originais em `projetos/*/midia/` nunca mudam. As chaves do `.env` nunca aparecem.

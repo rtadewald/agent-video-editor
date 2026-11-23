@@ -1,6 +1,6 @@
 # 06 · Motions e elementos
 
-> **Antes de começar, leia `biblioteca/aprendizados/motions.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/motions.md`) e `biblioteca/aprendizados/elementos.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/elementos.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## Motions
 
@@ -16,7 +16,9 @@ A grade da página Motions toca uma prévia em vídeo de cada um (`biblioteca/mo
 mudou (sem a prévia, o card cai na animação ao vivo, mais pesada).
 
 Na página Banco › Motions do app, os que entraram em vídeos aprovados têm o selo **Usado em vídeo** e o chip do projeto e
-do plano (`curl -s localhost:8719/api/estados` → `motions`): prefira-os, e use-os como modelo de estilo para os novos.
+do plano (`curl -s localhost:8719/api/estados` → `motions`). Use um preset quando ele for perfeito para a frase
+(reaproveitar o que foi aprovado é bom; encaixar o que serve mais ou menos, não); os aprovados são o modelo de estilo
+para os novos. Os campos de cada um estão no JSON do topo do `.html`. Alguns dos mais simples:
 
 | id | nome | campos | fundo sugerido |
 |---|---|---|---|
@@ -36,41 +38,23 @@ entra na 1ª palavra do plano, nunca no meio da frase com a tela parada no fundo
 No motion em tela cheia, a composição fica no meio da tela, nunca só na metade de cima com a de baixo vazia; a
 legenda desce para baixo dela (`motions[p].legenda_y`). _design-por-imagem v11 c2_
 
-### O motion contínuo (um palco o vídeo inteiro, ele pequeno embaixo)
+### A tela dividida padrão e o palco contínuo (preset `vitrine`)
 
-Quando o criador pede **uma tela fixa com um motion só o vídeo inteiro e ele pequeno embaixo**, o modelo é o Reel de
-referência que ele mandou (instagram.com/reel/DVhNGTAjPwu): o preset `vitrine`, fundo quase preto com uma grade leve,
-ele embaixo numa **janela larga com a cabeça saindo por cima** (o criador aprovou: "eu apareci bem") e, no canvas de
-cima, **um insert por vez**, o melhor para a frase: deitado vai de ponta a ponta da tela (`forma: "faixa"`), quadrado ou
-em pé vai num cartão de cantos redondos (`"cartao"`). Dois andares de cards ao mesmo tempo ficaram "muito sujo, muita
-informação". O **título de apoio (curto, com emoji) só no começo**. Troca em **corte seco** a cada frase; os vídeos
-seguem tocando, com um zoom lento por dentro.
-Um plano `tela_dividida_motion` do começo ao fim, com `formato: "vertical"`, `ator: {modo: "janela", escala: 0.75, y:
-1.0125, topo: 0.103}` (no bruto de mesa: a janela começa a ~71% e só a cabeça sai por cima) e `legenda_y: 0.87`.
-`valores.cenas` (JSON): `[{em: "as palavras onde começa", m: id, forma, asp, foco: [x,y], zoom, revela: 0.36, titulo}]`;
-`valores.midias`: todos os ids. A mesma mídia em cenas seguidas continua tocando.
-**Cada fala provada com material real e escolhido para ela**, nunca os inserts da versão anterior por inércia: os apps
-do criador gravados de verdade, os vídeos de outras pessoas e a prova com número (ex.: o gráfico do star-history.com
-para "começou nos últimos meses"); nada de imagem gerada fingindo ser app. Trecho de gravação com o player piscando
-preto no começo: corte o trecho depois disso (`folha.py --soltos` acha); um vídeo com um pulo ou zoom brusco no meio
-vira dois trechos, um antes e um depois, trocando na palavra mais próxima. **Um motion em 3D no meio do contínuo** (o
-criador pede para explicar um conceito) é um plano `tela_dividida_motion` só dele entre dois planos da vitrine, com o
-mesmo `ator` e `legenda_y` e, no `--pedido` do brief, o fundo da vitrine (#0b0b0c com a grade) e a cena só no canvas de
-cima (13,5–69%): sai sem emenda.
-**O insert ocupa a tela toda, em 9:16** (`forma: "tela"`), com ele na janela por cima: "sempre que puder", sem faixa
-16:9 ou cartão 1:1 no meio de preto vazio ("espaço em branco que não precisava"). Por isso as gravações de app já saem
-**em pé**: o app numa janela 900×1600 (escala 1.2 → 1080×1920) quando ele cabe nela (Neo Stitch, a lista do editor,
-páginas de docs e sites); quando quebra em pé (a revisão do editor, o Neo-Obsidian), a janela larga em 2x e o recorte
-9:16 da área que importa (o player, o painel de comentários, a coluna da nota, o chat). O que importa fica nos 65% de
-cima (a janela dele cobre o resto). Banners de cookies escondidos. Gravação quadro a quadro (as ações postas entre os
-quadros e a foto de cada um), nunca o screencast em 1x; ao vivo (o Claude trabalhando), fotos em laço com o tempo real.
-**Zoom só com motivo** (ler um detalhe), nunca o tempo todo nem num canto aleatório: a gravação já anda sozinha (o
-cursor, o clique, a rolagem, o app respondendo). **Sons presos ao que acontece**: o clique quando há clique, a
-digitação quando digita, o pop quando algo surge (`sons: [["clique", t], ["digitar", t, dur], ["pop", t]]`); uma
-sequência de resultados troca com `clique: true`. O Claude que aparece é o **app desktop, tela branca**. Recusados antes
-dele: janelas do Mac com zoom
-nas caixas, a tela dividida 70/30 e o estúdio branco em 3D (o `estudio-branco` fica na biblioteca, sem uso).
-_claude-code-apps-2 · 2026-11-23_
+É o padrão de tela dividida (o guia; aprovado no Claude Code Apps 2): ele embaixo numa janela larga com a cabeça saindo
+por cima e o insert por trás de tudo, em 9:16 (`forma: "tela"`). Pode ser um plano curto ou o vídeo inteiro (um palco
+só, as mídias trocando presas às palavras).
+- O plano: `tela_dividida_motion`, com `motions[p]` = preset `vitrine`, `formato: "vertical"`, `ator: {modo: "janela",
+  escala: 0.75, y: 1.0125, topo: 0.103}` (no bruto de mesa) e `legenda_y: 0.87`.
+- `valores.cenas` (JSON), uma por troca: `{em: "as palavras onde começa", m: <id do banco>, forma: "tela", zoom: 1}`;
+  opcionais: `pontos: [[x, y, zoom, t]…]` (a câmera vai com calma de um destaque ao outro; t em s desde o começo da
+  cena), `sons: [["clique", t], ["digitar", t, dur], ["pop", t]]`, `clique: true` (um clique na troca), `forma: "faixa"
+  | "cartao"` (a mídia deitada ou quadrada sobre o fundo escuro com grade; só quando não há como ter em pé), `titulo`.
+  `valores.midias`: todos os ids. A mesma mídia em cenas seguidas continua tocando; mídia mais curta que a cena congela
+  no último quadro.
+- Um motion 3D no meio (um conceito a explicar) é um plano só dele, com o mesmo `ator` e `legenda_y` e, no `--pedido`
+  do brief, o fundo da vitrine (#0b0b0c com a grade de 120 px) e a cena nos ~65% de cima: sai sem emenda.
+- Gravação com um pulo no meio (o player piscando, um zoom brusco do original): dois trechos, trocando na palavra mais
+  próxima (`banco.py trecho`).
 
 ### Motion novo
 
@@ -83,11 +67,10 @@ uv run ferramentas/inserts.py motion-brief <slug> <plano> --preset <id-novo> [--
 Um plano com `refs` (da direção) já leva as refs no brief: o subagente abre cada uma e recria na linha dela.
 **Pedido por uma referência** (o criador citou um `REF-…·pN` ou "como este"): o `--pedido` manda extrair e olhar os
 quadros dela (o vídeo e o trecho vêm do `codigo.py`) e copiar ritmo, tipo de troca, tamanho, vinheta, curva e o material
-real; não descreva a referência de cabeça (`aprendizados/motions.md`).
+real; não descreva a referência de cabeça.
 Dispare o subagente com o prompt **só**: `Leia <caminho> e siga.` (o modelo é `06-brief-motion.md`; mude lá; ele já
-manda ler os recusados e os aprendizados). Ele leva ~7 min: **nunca espere por ele na v1**. Ligue já ao plano o preset
-mais próximo (`inserts.py motion`); se o novo ficar pronto antes do render da entrega, troque; senão, ele entra na v2 e
-você diz isso na entrega.
+manda ler os recusados e o guia). Ele leva ~10 min: siga com o resto enquanto ele trabalha e ligue-o ao plano
+(`inserts.py motion`) quando ficar pronto, depois de olhar a prévia dele.
 **Motion novo é em 3D** (o estilo do criador desde 2026-11-17: objetos de vidro e metal, chão que reflete, bloom,
 câmera andando; em 2D só a janela de um app real). Vídeo como textura: desenhe em `motion.depois(f)` (os vídeos já no
 quadro) e dê ao `<video>` os atributos `width`/`height` (sem eles a textura sai preta). O Three.js está em

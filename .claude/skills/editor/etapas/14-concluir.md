@@ -1,90 +1,25 @@
-# 14 · Concluir um vídeo: aprendizados, tags e faxina do banco, e encerramento
+# 14 · Concluir um vídeo: reescrever o guia e a skill, tags, faxina e encerramento
 
-Depois do vídeo aprovado e exportado (`12-final.md`), feche o ciclo: aprendizados, tags e faxina do banco e, quando o criador
-disser que acabou, o encerramento (o passo 4). É aqui que a skill aprende: o que o
-criador corrigiu num vídeo não pode se repetir no próximo.
+Depois do vídeo aprovado e exportado (`12-final.md`), feche o ciclo: o guia e a skill reescritos com o que o vídeo
+ensinou, as tags e a faxina do banco e, quando o criador disser que acabou, o encerramento. É aqui que a skill aprende.
 
-## 1. Aprendizados (com o criador)
+## 1. Reescrever o guia e a skill (com o criador)
 
-1. **Junte o que aconteceu no vídeo:** `uv run ferramentas/revisao.py historico <slug>` (todas as revisões, versão a
-   versão: cada comentário com o bloco e a sua resposta, e os blocos que voltaram a ser comentados; os anexos de cada
-   um com `revisao.py ler <slug> vN`); o que ele respondeu no chat às suas dúvidas; e o que você mesmo teve de corrigir
-   na autorrevisão.
-2. **Analise por que errou.** Cada comentário é um erro seu que o criador teve de apontar; os do mesmo assunto que
-   voltaram no mesmo bloco numa versão seguinte (a primeira solução não resolveu) ou ficaram `nao_aplicado` pesam mais. Para cada um, a causa:
-   - **pedido mal entendido** (você fez outra coisa): o que na fala dele devia ter guiado, e como perguntar ou ler melhor;
-   - **faltava regra** (a skill não dizia): a regra nova, na área certa;
-   - **a regra existia e não foi seguida** (está no `aprendizados/` ou na etapa e você não leu ou não aplicou): reescreva
-     mais curta e mais visível, ou leve-a para o passo da etapa em que o erro acontece;
-   - **defeito de ferramenta**: corrija o script;
-   - **gosto novo** do criador: um aprendizado `[gosto]`.
-   Junte os erros de mesma causa: três correções de legenda pelo mesmo motivo são um aprendizado, não três.
-3. **Extraia os aprendizados.** Para cada comentário, pergunte: isso vale para os próximos vídeos ou só para este?
-   - Correção pontual ("aqui prefiro o outro site") **não** é aprendizado.
-   - Um gosto que pode se repetir ("lettering demais", "esse tipo de motion fica poluído", "música alta") é.
-   - Um **defeito** técnico (palavra cortada no meio, captura com tela branca, som estourado) é aprendizado **e** pede
-     correção na ferramenta, se der: corrija o script e anote "corrigido em <script>".
-   - **Escreva o princípio, não o caso.** A regra fala do tipo de situação ("quando a fala cita uma ferramenta…",
-     "quando a fala enumera itens…"), nunca deste vídeo ("quando ele fala do WordPress…", "na abertura com Claude e
-     Elementor…"). Teste: a regra serviria a um vídeo sobre outro assunto? Se não, suba um nível. O caso concreto
-     (ferramenta, site, preset usado) cabe só em *O que aconteceu* ou como exemplo de *Como*.
-   - Antes, leia o `biblioteca/aprendizados/<área>.md`: se o aprendizado já existe, reforce (some a origem nova) em vez de repetir.
-4. **Mostre ao criador antes de gravar**, numa lista curta por área, com o porquê de cada erro:
-   ```text
-   Aprendizados do PRJ-03 (v3 aprovada):
-   inserts · [gosto] prefira gravação de tela rolando a print parado quando a fala cita um site  (v1·c2, v2·c5)
-     por que errei: a regra não existia; escolhi o print por ser mais rápido de achar
-   elementos · [gosto] no máximo 1 lettering a cada ~10 s; nunca dois seguidos  (v1·c4, de novo no mesmo bloco na v2)
-     por que errei: a regra estava em elementos.md e não li antes da direção → movida para o passo 3 de 03-direcao.md
-   cortes · [defeito] o "m" de "mas" vazou na emenda do ✂3 → borda ajustada; regra: …  (autorrevisão)
-   Confirma? Pode cortar, mudar o texto ou acrescentar.
-   ```
-   Grave só o que ele confirmar, com o texto que ele aprovar.
-5. **Grave** cada aprendizado no arquivo certo (a tabela abaixo):
-   - **Geral ou da categoria?** Técnicas e defeitos de ferramenta (fps, captura, corte, render) e os gostos de
-     identidade e qualidade (fundo da marca, fontes, legibilidade) valem para qualquer vídeo: vão para o geral,
-     `biblioteca/aprendizados/<área>.md`. Os gostos que mudam com o formato (ritmo, pausas, zoom, quantos sites, como
-     emendar) vão para a categoria do vídeo, `biblioteca/exemplos/<categoria>/aprendizados/<área>.md` (a categoria:
-     `calibragem.py exemplos <slug>`; crie o arquivo copiando o cabeçalho de um que já existe). Na dúvida, pergunte ao
-     criador ao mostrar a lista. Se um gosto da categoria aparecer igual em outra, suba-o para o geral.
-   - **Escreva para um agente que não viu este vídeo.** Cada aprendizado diz: *Quando* vale (em que momento da edição),
-     a *Regra* (o que fazer, com os nomes reais: preset, campo, comando), *O que aconteceu* (o erro e as palavras do
-     criador: é o porquê, que deixa o agente julgar casos parecidos), *Como* fazer ou medir (os comandos, quando houver)
-     e a origem. Um gosto simples cabe em 2–3 linhas; um técnico pede os comandos. Exemplo:
-     ```markdown
-     - **[gosto] Tudo entra na palavra falada.**
-       - *Quando:* ao pôr qualquer card, lettering, preço ou nome de ferramenta na tela.
-       - *Regra:* o elemento é preso à palavra (o ID da transcrição) e aparece no instante em que ela é dita, não no
-         começo do plano.
-       - *O que aconteceu:* em 11 comentários o criador apontou elementos fora da fala ("parece 1 s desencaixado").
-       - _vsl-isca-fid · v2 c5, v4 c31 · 2026-10-18_ · ![exemplo](imagens/vsl-isca-fid-v2c5.png)
-     ```
-   - Um print ajuda quando o texto sozinho é ambíguo ("poluído", "card grande demais"): copie o anexo do comentário
-     (`projetos/<slug>/revisoes/anexos/…`) ou um quadro do vídeo (ffmpeg) para `biblioteca/aprendizados/imagens/<prj>-<cN>.png`
-     e mostre-o no bullet (um "certo" e um "errado" lado a lado é o melhor exemplo).
-   - Aprendizados de **direção** (que plano, quando, abertura, ritmo, lettering como decisão de roteiro) vão para a
-     área Direção: `biblioteca/aprendizados/direcao.md` (qualquer vídeo) ou `exemplos/<categoria>/aprendizados/direcao.md`
-     (o quadro), como as outras áreas. As **Regras do criador** (`exemplos/<categoria>/regras.md`, a Heurística do app)
-     são poucos princípios: só mexa nelas quando o criador disser que algo é um princípio ("regra geral", "sempre"), e
-     mantenha-as curtas (um princípio por linha, sem a origem). Muito texto ali faz a direção se perder.
-   - Preset, transição, motion ou trilha que o criador não quer mais: tire das favoritas/recomendados (`ordem.json`) ou
-     recuse (página Presets/Motions do app) — e anote o porquê no arquivo da área.
+O objetivo não é acrescentar casos: é deixar o guia (`guias/padrao.md`) e a skill **melhores e mais curtos** para o
+próximo vídeo.
 
-Cada área tem o arquivo geral (abaixo) e, por categoria, `biblioteca/exemplos/<categoria>/aprendizados/<área>.md` (os
-gostos daquele formato). As etapas leem os dois.
-
-| Área | Arquivo geral | Lido em |
-|---|---|---|
-| Cortes | `biblioteca/aprendizados/cortes.md` | `02-cortes.md` |
-| Direção | `biblioteca/aprendizados/direcao.md` (os princípios: `exemplos/<categoria>/regras.md`) | `03-direcao.md` |
-| Inserts (busca, captura de tela, escolha da mídia) | `biblioteca/aprendizados/inserts.md` | `04-inserts.md` e o prompt dos subagentes |
-| Enriquecimento (presets, Full ator, fundo) | `biblioteca/aprendizados/enriquecimento.md` | `05-enriquecimento.md` |
-| Motions | `biblioteca/aprendizados/motions.md` | `06-…` e o prompt do subagente de motion |
-| Elementos (lettering, ManyChat, caixinha, print) | `biblioteca/aprendizados/elementos.md` | `06-…` e `03-direcao.md` |
-| Transições | `biblioteca/aprendizados/transicoes.md` | `07-transicoes.md` |
-| Áudio | `biblioteca/aprendizados/audio.md` | `08-audio.md` |
-| Legenda | `biblioteca/aprendizados/legenda.md` | `09-legenda.md` |
-| Render e autorrevisão | `biblioteca/aprendizados/render.md` | `10-render.md` |
+1. **Junte o que aconteceu**: `uv run ferramentas/revisao.py historico <slug>` (os comentários de todas as versões, com
+   as suas respostas e os que voltaram), o que ele disse no chat e o que você mesmo corrigiu na revisão.
+2. **Ache a causa de cada erro**, juntando os de mesma causa: faltava no guia; estava no guia e não foi seguido (então o
+   texto não está claro ou não está onde a decisão acontece); a skill empurrava para o lado errado (um passo, uma meta, um
+   padrão); defeito de ferramenta (corrija o script); gosto novo.
+3. **Proponha a reescrita**, não uma lista de adendos:
+   - o princípio, não o caso: serve a um vídeo sobre outro assunto? senão, suba um nível;
+   - **tire** o que não faz mais sentido, o que virou correção no código e o que o criador desmentiu; junte o que se repete;
+   - mude o passo da skill ou da etapa que levou ao erro, não só o guia;
+   - um vídeo aprovado que serve de modelo entra nas Referências do guia, com o que ele faz bem.
+4. **Mostre ao criador** o que muda (o antes e o depois, curto, com o porquê de cada erro) e grave só o que ele aprovar.
+   Um commit com a reescrita.
 
 ## 2. Tags e faxina do banco
 
@@ -120,16 +55,9 @@ gostos daquele formato). As etapas leem os dois.
    é `bf26/carrinho`, mesmo vindo de um vídeo da FID). O formato com barra própria (`manychat`, `stories`) é a tag
    dele. Na dúvida do produto, a tag da copy no vault decide. Tag nova, pergunte ao criador.
 
-## 3. Consolidar (a cada 5 vídeos aprovados)
+## 3. Encerrar o projeto (quando o criador disser que acabou)
 
-Os arquivos de `aprendizados/` são lidos em toda edição: precisam ficar curtos. A cada 5 vídeos aprovados (conte os
-`prj-*` em `biblioteca/referencias/`), releia cada arquivo: junte bullets que dizem a mesma coisa (somando as
-origens), tire os defeitos que já viraram correção no código, e os gostos que o criador desmentiu depois. Mostre ao
-criador o antes e o depois de cada arquivo em poucas linhas e grave com o "ok" dele.
-
-## 4. Encerrar o projeto (quando o criador disser que acabou)
-
-Depois dos exports (todas as saídas que ele quis) e dos aprendizados, o projeto não precisa carregar o histórico de
+Depois dos exports (todas as saídas que ele quis) e da reescrita, o projeto não precisa carregar o histórico de
 renders. **Encerrar** deixa só a última versão (cada render é do vídeo inteiro: ela tem a última de todos os blocos), as
 revisões (o texto dos comentários e das respostas), a mídia original e o `final/`; saem as versões anteriores e o
 `.cache` (as fotos da camada, o áudio, o corpo em 4K das saídas e os temporários).
@@ -142,13 +70,12 @@ uv run ferramentas/revisao.py encerrar <slug> --confirmar  # apaga (sem lixeira:
 - Só depois que **o criador disser que encerrou** (ou aceitar a sua sugestão): mostre a ele o que sai e quanto libera, e
   confirme. Nunca no meio de exports: o comando recusa se há um render do projeto rodando, ou uma saída aprovada sem
   export (passe `--mesmo-assim` só se ele mandar).
-- **Sugira o encerramento** quando o vídeo foi exportado e os aprendizados gravados ("posso encerrar o <nome>? libera
+- **Sugira o encerramento** quando o vídeo foi exportado e a reescrita gravada ("posso encerrar o <nome>? libera
   X GB: as versões v1–v(N-1) e o cache"), com o número do `encerrar` sem `--confirmar`.
 - Encerrado não é trancado: plugar uma saída nova depois reabre o projeto (volta para Em edição) e o render refaz o que
   precisar (o corpo em 4K, a camada: mais lento na primeira vez).
 
 ## No fim
 
-Diga ao criador, em 3 linhas: quantos aprendizados entraram e em quais áreas, quantas mídias saíram do banco e quantas
-ganharam descrição melhor, e que a referência do vídeo está na Calibragem esperando a revisão dele. Na mesma mensagem,
-sugira encerrar o projeto (o passo 4), com quanto libera.
+Diga ao criador, em 3 linhas: o que mudou no guia e na skill, quantas mídias ganharam descrição melhor, e que a referência do vídeo está na Calibragem esperando a revisão dele. Na mesma mensagem,
+sugira encerrar o projeto (o passo 3), com quanto libera.

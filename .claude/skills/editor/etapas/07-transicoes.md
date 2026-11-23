@@ -4,7 +4,7 @@ Em cada troca de plano, uma transição com som. O padrão vem das **favoritas q
 (de onde sai → para onde vai): Full ator · Tela dividida · Tela cheia (9 pares, 2 favoritas cada, em
 `biblioteca/transicoes/ordem.json`).
 
-> **Antes de começar, leia `biblioteca/aprendizados/transicoes.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/transicoes.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## Rodar
 

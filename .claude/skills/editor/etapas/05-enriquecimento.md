@@ -1,15 +1,16 @@
 # 05 · Enriquecimento
 
 Como as mídias de cada insert aparecem (onde fica cada card, como entra, se mexe e sai, com os sons de apoio) e o
-movimento de câmera nos planos de Full ator. Tudo vem de **presets aprovados** pelo criador (`biblioteca/presets/`):
-receitas genéricas que se adaptam ao nº de mídias, à proporção delas e à divisão da tela.
+movimento de câmera nos planos de Full ator, quando o plano usa os inserts com **presets** (`biblioteca/presets/`):
+receitas que se adaptam ao nº de mídias, à proporção e à divisão da tela. São uma opção, não o caminho obrigatório: no
+palco contínuo (`06-…`) a composição é sua.
 
 **Vídeo deitado (16:9)**: os mesmos presets. Lado a lado, a mídia que não tem a proporção da área (9:8) vai num card
 centrado, inteira, sobre o fundo dos inserts (use `chuva`, o oficial); na tela cheia, a mídia horizontal (até 3:2) ocupa a
 tela e a em pé vira card. O "ator embaixo" (`divisao: atras`) não existe deitado. Os motions tocam no palco da dividida
 (1080×960): lado a lado, na área do insert; na tela cheia, centrados na altura toda, com o fundo do motion nas laterais.
 
-> **Antes de começar, leia `biblioteca/aprendizados/enriquecimento.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/enriquecimento.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## Rodar
 
@@ -42,18 +43,11 @@ presets sem sentido. Para cada insert com refs:
 
 Os inserts sem refs ficam com a escolha do `escolher` (o favorito da situação).
 
-## O zoom: decidido olhando o quadro
+## O zoom
 
-O criador cobrou zoom "sem noção" em quase todo vídeo (aproximando lugar nenhum, cortando texto, na cara dele na tela
-dividida). Regra geral em `biblioteca/aprendizados/enriquecimento.md` (*Zoom só onde faz sentido*). Na prática:
-- **Sem alvo, sem zoom dirigido.** Tela dividida: `camera: Parado`. Site, página ou print em tela cheia: `camera: Leve`
-  (o zoom in leve e constante). Vídeo de banco: sem zoom.
-- **Zoom dirigido (Mergulho, `zoom: Mais`, `zona`) só quando a fala aponta um detalhe** (um número, um nome, uma linha).
-  Antes de escolher, abra o quadro da mídia no instante do plano, ache a região do detalhe e escolha a `zona` e o `zoom`
-  que deixam o detalhe **inteiro, centrado e legível**, sem cortar a linha ou a palavra. Precisa de dois pontos ou de
-  círculo/destaque: motion `imagem-circulos` (foco e círculos medidos em fração da imagem).
-- **Confira no último quadro do plano** (`folha.py --planos`, colunas fim-1 e fim): o detalhe citado está inteiro e
-  legível? Texto cortado na borda, zoom no vazio ou no lugar errado: tire o zoom ou mude a zona antes de entregar.
+Só com motivo (o guia): sem alvo, sem zoom dirigido (tela dividida: `camera: Parado`; print parado em tela cheia:
+`camera: Leve`); zoom dirigido (Mergulho, `zoom: Mais`, `zona`) só para o detalhe que a fala aponta, com a zona
+escolhida olhando o quadro e o detalhe inteiro e legível no último quadro do plano.
 
 ## Quando trocar à mão
 

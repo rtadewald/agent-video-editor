@@ -1,6 +1,6 @@
-# 10 · Render e autorrevisão
+# 10 · Render e revisão
 
-> **Antes de começar, leia `biblioteca/aprendizados/render.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/render.md`) e, na autorrevisão, confira o vídeo contra os aprendizados de todas as áreas**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## Render do proxy
 
@@ -20,46 +20,33 @@ camada, as transições e a legenda (ASS). A montagem (proxy e final em 4K) sai 
 `.cache/trechos/` (nunca no meio de um insert, motion ou transição): numa revisão, só os trechos em que algo mudou são
 montados de novo, 4 por vez, e emendados sem recodificar. Um corte que muda a duração refaz os trechos dali para a frente. O áudio (voz limpa, sons, trilha com ducking, −14 LUFS) é misturado uma vez e entra inteiro por cima.
 
-## Revisão detalhada (antes de entregar)
+## Revisar com olho crítico (antes de entregar)
 
-A folha de 1 quadro por segundo não pega o que passa em 1 a 5 quadros nem o detalhe de um insert. Por isso:
+A revisão é a parte da edição que decide a qualidade: assista ao vídeo como o criador vai assistir, no celular, e
+corrija o que não estiver bom antes de entregar. Nenhum script substitui isso.
 
-1. **Frame solto, quadro a quadro:** `uv run ferramentas/folha.py projetos/<slug>/versoes/vN/proxy.mp4 --soltos`. Varre os
-   24 quadros de cada segundo atrás de 1 a 5 quadros que destoam do antes e do depois (o frame vazio, o quadro de outra
-   mídia, o fundo antes do card, o frame do ator perdido no corte) e grava uma tira de 8 quadros por alerta
-   (`soltos_folha.jpg`). **Olhe cada tira**: cerca de metade é a entrada de um motion ou um movimento (deixa); o resto é
-   defeito grave, sempre. O criador cobrou isso em quase todo vídeo ("CLÁSSICO erro do frame vazio"). Causa comum: um
-   trecho (`banco.py trecho`) que começa 1 quadro antes da mídia trocar; o preset que entra com o card vazio; o motion
-   cuja 1ª coisa não está na tela no 1º quadro. Medido no SkillSpector: os 3 frames soltos reais da v6 (um que o criador
-   marcou e dois que passaram) e o da v9 aprovada, aos 51,3 s. _2026-11-18_
-2. **Plano a plano, em quadros grandes:** `folha.py … --planos` (uma imagem a cada 6 planos: os 3 primeiros quadros, o
-   meio e os 2 últimos de cada insert e motion). Leia cada linha contra a fala do plano e a checagem de
-   `04-inserts.md`: o 1º quadro já tem conteúdo; a mídia prova a fala; legível no celular; o zoom termina no detalhe
-   citado, inteiro (`05-enriquecimento.md` → O zoom); nada de borda, fundo duplo, texto cortado.
-3. `uv run ferramentas/gemini.py projetos/<slug>/versoes/vN/proxy.mp4 "<pergunta>"`, para fala e áudio:
-   ```text
-   Você revisa um Reels editado antes de ir para o criador. Aponte só problemas concretos, com o tempo (m:ss):
-   corte brusco ou palavra cortada no meio; insert que não combina com o que está sendo dito; tela preta ou vazia;
-   legenda sobre texto importante ou ilegível; som alto demais, estalo ou música cobrindo a voz; repetição de fala.
-   Se estiver tudo bem num item, não comente. Máximo 10 itens.
-   ```
-3. Separe o que é **grave** do que é **ajuste**:
-   - **grave** (o criador não deveria ver): frame solto ou vazio, fala cortada no meio de uma palavra, tela preta ou
-     vazia, mídia errada ou quebrada, zoom que corta o detalhe citado, um texto na tela errado (nome de ferramenta,
-     número). Corrija, renderize de novo e repita os passos 1 e 2 nos pontos mexidos: a correção vira a
-     versão seguinte (a v2) e é ela que você entrega. **Nunca apague uma versão** (`versoes/vN`): o app, os comentários e o
-     histórico dos blocos dependem delas (`11-revisao.md`);
-   - **ajuste** (gosto, ou uma limitação conhecida, como a legenda sobre o conteúdo de um insert em tela cheia): não
-     renderize de novo; diga na entrega, no chat ("0:21 · vi isso, posso trocar por…").
-   Sem nada grave, entregue a v1 como saiu do primeiro render.
+1. **Assista em quadros grandes.** Tire quadros do vídeo inteiro (do proxy ou, melhor, da camada em tamanho real): um a
+   cada ~0,5–1 s, em pelo menos 360 px de largura, e os 2–3 quadros de cada troca. Em miniatura de 150 px um cartão
+   pequeno no meio do vazio "parece ok": não é.
+2. **Cada cena contra o guia** (`guias/padrao.md`), perguntando o que quem assiste vê: ocupa a tela? lê no celular? prova
+   a frase, no instante certo? o zoom tem motivo? o som bate com o que acontece? é o melhor material possível, ou dá
+   para explicar melhor com outro insert, outra gravação, um motion? Anote também as melhorias, não só os erros.
+3. **Um revisor que não fez o vídeo.** Um subagente (`inserts.py brief <slug> revisao --tarefa <arq> --areas todas`,
+   prompt `Leia <arquivo> e siga.`) recebe só os quadros, a fala e o guia — nunca a sua justificativa — e aponta, com
+   o tempo, o que fugiu do guia e o que poderia ser melhor. Leve a sério o que ele achar.
+4. **O que a máquina mede melhor que o olho:** quadros soltos (`folha.py <proxy> --soltos`: olhe cada tira; metade é a
+   entrada de um motion, o resto é defeito), quadros repetidos num vídeo (`mpdecimate`, em `04-inserts.md`), e fala e
+   áudio (`gemini.py <proxy> "<pergunta>"`: corte no meio de palavra, música cobrindo a voz, estalo).
+5. **Corrija e renderize de novo** o que não passou — é a versão seguinte (nunca apague `versoes/vN`) — e revise de novo
+   o que mudou. Só entregue quando você mesmo aprovaria. O que é gosto em aberto vai na entrega, como pergunta.
 
 ## Entregar
 
 ```bash
 uv run ferramentas/servidor.py      # se não estiver no ar (em segundo plano) → http://localhost:8719/app/
 ```
-Diga ao criador, em poucas linhas: o link do app, a duração final, quanto tempo levou, as dúvidas (cada uma com o tempo
-no vídeo final e a fala) e o que não conseguiu (ex.: "o insert do p7 ficou com um print estático: o site exige login").
+Diga ao criador, em poucas linhas: o link do app, a duração final, o que você escolheu e por quê (curto), as dúvidas
+(cada uma com o tempo no vídeo final e a fala) e o que não conseguiu (ex.: "o p7 ficou com um print: o site exige login").
 
 Tempo esperado: com o pré-render feito (`render.py <slug> --camadas`, em segundo plano a cada leva de inserts), ~25 s
 para 80 s de vídeo (medido: a montagem; a camada vem toda do cache, `.cache/camadas/` do projeto, e o áudio também, se

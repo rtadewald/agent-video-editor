@@ -9,16 +9,19 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
 
 ## Estrutura
 
-- `.claude/skills/editor/`: `SKILL.md` (os fluxos), `etapas/` (um .md por etapa, lido na hora), `edicao.md` (o contrato
-  do `edicao.json`). Só o "como editar": o que é do criador mora na biblioteca.
+- `.claude/skills/editor/`: `SKILL.md` (o passo a passo, curto), `guias/padrao.md` (o guia de estilo: o gosto do
+  criador, o único lugar dele; reescrito ao fim de cada vídeo), `etapas/` (o como de cada ferramenta, lido na hora),
+  `edicao.md` (o contrato do `edicao.json`).
 - `ferramentas/`: um script por etapa, `uv run ferramentas/<script>.py` (dependências no próprio arquivo, PEP 723).
-  `base.py` (os caminhos) e `servidor.py` são o comum. `ferramentas/inicial/`: o que uma biblioteca nova recebe.
+  `base.py` (os caminhos) e `servidor.py` são o comum; `gravar.py` grava páginas e apps para os inserts (quadro a quadro
+  ou ao vivo). `ferramentas/inicial/`: o que uma biblioteca nova recebe.
 - `render/`: a página que desenha a camada dos inserts e motions para o render (fonte em `render/src/`), e o que ela
-  usa (`motion/`: runtime, GSAP e fontes; `fundos/`; `avatares/`).
+  usa (`motion/`: runtime, GSAP e fontes; `fundos/`; `avatares/`); `claude-desktop.html`: o Claude desktop desenhado no
+  tempo, para gravar uma conversa real.
 - `app/`: o app de revisão. `uv run ferramentas/servidor.py` → http://localhost:8719/app/
 - `biblioteca/` (fora do git; copia-se entre máquinas, por cima): `exemplos/` (criador.md e, por categoria de vídeo, as
-  regras e os roteiros dirigidos, gerados pela Calibragem), `aprendizados/` (um .md por área com as correções do criador,
-  e `imagens/`), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
+  regras e os roteiros dirigidos, gerados pela Calibragem, para consulta), `aprendizados/` (as correções antigas por área,
+  destiladas no guia de estilo em 2026-11-23; só o `carrossel.md` ainda é lido), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
   `lixeira/` (o que se apaga no app: `base.para_lixeira`; restaurar ou apagar de vez pela página Lixeira).
 - `projetos/<slug>/` (fora do git): um vídeo por pasta.
 - `animacoes/<slug>/animacao.json` (fora do git): uma animação por pasta, as cenas na ordem (presets de
@@ -34,8 +37,8 @@ Referência: `../18-harness-video-editor` (o app web anterior). Só leitura: cop
   abstração antes de um caso real. Arquivo novo fora deste mapa: pergunte antes.
 - **Decisões editoriais são do Claude**, guiadas por `biblioteca/exemplos/`; o código valida e calcula tempos.
 - **Tudo preso às palavras** (IDs da transcrição), nunca a segundos (`edicao.md`).
-- **Correção pontual não é regra geral.** Os aprendizados saem quando um vídeo é aprovado (`etapas/14-concluir.md`):
-  junte-os por área, mostre ao criador e grave só o que ele confirmar.
+- **Correção pontual não é regra geral.** Ao fim de cada vídeo aprovado, o guia e a skill são reescritos com o que ele
+  ensinou (`etapas/14-concluir.md`): generalizar, corrigir e tirar, nunca empilhar casos; grave só o que o criador aprovar.
 - **Não declare aprovado** o que o criador não aprovou.
 - Os originais em `projetos/*/midia/` nunca são alterados.
 - Chaves (OpenRouter, ElevenLabs) só no `.env` da raiz. Nunca mostre, registre ou faça commit delas.

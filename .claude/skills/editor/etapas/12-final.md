@@ -62,4 +62,4 @@ O cache da camada (ProRes 4444 em 4K: ~1 GB por 10 s) não fica para sempre: o s
 `uv run ferramentas/servidor.py --limpar-caches [dias]`). O `.cache/final/corpo.mp4` fica. Um export depois disso
 fotografa a camada de novo: rode o `--camadas --final` em segundo plano antes, se o criador avisar que vai exportar.
 
-Depois, **conclua o vídeo**: `14-concluir.md` (aprendizados com o criador, tags e faxina do banco).
+Depois, **conclua o vídeo**: `14-concluir.md` (a reescrita do guia e da skill com o criador, tags e faxina do banco).

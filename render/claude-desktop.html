@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<!--
+  O Claude desktop (tela branca, em pé 900×1600) desenhado no tempo, para gravar com `ferramentas/gravar.py quadro` e a
+  ação ["tempo", "em"]. A conversa é a de uma sessão REAL (as mensagens e os comandos dela), nunca inventada.
+  No `prep` (ação "js"): window.CAB = [ícone, nome, sub] · window.HIST = [[classe, texto]…] (classe: eu | cmd | txt) ·
+  window.NOVO = o pedido digitado na caixa de T0 a T1 e enviado em T1 · window.CMDS = [t…] ("Executou N comandos")
+  · sem NOVO: só o histórico, subindo ROLA px em DUR s (um paredão de texto).
+-->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 900px; height: 1600px; background: #fff; font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    color: #1f1e1d; overflow: hidden; -webkit-font-smoothing: antialiased; }
+  #barra { height: 64px; border-bottom: 1px solid #efefed; display: flex; align-items: center; padding: 0 26px; gap: 12px; font-size: 19px; background: #fbfbfa; }
+  .sem { display: flex; gap: 8px; margin-right: 14px; } .sem i { width: 13px; height: 13px; border-radius: 50%; display: block; }
+  #conv { position: absolute; top: 64px; left: 0; right: 0; height: 850px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 44px 26px; }
+  .col { display: flex; flex-direction: column; gap: 22px; }
+  .eu { align-self: flex-end; background: #f1f0ed; border-radius: 20px; padding: 16px 20px; max-width: 620px; font-size: 21px; line-height: 1.5; }
+  .cmd { color: #8a8985; font-size: 20px; }
+  .txt { font-size: 21px; line-height: 1.6; }
+  .pensa { color: #8a8985; font-size: 20px; } .pensa b { color: #d97757; letter-spacing: 1px; }
+  #caixa { position: absolute; top: 925px; left: 34px; right: 34px; border: 1px solid #dedcd8; border-radius: 22px; padding: 20px 24px 54px;
+    font-size: 21px; color: #9b9a96; box-shadow: 0 2px 10px rgba(0,0,0,.05); background: #fff; min-height: 110px; }
+  #caixa.cheia { color: #1f1e1d; }
+  #caixa .cur { display: inline-block; width: 2px; height: 24px; background: #1f1e1d; vertical-align: -4px; margin-left: 1px; }
+  #rod { position: absolute; top: 1052px; right: 40px; font-size: 16px; color: #8a8985; }
+  #env { position: absolute; right: 18px; bottom: 14px; width: 38px; height: 38px; border-radius: 10px; background: #d9d7d2; }
+  #caixa.cheia #env { background: #d97757; }
+</style></head><body>
+<div id="barra"><div class="sem"><i style="background:#fe5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div><span id="ico">🧑🏻‍🎨</span> <b id="nome" style="font-weight:500">Designer</b><span id="sub" style="color:#9b9a96">· Neo Stitch</span></div>
+<div id="conv"><div class="col" id="col"></div></div>
+<div id="caixa"><span id="ct"></span><div id="env"></div></div>
+<div id="rod">Sonnet 5.5 · Automático</div>
+<script>
+  // HIST: a conversa anterior (real); NOVO: o pedido digitado na caixa de T0 a T1 e enviado em T1; depois "Trabalhando" e os comandos
+  window.HIST = []; window.NOVO = ''; window.T0 = 0; window.T1 = 1; window.CMDS = []
+  function bloco(cls, txt) { const d = document.createElement('div'); d.className = cls; d.textContent = txt; return d }
+  window.em = function (t) {
+    if (window.CAB) { ico.textContent = CAB[0]; nome.textContent = CAB[1]; sub.textContent = CAB[2] || '' }
+    const col = document.getElementById('col'); col.innerHTML = ''
+    for (const h of HIST) col.appendChild(bloco(h[0], h[1]))
+    if (!NOVO) { col.style.transform = 'translateY(' + ((window.ROLA || 0) * (1 - t / (window.DUR || 1))).toFixed(1) + 'px)'; return }
+    const cx = document.getElementById('caixa'), ct = document.getElementById('ct')
+    if (t < T1) {
+      const n = Math.max(0, Math.min(NOVO.length, Math.round(NOVO.length * (t - T0) / (T1 - T0))))
+      ct.innerHTML = n ? NOVO.slice(0, n).replace(/</g, '&lt;') + '<span class="cur"></span>' : 'Responder…'
+      cx.className = n ? 'cheia' : ''
+    } else {
+      ct.textContent = 'Responder…'; cx.className = ''
+      col.appendChild(bloco('eu', NOVO))
+      const feitos = CMDS.filter((c) => t >= c).length
+      if (feitos) col.appendChild(bloco('cmd', 'Executou ' + feitos + (feitos > 1 ? ' comandos ›' : ' comando ›')))
+      const p = document.createElement('div'); p.className = 'pensa'
+      p.innerHTML = '<b>' + ['·  ', '·· ', '···'][Math.floor(t * 3) % 3] + '</b> Trabalhando'; col.appendChild(p)
+    }
+  }
+</script>
+</body></html>

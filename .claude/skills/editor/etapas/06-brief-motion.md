@@ -1,7 +1,6 @@
 Escreva um preset de motion novo em {raiz}/biblioteca/motions/presets/{preset}.html (id: {preset}) para o editor de
 Reels em {raiz}.
-Leia antes: os APRENDIZADOS no fim deste brief (o que o criador já corrigiu nos motions, em qualquer vídeo e nos de
-{categoria}, a categoria deste: não repita nenhum); os recusados em
+Leia antes: o GUIA DE ESTILO no fim deste brief (o gosto do criador; a parte de Motions e de A tela pesam mais); os recusados em
 {raiz}/biblioteca/motions/presets/_recusados/ (o JSON do topo tem o `motivo`), para não repetir; 2 presets existentes
 (prompt.html e lettering.html) e {raiz}/render/motion/runtime.js: copie a estrutura (o JSON <script id="preset">
 com nome, descricao, fundo, duracao, sons, "a_revisar": true e "projeto": "{projeto}"; o <script id="campos">; o <style>; a timeline do GSAP
@@ -28,5 +27,5 @@ ficar limpo e legível. No fim, grave a prévia que a página Motions do app toc
 previas-motions {preset}`. Não ligue o motion ao plano (quem edita liga) e não edite outros arquivos. Responda com o id,
 os campos e 1 linha sobre como ficou.
 
-APRENDIZADOS (motions)
+O GUIA DE ESTILO DO CRIADOR
 {aprendizados}

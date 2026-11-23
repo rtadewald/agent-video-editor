@@ -4,7 +4,7 @@ Gerada sozinha da fala cortada, no estilo medido nas referências: SF Pro Displa
 minúsculas como na fala, centralizada, **uma palavra por vez**, na altura de cada tipo de plano (desviando da costura da
 tela dividida e do card do comentário). Entra 0,17 s antes da palavra.
 
-> **Antes de começar, leia `biblioteca/aprendizados/legenda.md` (+ `biblioteca/exemplos/<categoria>/aprendizados/legenda.md`)**: o que o criador já corrigiu em vídeos anteriores. Não repita esses erros.
+> **O gosto está em `guias/padrao.md`** (leia antes de começar). Aqui fica só o como.
 
 ## O que você faz
 

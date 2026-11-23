@@ -111,17 +111,16 @@ sobe quando a fala dele muda. Por isso, depois de renderizar o CTA, **renderize 
 remonta as saídas, em segundos): sem isso a prévia continua com o CTA anterior e o criador não vê a correção. Responda
 os comentários do Final na revisão do corpo (é onde eles estão), como os de qualquer bloco. _design-por-imagem v27 · 2026-10-28_
 
-## Aprendizados: ler sempre, gravar só na conclusão
+## Ler tudo, pensar no todo
 
-**Antes de aplicar cada comentário, leia os aprendizados da área dele** (um comentário de insert: `inserts.md`; de
-zoom ou preset: `enriquecimento.md`; de motion: `motions.md`; de corte: `cortes.md`…), o geral
-(`biblioteca/aprendizados/<área>.md`) e o da categoria (`biblioteca/exemplos/<categoria>/aprendizados/<área>.md`): a
-correção que o criador pede costuma já estar escrita ali, e a sua solução não pode criar outro erro que já está.
-
-Não grave aprendizados no meio das revisões: eles saem todos juntos quando o vídeo é aprovado (`14-concluir.md`), lendo
-as revisões de todas as versões. Aqui, só cuide de responder bem cada comentário (a resposta diz o que mudou: é o
-registro que a conclusão lê). Exceção: se o criador disser explicitamente que algo vale para sempre ("regra geral",
-"sempre", "nunca mais"), confirme com ele o texto e grave já, como manda o `14-concluir.md`.
+- **Leia todos os pendentes antes de mexer em qualquer coisa**: uns valem para o vídeo inteiro ("menos de 90 s", "o
+  zoom está estranho", "ocupa a tela") e mudam o que os outros pedem. Aplique primeiro os que valem para o todo.
+- **Um comentário sobre um tipo de erro é sobre o vídeo inteiro**: corrija o ponto e procure o mesmo erro em todas as
+  outras cenas. "Mesma coisa aqui… mesma coisa aqui" é sinal de que isso faltou.
+- O guia (`guias/padrao.md`) costuma já ter a resposta; a correção não pode criar outro erro que ele já descreve.
+- Quando o criador diz que algo vale para sempre ("sempre", "nunca mais", "regra geral"), confirme com ele o texto e
+  ponha no guia já. O resto espera a conclusão (`14-concluir.md`), que lê as respostas de todas as revisões.
+- Depois de aplicar, revise a versão nova com olho crítico (`10-render.md`), não só os pontos comentados.
 
 **O look é do criador.** Na revisão, o botão **Look** do app prova LUT, intensidade e vinheta em 3 s do bruto e, ao
 aplicar, grava `edicao.look` e renderiza uma versão nova sozinho (sem comentários). Não mude o look de volta: se uma
