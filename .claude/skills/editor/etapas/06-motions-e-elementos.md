@@ -52,7 +52,11 @@ Um plano `tela_dividida_motion` do começo ao fim, com `formato: "vertical"`, `a
 **Cada fala provada com material real e escolhido para ela**, nunca os inserts da versão anterior por inércia: os apps
 do criador gravados de verdade, os vídeos de outras pessoas e a prova com número (ex.: o gráfico do star-history.com
 para "começou nos últimos meses"); nada de imagem gerada fingindo ser app. Trecho de gravação com o player piscando
-preto no começo: corte o trecho depois disso (`folha.py --soltos` acha). Recusados antes dele: janelas do Mac com zoom
+preto no começo: corte o trecho depois disso (`folha.py --soltos` acha); um vídeo com um pulo ou zoom brusco no meio
+vira dois trechos, um antes e um depois, trocando na palavra mais próxima. **Um motion em 3D no meio do contínuo** (o
+criador pede para explicar um conceito) é um plano `tela_dividida_motion` só dele entre dois planos da vitrine, com o
+mesmo `ator` e `legenda_y` e, no `--pedido` do brief, o fundo da vitrine (#0b0b0c com a grade) e a cena só no canvas de
+cima (13,5–69%): sai sem emenda. Recusados antes dele: janelas do Mac com zoom
 nas caixas, a tela dividida 70/30 e o estúdio branco em 3D (o `estudio-branco` fica na biblioteca, sem uso).
 _claude-code-apps-2 · 2026-11-23_
 
