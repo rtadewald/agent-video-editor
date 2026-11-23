@@ -17,7 +17,8 @@ import { QUADRO } from './quadro'
  *    no vídeo (`x`, `y`, `escala`). A **caixa** (REF-15·p42): uma caixa quase quadrada centrada embaixo, com o rosto e os
  *    ombros enquadrados dentro (`escala` = a largura da caixa). */
 export type ModoAtor = 'janela' | 'recortado' | 'canto' | 'caixa'
-export type AjusteAtor = { modo?: ModoAtor; x?: number; y?: number; escala?: number; dx?: number; dy?: number; zoom?: number }
+/** `topo`: na janela, onde ela começa dentro do quadro do ator (fração; padrão `TOPO_JANELA`): mais baixo, só a cabeça sai. */
+export type AjusteAtor = { modo?: ModoAtor; x?: number; y?: number; escala?: number; dx?: number; dy?: number; zoom?: number; topo?: number }
 export type Rosto = { cx: number; cy: number; w: number; h: number }
 /** `topo`: na janela, onde ela começa dentro do quadro do ator (fração); `raio`: o raio dos cantos (fração da largura
  *  do quadro do ator encolhido). */
@@ -95,7 +96,7 @@ export function geometriaDoAtor(d: Divisao | null, aj: AjusteAtor | null | undef
   const xAuto = modo !== 'canto' && rosto ? limite(0.5 - s * (rosto.cx - 0.5), s / 2, 1 - s / 2) : p.x
   const x = aj?.x ?? xAuto
   const y = aj?.y ?? (modo === 'canto' ? p.y : 1 - s / 2)
-  return { modo, s, tx: x - s / 2, ty: y - s / 2, topo: modo === 'janela' ? TOPO_JANELA : undefined, raio: modo === 'recortado' ? undefined : RAIO }
+  return { modo, s, tx: x - s / 2, ty: y - s / 2, topo: modo === 'janela' ? aj?.topo ?? TOPO_JANELA : undefined, raio: modo === 'recortado' ? undefined : RAIO }
 }
 
 /** A caixa: quase quadrada (no quadro 9:16), centrada em (`x`, `y`), o ator ampliado pelo rosto e sempre cobrindo a caixa. */

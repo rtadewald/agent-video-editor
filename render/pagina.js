@@ -574,7 +574,7 @@
     const xAuto = modo !== "canto" && rosto ? limite2(0.5 - s * (rosto.cx - 0.5), s / 2, 1 - s / 2) : p.x;
     const x = aj?.x ?? xAuto;
     const y = aj?.y ?? (modo === "canto" ? p.y : 1 - s / 2);
-    return { modo, s, tx: x - s / 2, ty: y - s / 2, topo: modo === "janela" ? TOPO_JANELA : void 0, raio: modo === "recortado" ? void 0 : RAIO };
+    return { modo, s, tx: x - s / 2, ty: y - s / 2, topo: modo === "janela" ? aj?.topo ?? TOPO_JANELA : void 0, raio: modo === "recortado" ? void 0 : RAIO };
   }
   function caixaDoAtor(aj, rosto) {
     const p = PADRAO_MODO.caixa;
