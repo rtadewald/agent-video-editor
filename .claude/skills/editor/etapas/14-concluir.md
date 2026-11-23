@@ -99,6 +99,18 @@ gostos daquele formato). As etapas leem os dois.
    ilustrou ("home da Anthropic, título serifado em fundo creme; usada como exemplo de 'clichê de site de IA'"),
    palavras-chave pelos assuntos em que ela serve (edite o `item.json`, ou `banco.py descrever <id>` para a IA sugerir e
    depois corrija). Se só um pedaço do vídeo é bom, crie o trecho (`banco.py trecho`).
+   **E a tag** (`tags` no `item.json` do original; o trecho não tem tag própria): uma, no máximo duas, sempre das que
+   já existem. A tag diz **o que a mídia mostra**, não onde foi usada (o uso o card já mostra); o tema fino (n8n, MCP,
+   prompts) vai nas palavras-chave. Tag nova só com 3 mídias ou mais, e perguntando ao criador. A árvore:
+   - `asimov/`: aulas, cursos, formacoes, hub, site, design-systems (a galeria ds.asimov), autoridade (eventos, equipe,
+     podcasts, seguidores), asimov-skills, prisma, ofertas (preços, planos, checkout);
+   - `bf26`: a campanha da Black (a live, a arte, as VSLs dela);
+   - `projeto/` (o que o criador fez e gravou): neo-stitch, interfaces (rodando no monitor), neo-obsidian, editor,
+     agentes, skills (as dele), testes (os testes e demos que ele rodou);
+   - `sites/` (de fora): 3d, referencias, ai-slop;
+   - `ferramentas/` (produtos de terceiros, a tela ou o anúncio oficial): claude, openai, google, agentes, skills, voz,
+     dev, redes (YouTube, Instagram, TikTok, Hacker News);
+   - `noticias` e `broll`.
 
 ## 3. Consolidar (a cada 5 vídeos aprovados)
 

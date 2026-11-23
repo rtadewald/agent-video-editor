@@ -21,7 +21,7 @@ inserts ligados, os presets e o zoom deles e o pré-render em segundo plano (`05
 ## De onde vem a mídia (nesta ordem)
 
 1. **Materiais do criador** (`projetos/<slug>/apoio/`): se servem, use-os (suba ao banco).
-2. **O banco** (`banco.py buscar "<termos>"`, e pelo projeto e pela tag `#projeto`: o que o criador gravou): prefira
+2. **O banco** (`banco.py buscar "<termos>"`, e pelo projeto e pelas tags `projeto/…`: o que o criador gravou e fez): prefira
    as **★ usado em vídeo aprovado** e as **✓ aprovado**; evite as **✗ recusado**.
 3. **Captura do site real** (`captura.py <url> --proporcao <16:9|9:16> --duracao <s> --projeto <slug>`), quando a fala
    cita um site, ferramenta, produto ou repositório. Num vídeo **deitado** (16:9), tudo em 16:9.
@@ -49,7 +49,7 @@ banco). Um "não" e a mídia não entra:
 - **1º quadro com conteúdo:** nada de branco, loader ou tela de carregamento; e o trecho não pode começar 1 quadro
   antes da mídia trocar (olhe os 3 primeiros quadros do trecho: `banco.py trecho` com o início medido).
 - **Produto em ação** em vez de página, doc ou tabela (página só se a fala cita a própria página).
-- **Do criador primeiro:** apoio, banco `#projeto` e ★ foram olhados antes da web?
+- **Do criador primeiro:** apoio, banco `projeto/…` e ★ foram olhados antes da web?
 - **Atual:** a interface e os nomes de hoje.
 - **Proporção:** horizontal nunca cortado em 9:16; nada cropado; recortado no que impressiona.
 - **Limpo:** sem marca d'água, cronômetro, legenda do original, barra do navegador, papel de parede, página poluída ou
