@@ -144,6 +144,18 @@ def copias_do_banco(edicao: dict) -> int:
     banco.arquivo_para_exportar. Devolve quantas fez."""
     feitas = 0
     usados = {m['banco'] for x in (edicao.get('inserts') or {}).get('pedidos', []) for m in x.get('midias', []) if m.get('banco')}
+    # os vídeos de dentro dos motions (o campo `midias` de um preset, como o da vitrine): sem a cópia, a página buscava
+    # no original, de quadro-chave raro, e o vídeo saía travado no render
+    for m in (edicao.get('motions') or {}).values():
+        ids = (m.get('valores') or {}).get('midias') if isinstance(m, dict) else None
+        if isinstance(ids, str):
+            try:
+                ids = json.loads(ids)
+            except ValueError:
+                ids = []
+        usados |= {i for i in (ids or []) if isinstance(i, str)}
+        if isinstance(m, dict) and m.get('video'):
+            usados.add(m['video'])
     for base in sorted({(ler_json(BIBLIOTECA / 'banco' / b / 'item.json') or {}).get('pai') or b for b in usados}):
         pasta_item = BIBLIOTECA / 'banco' / base
         item = ler_json(pasta_item / 'item.json')

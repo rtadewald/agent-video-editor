@@ -56,7 +56,11 @@ preto no começo: corte o trecho depois disso (`folha.py --soltos` acha); um ví
 vira dois trechos, um antes e um depois, trocando na palavra mais próxima. **Um motion em 3D no meio do contínuo** (o
 criador pede para explicar um conceito) é um plano `tela_dividida_motion` só dele entre dois planos da vitrine, com o
 mesmo `ator` e `legenda_y` e, no `--pedido` do brief, o fundo da vitrine (#0b0b0c com a grade) e a cena só no canvas de
-cima (13,5–69%): sai sem emenda. Recusados antes dele: janelas do Mac com zoom
+cima (13,5–69%): sai sem emenda. **Zooms calmos** (o criador, na referência do Caféra): numa gravação de tela, a câmera vai
+com calma de um destaque ao outro, `pontos: [[x, y, zoom, t]…]` (t em s desde o começo da cena), em vez de mostrar a
+tela inteira parada. Uma sequência de resultados troca com `clique: true` (o som do clique). As gravações de app que
+rolam saem quadro a quadro em 2x (a rolagem posta a cada quadro e a foto do recorte), nunca do screencast em 1x com a
+roda do mouse, que trava ("parece fps errado"). Recusados antes dele: janelas do Mac com zoom
 nas caixas, a tela dividida 70/30 e o estúdio branco em 3D (o `estudio-branco` fica na biblioteca, sem uso).
 _claude-code-apps-2 · 2026-11-23_
 
