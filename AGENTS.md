@@ -21,6 +21,8 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
   e `imagens/`), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
   `lixeira/` (o que se apaga no app: `base.para_lixeira`; restaurar ou apagar de vez pela página Lixeira).
 - `projetos/<slug>/` (fora do git): um vídeo por pasta.
+- `animacoes/<slug>/animacao.json` (fora do git): uma animação por pasta, as cenas na ordem (presets de
+  `biblioteca/motions/presets/`, tocados pelas prévias gravadas); no app, Animações (`app/animacoes.js`).
 - `carrosseis/<slug>/` (fora do git): um carrossel por pasta (4:5; `ferramentas/carrossel.py`, os slides em
   `render/carrossel.html` e os 4 presets, com 5 destaques cada, em `render/carrossel.css`).
 

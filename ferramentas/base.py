@@ -13,6 +13,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 # fora do git: a biblioteca (o que serve a qualquer vídeo; copia-se entre máquinas, por cima) e os projetos de cada um
 BIBLIOTECA = RAIZ / 'biblioteca'
 PROJETOS = RAIZ / 'projetos'
+# as animações (fora do git): animacoes/<slug>/animacao.json, as cenas na ordem (presets de biblioteca/motions/presets/)
+ANIMACOES = RAIZ / 'animacoes'
 # na biblioteca, o que o Claude lê para editar: os exemplos da direção (criador.md e uma pasta por categoria de vídeo,
 # gerados pela Calibragem) e os aprendizados (um .md por área, as correções do criador)
 EXEMPLOS = BIBLIOTECA / 'exemplos'

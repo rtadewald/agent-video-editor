@@ -1,7 +1,7 @@
 // O app de revisão: roteamento pelo endereço e o início (os projetos). As páginas: #/ (projetos), #/p/<slug>[/vN] (a
 // revisão de uma versão), #/calibragem[/<id>], #/referencias, #/heuristica, #/aprendizados[/<área>] e as da biblioteca
 // (#/presets, #/transicoes[/<de>><para>], #/banco (os inserts), #/motions, #/trilhas); os carrosséis: #/carrosseis e
-// #/c/<slug>[/vN] (carrosseis.js).
+// #/c/<slug>[/vN] (carrosseis.js); as animações: #/animacoes e #/a/<slug> (animacoes.js).
 import { $, $$, ICONE, abasAbertas, abrirAba, aviso, preferencia, chipCodigo, codigos, confirmar, copiar, enviar, esc, fecharAba, json, mmss } from './comum.js'
 import { abrirRevisao } from './revisao.js'
 import { abrirBiblioteca, PAGINAS_BIBLIOTECA, preCarregarBanco } from './biblioteca.js'
@@ -9,6 +9,7 @@ import { abrirCalibragem, abrirRevisaoReferencia } from './calibragem.js'
 import { abrirAprendizados, abrirHeuristica, abrirReferencias } from './referencias.js'
 import { abrirLixeira } from './lixeira.js'
 import { abrirCarrossel, abrirCarrosseis } from './carrosseis.js'
+import { abrirAnimacao, abrirAnimacoes } from './animacoes.js'
 import { barraDeTags, datalistTags, htmlTagsCard, ligarTags, tagEscolhida, temTag } from './tags.js'
 import { CATEGORIA_PADRAO, botaoCategorias, carregarCategorias, categoriaCta, editarCategorias, pilulasCategoria, seletorCategoria } from './categorias.js'
 
@@ -354,8 +355,8 @@ async function rotear() {
   $('#barra-versao').innerHTML = ''
   desenharAbas()
   // os projetos abrem pela marca; num projeto, acende a aba dele; o endereço antigo dos motions (#/banco/motions) acende Motions
-  const aba = !partes[0] ? 'projetos' : partes[0] === 'banco' && partes[1] === 'motions' ? 'motions' : partes[0] === 'transicoes' ? 'presets' : partes[0] === 'c' ? 'carrosseis' : partes[0] // as transições moram na aba Presets
-  for (const a of $$('.abas a, .abas-casa a')) a.classList.toggle('ativa', a.dataset.aba === aba)
+  const aba = !partes[0] ? 'projetos' : partes[0] === 'banco' && partes[1] === 'motions' ? 'motions' : partes[0] === 'transicoes' ? 'presets' : partes[0] === 'c' ? 'carrosseis' : partes[0] === 'a' ? 'animacoes' : partes[0] // as transições moram na aba Presets
+  for (const a of $$('.abas a, .lateral a')) a.classList.toggle('ativa', a.dataset.aba === aba)
   document.body.classList.toggle('em-revisao', (partes[0] === 'p' || partes[0] === 'calibragem') && !!partes[1])
   let s
   // #/p/<slug>/vN/t12.3 (o chip "usado em" do Banco e dos Motions): a revisão abre naquele instante
@@ -370,6 +371,8 @@ async function rotear() {
   else if (partes[0] === 'aprendizados') s = await abrirAprendizados(tela, partes[1])
   else if (partes[0] === 'lixeira') s = await abrirLixeira(tela)
   else if (partes[0] === 'carrosseis') s = await abrirCarrosseis(tela)
+  else if (partes[0] === 'animacoes') s = await abrirAnimacoes(tela)
+  else if (partes[0] === 'a' && partes[1]) s = await abrirAnimacao(tela, partes[1])
   else if (partes[0] === 'c' && partes[1]) s = await abrirCarrossel(tela, partes[1], partes[2] ? parseInt(partes[2].replace(/^v/, ''), 10) : null)
   else if (PAGINAS_BIBLIOTECA.includes(partes[0])) s = await abrirBiblioteca(tela, partes[0], partes.slice(1))
   else s = await inicio(tela, partes[0] === 'ctas')
@@ -400,6 +403,15 @@ document.addEventListener('click', (e) => {
 }, true)
 for (const ev of ['pointerdown', 'mousedown']) document.addEventListener(ev, (e) => botaoCopiar(e.target) && e.stopPropagation(), true)
 
+// a sidebar aberta ou recolhida: o botão de baixo alterna, e fica assim em todas as páginas (lembrado neste navegador)
+const lateral = (fechada) => {
+  document.body.classList.toggle('lateral-fechada', fechada)
+  const b = $('[data-recolher-lateral]')
+  b.title = fechada ? 'Abrir a barra' : 'Recolher a barra (só os ícones)'
+  b.setAttribute('aria-label', fechada ? 'Abrir a barra' : 'Recolher a barra')
+}
+lateral(preferencia('lateral.fechada', false))
+$('[data-recolher-lateral]').addEventListener('click', () => lateral(preferencia('lateral.fechada', false, !document.body.classList.contains('lateral-fechada'))))
 window.addEventListener('hashchange', rotear)
 setTimeout(preCarregarBanco, 1500) // o Banco e os Motions já lidos quando a aba abrir
 rotear()

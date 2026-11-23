@@ -12,13 +12,6 @@
 <body>
   <header class="barra">
     <a class="logo" href="#/" title="Projetos" aria-label="Projetos"><span class="marca-otto" aria-hidden="true"><i></i><i></i><i></i><i></i></span></a>
-    <!-- os vídeos (os projetos e, à parte, os CTAs: os de categoria com "CTA" no nome) e os carrosséis -->
-    <nav class="abas-casa">
-      <a href="#/" data-aba="projetos" class="pilula" title="Projetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>Projetos</span></a>
-      <a href="#/ctas" data-aba="ctas" class="pilula" title="CTAs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>CTAs</span></a>
-      <a href="#/carrosseis" data-aba="carrosseis" class="pilula" title="Carrosséis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/></svg><span>Carrosséis</span></a>
-    </nav>
-    <span class="barra-sep"></span>
     <div id="abas-projetos" class="abas-projetos"></div>
     <div id="barra-versao" class="barra-versao"></div>
     <span class="barra-sep sep-trilha"></span>
@@ -41,6 +34,14 @@
       </div>
     </nav>
   </header>
+  <!-- à esquerda, o que se edita: os projetos, os carrosséis, as animações e os CTAs (os vídeos de categoria com "CTA" no nome) -->
+  <nav class="lateral">
+    <a href="#/" data-aba="projetos" class="pilula" title="Projetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>Projetos</span><small>Reels e VSL</small></a>
+    <a href="#/carrosseis" data-aba="carrosseis" class="pilula" title="Carrosséis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/></svg><span>Carrosséis</span></a>
+    <a href="#/animacoes" data-aba="animacoes" class="pilula" title="Animações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg><span>Animações</span></a>
+    <a href="#/ctas" data-aba="ctas" class="pilula" title="CTAs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg><span>CTAs</span></a>
+    <button type="button" class="lateral-recolher" data-recolher-lateral title="Recolher a barra (só os ícones)" aria-label="Recolher a barra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg><span>Recolher</span></button>
+  </nav>
   <main id="tela"></main>
   <div id="aviso" class="aviso" role="status"></div>
 </body>

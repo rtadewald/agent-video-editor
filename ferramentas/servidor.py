@@ -23,6 +23,7 @@ Rotas (JSON; um erro volta como {"erro": "…"}, com 422 numa validação):
   roteiros de exemplo dela, com os tempos dos planos. · GET|PUT /api/categorias {categorias} (as categorias de vídeo:
   Reels, Ad…; uma em uso não sai) · PUT /api/referencias/<id>/categoria {categoria} · PUT /api/projetos/<slug>/categoria
   {categoria} · o POST /api/referencias aceita a categoria no cabeçalho X-Categoria.
+- Animações (animacoes/<slug>/animacao.json): GET /api/animacoes · GET /api/animacoes/<slug> (as cenas com a prévia e a duração de cada preset).
 - Carrosséis (ferramentas/carrossel.py): GET|POST /api/carrosseis {nome, tipo, origem, pedido} · GET /api/carrosseis/<slug>
   (com as revisões) · POST …/<slug>/entrada (o arquivo cru no corpo, nome em X-Nome) · PUT …/<slug>/preset {preset, destaque, cor?}
   (num aprovado, exporta de novo) · PUT …/<slug>/texto/v<N>/<i> {texto} (o criador edita o texto do slide i, de 0, na
@@ -71,7 +72,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).parent))
-from base import (APRENDIZADOS, BIBLIOTECA, CATEGORIA_PADRAO, EXEMPLOS, PROJETOS, RAIZ, apagar_de_vez, gravar_json, ler_json, listar_lixeira, migrar_lixeiras_antigas,  # noqa: E402
+from base import (ANIMACOES, APRENDIZADOS, BIBLIOTECA, CATEGORIA_PADRAO, EXEMPLOS, PROJETOS, RAIZ, apagar_de_vez, gravar_json, ler_json, listar_lixeira, migrar_lixeiras_antigas,  # noqa: E402
                   para_lixeira, preparar_biblioteca, renders_rodando, tamanho, renomear_tags, restaurar_da_lixeira, tag_limpa, tags_limpas)
 
 PORTA = 8719
@@ -1499,6 +1500,43 @@ def _recusar_motion(h, q, id_):
     destino.write_text(html, encoding='utf-8')
     arq.unlink()
     return {'ok': True, 'usos': usos_motion(id_)}
+
+
+# ---- as animações (animacoes/<slug>/animacao.json: {nome, estilo, cenas: [{preset, nome}]}, as cenas na ordem)
+
+def _info_motion(pid: str) -> dict:
+    """O JSON do preset (nome, descrição, duração, a_revisar) de biblioteca/motions/presets/<pid>.html."""
+    f = BIBLIOTECA / 'motions' / 'presets' / f'{pid}.html'
+    m = JSON_DO_MOTION.search(f.read_text(encoding='utf-8')) if f.is_file() else None
+    try:
+        return json.loads(m.group(2)) if m else {}
+    except ValueError:
+        return {}
+
+
+def _animacao(p: Path) -> dict:
+    meta = ler_json(p / 'animacao.json', {}) or {}
+    atualizado = (p / 'animacao.json').stat().st_mtime
+    cenas = []
+    for c in meta.get('cenas', []):
+        info, previa = _info_motion(c['preset']), BIBLIOTECA / 'motions' / 'previas' / f"{c['preset']}.mp4"
+        mt = previa.stat().st_mtime if previa.is_file() else 0
+        atualizado = max(atualizado, mt)
+        cenas.append({**c, 'duracao': info.get('duracao'), 'a_revisar': bool(info.get('a_revisar')), 'descricao': info.get('descricao', ''),
+                      'previa': f"/biblioteca/motions/previas/{c['preset']}.mp4?v={int(mt)}" if mt else None})
+    return {'slug': p.name, 'nome': meta.get('nome') or p.name, 'estilo': meta.get('estilo', ''), 'cenas': cenas, 'atualizado': atualizado}
+
+
+@rota('GET', '/api/animacoes')
+def _animacoes(h, q):
+    return {'animacoes': sorted((_animacao(f.parent) for f in ANIMACOES.glob('*/animacao.json')), key=lambda a: -a['atualizado'])}
+
+
+@rota('GET', r'/api/animacoes/([\w-]+)')
+def _ver_animacao(h, q, slug):
+    if not (ANIMACOES / slug / 'animacao.json').is_file():
+        raise Erro(f'Não encontrei a animação {slug}', 404)
+    return _animacao(ANIMACOES / slug)
 
 
 # ---- os carrosséis (ferramentas/carrossel.py: carrosseis/<slug>/)
