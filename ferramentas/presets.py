@@ -166,7 +166,7 @@ def escolher(slug: str) -> None:
         if not x.get('midias'):
             print(f'{rotulo}: sem mídia, fica sem preset')
             continue
-        if x['formato'] == 'dividida' and not e.get('divisao'):
+        if x['tipo'] == 'tela_dividida_insert' and not e.get('divisao'):
             # a tela dividida padrão: o ator na janela embaixo, a cabeça saindo por cima (05-enriquecimento.md)
             e = {**e, 'divisao': 'atras', 'ator': dict(ATOR_JANELA)}
             x['enriquecimento'] = e
