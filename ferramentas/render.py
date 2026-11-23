@@ -68,7 +68,7 @@ PROXY_DEITADO = (1280, 720, 'h264')
 FINAL_DEITADO = (3840, 2160, 'hevc')
 VELOCIDADE = (1.0, 1.5)
 # o código que desenha a camada: se muda, as fotos guardadas não valem mais
-CODIGO_CAMADA = [RAIZ / 'render' / x for x in ('index.html', 'pagina.js', 'motion.html')] + [BIBLIOTECA / 'motions' / 'runtime.js']
+CODIGO_CAMADA = [RAIZ / 'render' / x for x in ('index.html', 'pagina.js', 'motion.html')] + [RAIZ / 'render' / 'motion' / 'runtime.js']
 GUARDA = 3  # o cache da camada guarda os clipes usados nos últimos N renders do projeto
 
 

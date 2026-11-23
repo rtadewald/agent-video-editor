@@ -124,7 +124,8 @@
       var base = parseFloat(v.getAttribute('data-desde') || '0') // trechos: o início do trecho no arquivo
       v.muted = true
       v.pause()
-      var alvo = Math.max(0, t - ini) + base
+      // no meio do quadro (24 fps): buscar na borda entre dois quadros fazia o vídeo repetir um e pular o outro (travado)
+      var alvo = base + (Math.round(Math.max(0, t - ini) * 24) + 0.5) / 24
       if (v.duration) alvo = Math.min(alvo, v.duration - 0.01)
       return new Promise(function (r) {
         var ok = function () { r() }
