@@ -36,17 +36,26 @@ entra na 1ª palavra do plano, nunca no meio da frase com a tela parada no fundo
 No motion em tela cheia, a composição fica no meio da tela, nunca só na metade de cima com a de baixo vazia; a
 legenda desce para baixo dela (`motions[p].legenda_y`). _design-por-imagem v11 c2_
 
-### O motion contínuo (formato `alto`)
+### O motion contínuo (um motion o vídeo inteiro, ele pequeno embaixo)
 
-Quando o criador pede **uma tela fixa em cima e ele pequeno embaixo, com um motion só o vídeo inteiro**: um plano
-`tela_dividida_motion` do começo ao fim, com `motions[p].formato = "alto"` (o palco nos 70% de cima, 1080×1344; o ator
-na faixa de 30% de baixo, enquadrado pelo rosto) e `legenda_y: 0.70` (a legenda na costura). O preset `mesa-mac` é a
-mesa escura de um Mac (fundo `chuva`): janelas reais com os vídeos e prints do banco entram, deslizam e saem presas à
-fala. `valores.cenas` (JSON): `[{em: "as palavras onde começa", janelas: [{id, m: [ids do banco], troca: s (vários
-apps em corte seco), titulo, lugar: centro|cima|baixo, largura, zoom: [x, y, s, s0]}], cursor: [x, y]}]`; a janela de
-mesmo `id` na cena seguinte só desliza (e o vídeo continua). `valores.midias`: a lista de todos os ids usados (campo do
-tipo `midias`, que o `motion.html` resolve com os trechos). Limpo: no máximo o título da janela, nada de ícone ou texto
-solto; cada fala provada com material real. _claude-code-apps-2 · 2026-11-22_
+Quando o criador pede **uma tela fixa com um motion só o vídeo inteiro e ele pequeno embaixo**: "ele pequeno embaixo"
+é o **recortado** (só a silhueta, sem cenário; `uv run ferramentas/recorte.py <slug>` antes, ~10 min para 5 min de
+bruto), não a tela dividida. Um plano `tela_dividida_motion` do começo ao fim com `motions[p].formato = "vertical"` e
+`motions[p].ator = {modo: "recortado", escala, y}`: o motion na tela toda e o ator por cima. Ponha o corte da mesa e do
+notebook abaixo da borda (no bruto de mesa, `escala 0.48, y 0.894`: o peito encosta na borda) e a legenda na camiseta
+(`legenda_y ≈ 0.855`; legenda branca sobre o fundo branco some). Luminária ou objeto que vaza na máscara: apague a área
+na `midia/recorte/<bruto>_mascara.mp4` (`drawbox` preto), nunca no original.
+O preset `mesa-mac` é a mesa **branca** de um Mac: janelas reais em tema claro com os vídeos e prints do banco entram,
+deslizam e saem presas à fala. `valores.cenas` (JSON): `[{em: "as palavras onde começa", janelas: [{id, m: [ids do
+banco], troca: s (vários apps em corte seco), titulo, pos: [cx, cy] (frações do palco), largura, altura, atraso: s (uma
+depois da outra), revela: 0.36 (um gráfico que se desenha da esquerda, com o eixo à mostra desde a entrada), zoom: [x,
+y, s, s0]}], cursor: [x, y]}]`; a janela de mesmo `id` na cena seguinte só desliza (e o vídeo continua).
+`valores.midias`: a lista de todos os ids usados (campo do tipo `midias`). Janelas grandes (800–1020 px), na parte de
+cima (até ~0,63 da altura), no máximo 4 de uma vez. Limpo: no máximo o título da janela, nada de ícone ou texto solto.
+**Cada fala provada com material real e escolhido para ela**, nunca os inserts da versão anterior por inércia: os apps
+do criador gravados de verdade, os vídeos de outras pessoas e a prova com número (ex.: o gráfico do star-history.com
+para "começou nos últimos meses"); nada de imagem gerada fingindo ser app. O formato `alto` (motion nos 70% de cima,
+ator na faixa de baixo) continua existindo, mas não é o "pequeno embaixo". _claude-code-apps-2 · 2026-11-23_
 
 ### Motion novo
 

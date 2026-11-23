@@ -1,11 +1,13 @@
 // do 18: frontend/src/motions/api.ts e motions/sons.ts (a fala do plano, o endereço da página e os sons), sem a API: a
 // página de cada motion é montada no navegador por render/motion.html, a partir de biblioteca/motions/
+import type { AjusteAtor } from './ator'
 import { eventoNoTempo, INTENSIDADES, type Catalogo, type EventoSom, type Intensidade } from './sons'
 
 /** `alto`: a tela dividida com o motion nos 70% de cima (1080×1344) e o ator na faixa de baixo (o motion contínuo). */
 export type Formato = 'vertical' | 'dividida' | 'alto'
 /** O motion de um plano: um preset (com os valores e o fundo) ou um vídeo do banco. */
-export type MotionPlano = { nome: string; formato: Formato; usado_em?: string; legenda_y?: number } & (
+/** `ator`: o ator pequeno por cima do motion em tela cheia (o "ator embaixo": `recortado`, `janela`, `canto`, `caixa`). */
+export type MotionPlano = { nome: string; formato: Formato; usado_em?: string; legenda_y?: number; ator?: AjusteAtor } & (
   | { tipo: 'preset'; preset: string; valores: Record<string, string>; fundo: string; sons?: Record<string, { som: string | null; intensidade: Intensidade }> }
   | { tipo: 'video'; banco: string }
 )

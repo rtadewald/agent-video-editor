@@ -1931,7 +1931,7 @@ ${b}`, tam, n: 2, sobra };
     const visiveis = paraTempo(edicao.direcao?.itens ?? [], d.palavras, saida, seq.duracao).visiveis;
     const planos = visiveis.filter((i) => i.camada === "plano");
     const elementos = visiveis.filter((i) => i.camada === "elemento");
-    const comMotion = planos.filter((pl) => motions[pl.id]).map((pl) => ({ plano: pl.id, ini: pl.inicio, fim: pl.fim, dividida: pl.tipo === "tela_dividida_motion", f: fracaoDoMotion(motions[pl.id].formato), fala: falaDoPlano(saida, pl.inicio, pl.fim) }));
+    const comMotion = planos.filter((pl) => motions[pl.id]).map((pl) => ({ plano: pl.id, ini: pl.inicio, fim: pl.fim, dividida: pl.tipo === "tela_dividida_motion", f: fracaoDoMotion(motions[pl.id].formato), ator: QUADRO.deitado ? void 0 : motions[pl.id].ator, fala: falaDoPlano(saida, pl.inicio, pl.fim) }));
     const lista2 = pedidosNoTempo(ins.pedidos ?? [], planos).filter((x) => x.midias.length);
     const fundoInserts = ins.fundo ?? "gradiente";
     const cortes = cortesDoVideo(planos, d.transicoes, d.escolhas);
@@ -1942,8 +1942,8 @@ ${b}`, tam, n: 2, sobra };
         return { ini: x.t.inicio, fim: x.t.fim, dividida: x.formato === "dividida", divisao: divisao && { ...divisao, ator } };
       }),
       ...comMotion.map((m) => {
-        const divisao = m.dividida ? { modo: "metade", tipo: "area", f: QUADRO.deitado ? LADO : m.f } : null;
-        return { ini: m.ini, fim: m.fim, dividida: m.dividida, divisao: divisao && { ...divisao, ator: geometriaDoAtor(divisao, null, rostoEm?.(m.ini, m.fim) ?? null) } };
+        const divisao = m.ator ? { modo: "atras", tipo: "atras", f: 1 } : m.dividida ? { modo: "metade", tipo: "area", f: QUADRO.deitado ? LADO : m.f } : null;
+        return { ini: m.ini, fim: m.fim, dividida: m.dividida || !!m.ator, divisao: divisao && { ...divisao, ator: geometriaDoAtor(divisao, m.ator ?? null, rostoEm?.(m.ini, m.fim) ?? null) } };
       })
     ];
     const lugarEm = (ini, fim, t = (ini + fim) / 2) => {
@@ -1959,7 +1959,7 @@ ${b}`, tam, n: 2, sobra };
         const d2 = divisaoDe(x, banco, presets);
         return { modo: d2?.modo ?? "cheia", f: d2?.f ?? 1, rosto: null };
       }
-      if (m) return { modo: m.dividida ? "metade" : "cheia", f: m.dividida ? m.f : 1, rosto: null };
+      if (m) return { modo: m.ator ? "atras" : m.dividida ? "metade" : "cheia", f: m.dividida && !m.ator ? m.f : 1, rosto: null };
       return { modo: "ator", f: 1, rosto };
     };
     const caixinhaEm = (ini, fim) => {
