@@ -2,7 +2,8 @@
 // página de cada motion é montada no navegador por render/motion.html, a partir de biblioteca/motions/
 import { eventoNoTempo, INTENSIDADES, type Catalogo, type EventoSom, type Intensidade } from './sons'
 
-export type Formato = 'vertical' | 'dividida'
+/** `alto`: a tela dividida com o motion nos 70% de cima (1080×1344) e o ator na faixa de baixo (o motion contínuo). */
+export type Formato = 'vertical' | 'dividida' | 'alto'
 /** O motion de um plano: um preset (com os valores e o fundo) ou um vídeo do banco. */
 export type MotionPlano = { nome: string; formato: Formato; usado_em?: string; legenda_y?: number } & (
   | { tipo: 'preset'; preset: string; valores: Record<string, string>; fundo: string; sons?: Record<string, { som: string | null; intensidade: Intensidade }> }
@@ -12,6 +13,10 @@ export type MotionPlano = { nome: string; formato: Formato; usado_em?: string; l
 export type Fala = { texto: string; ini: number; fim: number }[]
 /** Os momentos de som que o preset declara (o JSON `preset` da página: rótulo e som padrão de cada um). */
 export type SonsDoPreset = Record<string, { som: string | null; intensidade: Intensidade }>
+
+/** A altura do palco de cada formato (px, na largura 1080) e a fração do quadro que o motion dividido ocupa em cima. */
+export const PALCO_H: Record<Formato, number> = { vertical: 1920, dividida: 960, alto: 1344 }
+export const fracaoDoMotion = (f: Formato) => (f === 'alto' ? 0.7 : 0.5)
 
 /** O fundo atrás do motion: o do preset; um vídeo cobre o palco todo, sem fundo. */
 export const fundoDoMotion = (m: MotionPlano) => (m.tipo === 'preset' ? m.fundo : undefined)
@@ -78,7 +83,7 @@ export const marcasDe = (w: Window | null | undefined): Promise<Marca[]> => (w a
 export function marcasDaPagina(src: string, formato: Formato): Promise<Marca[]> {
   return new Promise((ok) => {
     const f = document.createElement('iframe')
-    f.style.cssText = `position:fixed;left:-99999px;top:0;width:1080px;height:${formato === 'vertical' ? 1920 : 960}px;visibility:hidden`
+    f.style.cssText = `position:fixed;left:-99999px;top:0;width:1080px;height:${PALCO_H[formato] ?? 960}px;visibility:hidden`
     const fim = (m: Marca[]) => {
       clearTimeout(limite)
       f.remove()

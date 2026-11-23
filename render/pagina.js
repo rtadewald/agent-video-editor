@@ -287,6 +287,8 @@
   }
 
   // src/motions.ts
+  var PALCO_H = { vertical: 1920, dividida: 960, alto: 1344 };
+  var fracaoDoMotion = (f) => f === "alto" ? 0.7 : 0.5;
   var fundoDoMotion = (m) => m.tipo === "preset" ? m.fundo : void 0;
   var falaDoPlano = (palavras, ini, fim) => palavras.filter((w) => w.saida_ini >= ini - 0.01 && w.saida_ini < fim).map((w) => ({ texto: w.texto, ini: +(w.saida_ini - ini).toFixed(3), fim: +(w.saida_fim - ini).toFixed(3) }));
   var urlPaginaMotion = (m, duracao, fala, exportacao = false) => m.tipo === "video" ? `/render/motion.html?video=${m.banco}&formato=${m.formato}&duracao=${duracao.toFixed(3)}${exportacao ? "&exportacao=1" : ""}` : `/render/motion.html?preset=${m.preset}&formato=${m.formato}&duracao=${duracao.toFixed(3)}&valores=${encodeURIComponent(JSON.stringify(m.valores ?? {}))}&fala=${encodeURIComponent(JSON.stringify(fala))}${exportacao ? "&exportacao=1" : ""}`;
@@ -324,7 +326,7 @@
   function marcasDaPagina(src, formato) {
     return new Promise((ok) => {
       const f = document.createElement("iframe");
-      f.style.cssText = `position:fixed;left:-99999px;top:0;width:1080px;height:${formato === "vertical" ? 1920 : 960}px;visibility:hidden`;
+      f.style.cssText = `position:fixed;left:-99999px;top:0;width:1080px;height:${PALCO_H[formato] ?? 960}px;visibility:hidden`;
       const fim = (m) => {
         clearTimeout(limite3);
         f.remove();
@@ -1527,7 +1529,7 @@
     const area = !divisao ? { y: 0, h: 1 } : QUADRO.deitado ? { x: 0, w: divisao.f, y: 0, h: 1 } : { y: 0, h: divisao.f };
     return { area, fundo: r.fundo === "proprio" ? f.id : null, cards: cards2 };
   }
-  var PALCO = { vertical: { w: 1080, h: 1920 }, dividida: { w: 1080, h: 960 } };
+  var PALCO = { vertical: { w: 1080, h: 1920 }, dividida: { w: 1080, h: 960 }, alto: { w: 1080, h: 1344 } };
   var pinturas = 0;
   function pintar(f, rel) {
     const ir = f.contentWindow?.__ir;
@@ -1544,7 +1546,7 @@
     return {
       chave: "motion",
       classe: `pointer-events-none overflow-hidden absolute ${lugar}`,
-      estilo: p.formato === "dividida" && QUADRO.deitado ? { bottom: 0, width: `${palco.w * p.escala}px` } : void 0,
+      estilo: p.formato === "dividida" && QUADRO.deitado ? { bottom: 0, width: `${palco.w * p.escala}px` } : p.formato === "alto" ? { height: "70%", bottom: "auto" } : void 0,
       filhos: [
         p.fundo ? fundo(p.fundo) : null,
         p.escala > 0 && {
@@ -1929,7 +1931,7 @@ ${b}`, tam, n: 2, sobra };
     const visiveis = paraTempo(edicao.direcao?.itens ?? [], d.palavras, saida, seq.duracao).visiveis;
     const planos = visiveis.filter((i) => i.camada === "plano");
     const elementos = visiveis.filter((i) => i.camada === "elemento");
-    const comMotion = planos.filter((pl) => motions[pl.id]).map((pl) => ({ plano: pl.id, ini: pl.inicio, fim: pl.fim, dividida: pl.tipo === "tela_dividida_motion", fala: falaDoPlano(saida, pl.inicio, pl.fim) }));
+    const comMotion = planos.filter((pl) => motions[pl.id]).map((pl) => ({ plano: pl.id, ini: pl.inicio, fim: pl.fim, dividida: pl.tipo === "tela_dividida_motion", f: fracaoDoMotion(motions[pl.id].formato), fala: falaDoPlano(saida, pl.inicio, pl.fim) }));
     const lista2 = pedidosNoTempo(ins.pedidos ?? [], planos).filter((x) => x.midias.length);
     const fundoInserts = ins.fundo ?? "gradiente";
     const cortes = cortesDoVideo(planos, d.transicoes, d.escolhas);
@@ -1940,7 +1942,7 @@ ${b}`, tam, n: 2, sobra };
         return { ini: x.t.inicio, fim: x.t.fim, dividida: x.formato === "dividida", divisao: divisao && { ...divisao, ator } };
       }),
       ...comMotion.map((m) => {
-        const divisao = m.dividida ? { modo: "metade", tipo: "area", f: QUADRO.deitado ? LADO : 0.5 } : null;
+        const divisao = m.dividida ? { modo: "metade", tipo: "area", f: QUADRO.deitado ? LADO : m.f } : null;
         return { ini: m.ini, fim: m.fim, dividida: m.dividida, divisao: divisao && { ...divisao, ator: geometriaDoAtor(divisao, null, rostoEm?.(m.ini, m.fim) ?? null) } };
       })
     ];
@@ -1957,7 +1959,7 @@ ${b}`, tam, n: 2, sobra };
         const d2 = divisaoDe(x, banco, presets);
         return { modo: d2?.modo ?? "cheia", f: d2?.f ?? 1, rosto: null };
       }
-      if (m) return { modo: m.dividida ? "metade" : "cheia", f: m.dividida ? 0.5 : 1, rosto: null };
+      if (m) return { modo: m.dividida ? "metade" : "cheia", f: m.dividida ? m.f : 1, rosto: null };
       return { modo: "ator", f: 1, rosto };
     };
     const caixinhaEm = (ini, fim) => {

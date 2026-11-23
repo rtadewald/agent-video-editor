@@ -36,6 +36,18 @@ entra na 1ª palavra do plano, nunca no meio da frase com a tela parada no fundo
 No motion em tela cheia, a composição fica no meio da tela, nunca só na metade de cima com a de baixo vazia; a
 legenda desce para baixo dela (`motions[p].legenda_y`). _design-por-imagem v11 c2_
 
+### O motion contínuo (formato `alto`)
+
+Quando o criador pede **uma tela fixa em cima e ele pequeno embaixo, com um motion só o vídeo inteiro**: um plano
+`tela_dividida_motion` do começo ao fim, com `motions[p].formato = "alto"` (o palco nos 70% de cima, 1080×1344; o ator
+na faixa de 30% de baixo, enquadrado pelo rosto) e `legenda_y: 0.70` (a legenda na costura). O preset `mesa-mac` é a
+mesa escura de um Mac (fundo `chuva`): janelas reais com os vídeos e prints do banco entram, deslizam e saem presas à
+fala. `valores.cenas` (JSON): `[{em: "as palavras onde começa", janelas: [{id, m: [ids do banco], troca: s (vários
+apps em corte seco), titulo, lugar: centro|cima|baixo, largura, zoom: [x, y, s, s0]}], cursor: [x, y]}]`; a janela de
+mesmo `id` na cena seguinte só desliza (e o vídeo continua). `valores.midias`: a lista de todos os ids usados (campo do
+tipo `midias`, que o `motion.html` resolve com os trechos). Limpo: no máximo o título da janela, nada de ícone ou texto
+solto; cada fala provada com material real. _claude-code-apps-2 · 2026-11-22_
+
 ### Motion novo
 
 Se nenhum preset serve e a ideia é simples (um número que cresce, dois logos lado a lado, uma lista que se monta, um

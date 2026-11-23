@@ -372,7 +372,7 @@ export function geometriaDoInsert(pedido: PedidoNoTempo, banco: Map<string, Item
 
 // ---------------------------------------------------------------- um motion tocando (do 18: motions/MotionNoLugar.tsx)
 
-const PALCO = { vertical: { w: 1080, h: 1920 }, dividida: { w: 1080, h: 960 } }
+const PALCO = { vertical: { w: 1080, h: 1920 }, dividida: { w: 1080, h: 960 }, alto: { w: 1080, h: 1344 } }
 type Janela = Window & { __ir?: (t: number) => Promise<void> }
 let pinturas = 0
 
@@ -392,13 +392,13 @@ function pintar(f: HTMLIFrameElement, rel: number) {
  *  `escala`: a largura da área ÷ a do palco (0 antes de medir: sem iframe ainda). Deitado, os dois formatos tocam no
  *  palco da dividida (1080×960, que os presets já sabem desenhar): na tela cheia, centrado na altura toda, com o fundo
  *  no quadro inteiro (`x`: o deslocamento do palco, px); lado a lado, ocupando a área do insert, à esquerda. */
-export function motionNoLugar(p: { src: string; formato: 'vertical' | 'dividida'; rel: number; fundo?: string; escala: number; x?: number }): V {
+export function motionNoLugar(p: { src: string; formato: 'vertical' | 'dividida' | 'alto'; rel: number; fundo?: string; escala: number; x?: number }): V {
   const palco = PALCO[QUADRO.deitado ? 'dividida' : p.formato]
   const lugar = p.formato === 'vertical' ? 'inset-0' : QUADRO.deitado ? 'top-0 left-0' : 'inset-x-0 top-0 h-1-2'
   return {
     chave: 'motion',
     classe: `pointer-events-none overflow-hidden absolute ${lugar}`,
-    estilo: p.formato === 'dividida' && QUADRO.deitado ? { bottom: 0, width: `${palco.w * p.escala}px` } : undefined,
+    estilo: p.formato === 'dividida' && QUADRO.deitado ? { bottom: 0, width: `${palco.w * p.escala}px` } : p.formato === 'alto' ? { height: '70%', bottom: 'auto' } : undefined,
     filhos: [
       p.fundo ? fundo(p.fundo) : null,
       p.escala > 0 && {

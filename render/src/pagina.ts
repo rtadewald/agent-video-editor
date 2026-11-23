@@ -12,7 +12,7 @@ import { chaveParada, pedidosNoTempo, receitaDoInsert } from './inserts'
 import { blocosDaLegenda, paraExportar, semOsLetterings, zonasDaLegenda } from './legenda'
 import { cortesDoVideo, sonsDasTransicoes } from './transicoes'
 import { eventosDaReceita, type EventoSom } from './sons'
-import { escolhasDeSom, eventosDoMotion, falaDoPlano, fundoDoMotion, marcasDaPagina, urlPaginaMotion } from './motions'
+import { escolhasDeSom, eventosDoMotion, falaDoPlano, fracaoDoMotion, fundoDoMotion, marcasDaPagina, urlPaginaMotion } from './motions'
 import { comentarioDe, cardComentario } from './comentario'
 import { definirRelogio, desenhar, geometriaDoInsert, insertNoLugar, motionNoLugar, type Geometria, type V } from './desenho'
 import { desenharElementos, intervalosDeLettering, sonsDosElementos, zonasDosElementos, type Elemento, type Lugar } from './elementos'
@@ -121,7 +121,7 @@ async function iniciar() {
   // os motions: os planos de motion que já têm um motion escolhido
   const comMotion = planos
     .filter((pl) => motions[pl.id])
-    .map((pl) => ({ plano: pl.id, ini: pl.inicio, fim: pl.fim, dividida: pl.tipo === 'tela_dividida_motion', fala: falaDoPlano(saida, pl.inicio, pl.fim) }))
+    .map((pl) => ({ plano: pl.id, ini: pl.inicio, fim: pl.fim, dividida: pl.tipo === 'tela_dividida_motion', f: fracaoDoMotion(motions[pl.id].formato), fala: falaDoPlano(saida, pl.inicio, pl.fim) }))
   const lista = pedidosNoTempo(ins.pedidos ?? [], planos).filter((x) => x.midias.length)
   const fundoInserts = ins.fundo ?? 'gradiente'
   const cortes = cortesDoVideo(planos, d.transicoes, d.escolhas)
@@ -133,7 +133,7 @@ async function iniciar() {
       return { ini: x.t.inicio, fim: x.t.fim, dividida: x.formato === 'dividida', divisao: divisao && { ...divisao, ator } }
     }),
     ...comMotion.map((m) => {
-      const divisao: Divisao | null = m.dividida ? { modo: 'metade', tipo: 'area', f: QUADRO.deitado ? LADO : 0.5 } : null
+      const divisao: Divisao | null = m.dividida ? { modo: 'metade', tipo: 'area', f: QUADRO.deitado ? LADO : m.f } : null
       return { ini: m.ini, fim: m.fim, dividida: m.dividida, divisao: divisao && { ...divisao, ator: geometriaDoAtor(divisao, null, rostoEm?.(m.ini, m.fim) ?? null) } }
     }),
   ]
@@ -153,7 +153,7 @@ async function iniciar() {
       const d = divisaoDe(x, banco, presets)
       return { modo: d?.modo ?? 'cheia', f: d?.f ?? 1, rosto: null }
     }
-    if (m) return { modo: m.dividida ? 'metade' : 'cheia', f: m.dividida ? 0.5 : 1, rosto: null }
+    if (m) return { modo: m.dividida ? 'metade' : 'cheia', f: m.dividida ? m.f : 1, rosto: null }
     return { modo: 'ator', f: 1, rosto }
   }
   // a caixinha fica a pergunta inteira, com as telas trocando embaixo: na tela dividida, a costura mais alta do trecho

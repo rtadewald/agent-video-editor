@@ -14,7 +14,7 @@
 <script>
 (function () {
   var q = new URLSearchParams(location.search)
-  var FORMATOS = { vertical: [1080, 1920], dividida: [1080, 960] } // tela cheia 9:16; tela dividida: a metade de cima
+  var FORMATOS = { vertical: [1080, 1920], dividida: [1080, 960], alto: [1080, 1344] } // tela cheia 9:16; tela dividida: a metade de cima; alto: os 70% de cima (o motion contínuo)
   var HERDADOS = ['tipo', 'formato', 'largura', 'altura', 'arquivo', 'proxy', 'cortes'] // o que um trecho herda (banco.py)
   // do 18: inserts/Fundo.tsx (FUNDOS), para a galeria
   var FUNDOS = {
@@ -92,12 +92,22 @@
         var ii = item(v)
         v = ii ? urlBanco(ii, exportacao) : ''
       }
+      // uma lista de ids do banco (imagens, vídeos e trechos): cada um vira {id, url, tipo, largura, altura, desde, ate}
+      if (c.tipo === 'midias') {
+        var ids = Array.isArray(v) ? v : lerJson(v, [])
+        v = {}
+        ;(Array.isArray(ids) ? ids : []).forEach(function (bid) {
+          var im = item(bid)
+          if (im) v[bid] = { id: bid, url: urlBanco(im, exportacao), tipo: im.tipo, largura: im.largura, altura: im.altura,
+                             desde: im.inicio || 0, ate: im.fim != null ? im.fim : im.duracao || null }
+        })
+      }
       campos[k] = v
     })
   }
   // a fala do plano: [{texto, ini, fim}], em s desde o começo dele
   var fala = lerJson(q.get('fala'), [])
-  fala = (Array.isArray(fala) ? fala : []).slice(0, 200).filter(function (x) { return x && 'texto' in x && 'ini' in x && 'fim' in x })
+  fala = (Array.isArray(fala) ? fala : []).slice(0, 1000).filter(function (x) { return x && 'texto' in x && 'ini' in x && 'fim' in x })
     .map(function (x) { return { texto: String(x.texto).slice(0, 80), ini: parseFloat(x.ini), fim: parseFloat(x.fim) } })
 
   var tocar = q.get('tocar') === '1'
