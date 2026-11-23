@@ -45,17 +45,21 @@ bruto), não a tela dividida. Um plano `tela_dividida_motion` do começo ao fim 
 notebook abaixo da borda (no bruto de mesa, `escala 0.48, y 0.894`: o peito encosta na borda) e a legenda na camiseta
 (`legenda_y ≈ 0.855`; legenda branca sobre o fundo branco some). Luminária ou objeto que vaza na máscara: apague a área
 na `midia/recorte/<bruto>_mascara.mp4` (`drawbox` preto), nunca no original.
-O preset `mesa-mac` é a mesa **branca** de um Mac: janelas reais em tema claro com os vídeos e prints do banco entram,
-deslizam e saem presas à fala. `valores.cenas` (JSON): `[{em: "as palavras onde começa", janelas: [{id, m: [ids do
-banco], troca: s (vários apps em corte seco), titulo, pos: [cx, cy] (frações do palco), largura, altura, atraso: s (uma
-depois da outra), revela: 0.36 (um gráfico que se desenha da esquerda, com o eixo à mostra desde a entrada), zoom: [x,
-y, s, s0]}], cursor: [x, y]}]`; a janela de mesmo `id` na cena seguinte só desliza (e o vídeo continua).
-`valores.midias`: a lista de todos os ids usados (campo do tipo `midias`). Janelas grandes (800–1020 px), na parte de
-cima (até ~0,63 da altura), no máximo 4 de uma vez. Limpo: no máximo o título da janela, nada de ícone ou texto solto.
+O preset é o `estudio-branco` (3D, na linha do estilo aprovado, só que claro): um estúdio branco infinito onde placas
+de alumínio sobem do chão com os vídeos e prints reais nas telas, e núcleos de luz (o Claude em laranja, o Codex em
+grafite, com o rótulo no chão) se ligam a elas por feixes; a câmera desliza de cena em cena e nunca para.
+`valores.cenas` (JSON): `[{em: "as palavras onde começa", cam: {p: [x,y,z], a: [x,y,z]}, paineis: [{id, m: [ids],
+troca, p, h, asp, ry, foco: [x,y], zoom, revela: 0.36, atraso}], nucleos: [{id, tipo: claude|codex, p, r, rotulo}],
+feixes: [[núcleo, placa]]}]`; o mesmo `id` na cena seguinte desliza (e o vídeo continua), o que sai afunda no chão.
+Medidas que funcionaram (chão em y 0; o terço de baixo é do ator): a placa principal `p [0, 1.2, 0], h 1.5, asp 1.6`
+com a câmera a ~8,8 de distância (o 9:16 vê só ~0,32 × a distância de largura); o núcleo acima dela (`[0, 3.3, 0.3]`,
+r 0.4) com a câmera a ~10; "em todo canto" = uma parede 3×3 de placas (o app no meio) com a câmera a ~19,5.
+`valores.midias`: todos os ids usados. Limpo: nada de texto solto (só o rótulo do núcleo); conteúdo pequeno demais
+pede `zoom`/`foco` na placa, não uma placa maior que o quadro.
 **Cada fala provada com material real e escolhido para ela**, nunca os inserts da versão anterior por inércia: os apps
 do criador gravados de verdade, os vídeos de outras pessoas e a prova com número (ex.: o gráfico do star-history.com
-para "começou nos últimos meses"); nada de imagem gerada fingindo ser app. O formato `alto` (motion nos 70% de cima,
-ator na faixa de baixo) continua existindo, mas não é o "pequeno embaixo". _claude-code-apps-2 · 2026-11-23_
+para "começou nos últimos meses"); nada de imagem gerada fingindo ser app. Recusados: janelas 2D do Mac (escuras ou
+claras) com zoom nas caixas, e a tela dividida 70/30 ("nota zero"). _claude-code-apps-2 · 2026-11-23_
 
 ### Motion novo
 
@@ -74,7 +78,8 @@ manda ler os recusados e os aprendizados). Ele leva ~7 min: **nunca espere por e
 mais próximo (`inserts.py motion`); se o novo ficar pronto antes do render da entrega, troque; senão, ele entra na v2 e
 você diz isso na entrega.
 **Motion novo é em 3D** (o estilo do criador desde 2026-11-17: objetos de vidro e metal, chão que reflete, bloom,
-câmera andando; em 2D só a janela de um app real). O Three.js está em
+câmera andando; em 2D só a janela de um app real). Vídeo como textura: desenhe em `motion.depois(f)` (os vídeos já no
+quadro) e dê ao `<video>` os atributos `width`/`height` (sem eles a textura sai preta). O Three.js está em
 `render/motion/three/` (com os addons de bloom, espelho e caixa arredondada); o modelo aprovado é o
 `entrada-saida-3d`. O preset traz o `<script type="importmap">` e um `<script type="module">`, desenha a cena inteira
 dentro do `motion.aCada` (câmera, objetos e `composer.render()` a partir de `t`, sem estado entre quadros) e cria o

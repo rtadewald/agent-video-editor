@@ -7,6 +7,7 @@
   var tl = null
   var esperando = []
   var aCada = []
+  var depois = [] // o que desenha com os vídeos já no quadro (uma cena 3D com vídeos nas telas)
   var marcas = [] // os sons (SPEC §8.6): o momento, quando (s na timeline) e, opcional, por quanto tempo
   var norm = function (s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '')
@@ -55,6 +56,11 @@
     /** `f(t)` roda a cada instante pedido (t = tempo da cena, em s): para o que não é tween, como a digitação. */
     aCada: function (f) {
       aCada.push(f)
+    },
+    /** `f(t)` roda depois que os vídeos chegaram ao quadro de `t` (um vídeo como textura de uma cena 3D só pode ser
+     *  desenhado aqui; em `aCada` ele ainda está no quadro anterior). */
+    depois: function (f) {
+      depois.push(f)
     },
     /** O instante (s) em que cada letra de `texto` aparece, a partir de `ini` e no máximo até `fim`. Se o texto é dito na
      *  fala do plano (as mesmas palavras, em sequência), cada palavra é digitada enquanto é falada. Senão, num ritmo de
@@ -151,7 +157,8 @@
       var escala = M.duracao ? dur / M.duracao : 1 // a duração do plano manda
       tl.time(Math.max(0, Math.min(t * escala, dur)), false)
       aCada.forEach(function (f) { f(tl.time()) })
-      return Promise.all([document.fonts.ready, videosProntos(t)]).then(quadro)
+      var tt = tl.time()
+      return Promise.all([document.fonts.ready, videosProntos(t)]).then(function () { depois.forEach(function (f) { f(tt) }) }).then(quadro)
     }
     // um motion que nunca chama motion.pronto (erro no código) não pode travar a prévia nem a exportação
     var limite = new Promise(function (r) { setTimeout(r, 8000) })
