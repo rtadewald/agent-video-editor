@@ -50,7 +50,8 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. **Exceção: carrossel de uma skill,
   ferramenta ou hack que vem de um Reels (a demo é o conteúdo): todo slide tem mídia de apoio**, a prova do que o texto
   diz (os motions e inserts do vídeo ou da VSL do mesmo tema, o banco, o antes e depois); a capa leva a melhor delas,
-  a que mostra o benefício. _img-2-html v3 · 2026-11-23_ Uma sessão com IA é print real do app
+  a que mostra o benefício. Nele o texto é curto (2 ou 3 frases, cortadas da copy) para a mídia ficar grande, e a mídia
+  é a mais bonita que houver (os projetos top do Neo-Stitch, não um exemplo qualquer). _img-2-html v3–v4 · 2026-11-23_ Uma sessão com IA é print real do app
   claro do Claude, nunca uma simulação nem o terminal preto. A pergunta de um seguidor que abre o carrossel é um
   comentário do Instagram como aparece na lista, em card branco: foto e usuário borrados, o usuário na mesma linha do
   texto, o coração à direita e "5 d · 1 curtida · Responder · •••" embaixo. Nunca a caixinha de pergunta dos Stories. _wordpress-em-2026 v5 · 2026-11-03_
