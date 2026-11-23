@@ -1,7 +1,8 @@
 // A revisão de uma versão: o player do proxy, a linha do tempo (planos, fala e comentários) e os
 // comentários do criador, gravados sozinhos em projetos/<slug>/revisoes/vN.json (o Claude responde no mesmo arquivo).
-import { $, $$, ESTRELA_CHEIA, ICONE, ICONE_ATALHO, abrirAba, barraDaLinha, agora, aviso, chipCodigo, codigos, confirmar, copiar, dataHora, enviar, esc, quandoCurto, fecharAba, janela, json, mmss, modalAberto, nomePlano, num, PLANOS, preferencia, tempo } from './comum.js'
+import { $, $$, ESTRELA_CHEIA, ICONE, ICONE_ATALHO, abrirAba, barraDaLinha, agora, aviso, chipCodigo, codigos, comMarcas, confirmar, copiar, dataHora, enviar, esc, quandoCurto, fecharAba, janela, json, mmss, modalAberto, nomePlano, num, PLANOS, preferencia, tempo } from './comum.js'
 import { CATEGORIA_PADRAO, carregarCategorias, categoriaCta } from './categorias.js'
+import { ligarArroba } from './biblioteca.js'
 
 /** A data do comentário, curta e relativa a hoje (o dia e a hora inteiros no title). */
 const dataComentario = (c) => (c.criado_em ? `<time class="data-comentario" datetime="${esc(c.criado_em)}" title="${esc(dataHora(c.criado_em))}">${quandoCurto(c.criado_em)}</time>` : '')
@@ -49,6 +50,7 @@ const ESTADO_VERSAO = {
 }
 
 export async function abrirRevisao(tela, slug, vPedida) {
+  ligarArroba('#nova-texto, #editor-texto') // o @ abre o Banco e os Motions para marcar
   const projetos = await json('/api/projetos', [])
   const proj = projetos.find((p) => p.slug === slug)
   if (!proj) {
@@ -423,7 +425,7 @@ class Revisao {
   htmlVelho({ c }) {
     const o = this.ondeAgora(c) // o tempo de lá levado para esta versão (pela palavra)
     return `<div class="item-velho"><div class="item-velho-cabeca"><button class="chip-tempo" data-ir-velho="${o.t}" title="Ir a este ponto">${quando(o)}</button>${dataComentario(c)}</div>
-      <p class="texto">${esc(c.texto || '(só o print)')}</p>${this.htmlResposta(c)}</div>`
+      <p class="texto">${comMarcas(esc(c.texto || '(só o print)'), this.cods)}</p>${this.htmlResposta(c)}</div>`
   }
 
   /** As versões anteriores de um bloco (pela versão do bloco, como no seletor de cima): o que foi pedido e a resposta. */
@@ -855,7 +857,7 @@ class Revisao {
         <div class="caixa-nova" id="caixa-nova">
           <div class="item-cabeca"><span class="eyebrow" id="nova-rotulo">Comentar em</span><button class="chip-tempo chip-alternar" data-acao="alternar-tempo" id="nova-quando" title="Desligar o tempo: vira um comentário geral (C)">0:00,0</button>
             <button class="botao-icone pequeno" data-acao="soltar" id="nova-soltar" hidden title="Soltar: a caixa volta a acompanhar o vídeo">${ICONE.fechar}</button></div>
-          <textarea id="nova-texto" rows="3" placeholder="O que mudar aqui? Ao escrever, o vídeo pausa e o comentário fica neste instante."></textarea>
+          <textarea id="nova-texto" rows="3" placeholder="O que mudar aqui? Ao escrever, o vídeo pausa e o comentário fica neste instante. @ marca mídias e motions do banco."></textarea>
           <div id="nova-anexos"></div>
           <div class="editor-acoes">${clipe('nova')}<span class="dica">Enter grava · Shift+Enter quebra a linha · ⌘V cola print ou vídeo</span>
             <button class="botao pequeno botao-coral" data-acao="salvar-nova">Comentar</button></div></div>
@@ -896,7 +898,7 @@ class Revisao {
       $('#nova-soltar').hidden = geral || !this.nova.preso
       $('#caixa-nova').classList.toggle('presa', this.nova.preso && !geral)
       $('#caixa-nova').classList.toggle('geral', geral)
-      $('#nova-texto').placeholder = geral ? 'Sobre o vídeo todo (ex.: legenda um pouco mais baixa).' : 'O que mudar aqui? Ao escrever, o vídeo pausa e o comentário fica neste instante.'
+      $('#nova-texto').placeholder = geral ? 'Sobre o vídeo todo (ex.: legenda um pouco mais baixa).' : 'O que mudar aqui? Ao escrever, o vídeo pausa e o comentário fica neste instante. @ marca mídias e motions do banco.'
     }
   }
 
@@ -1319,7 +1321,7 @@ class Revisao {
         ${dataComentario(c)}
         <span class="item-acoes"><button class="botao-icone pequeno" data-editar="${c.id}" title="Editar">${ICONE.lapis}</button>
         <button class="botao-icone pequeno" data-apagar="${c.id}" title="Apagar">${ICONE.lixo}</button></span></header>
-      ${c.texto ? `<p class="texto">${esc(c.texto)}</p>` : ''}${this.htmlAnexos(c.anexos, c.id)}
+      ${c.texto ? `<p class="texto">${comMarcas(esc(c.texto), this.cods)}</p>` : ''}${this.htmlAnexos(c.anexos, c.id)}
       ${this.htmlResposta(c)}
     </article>`
   }
@@ -1350,7 +1352,7 @@ class Revisao {
     const ed = this.editor
     return `<div class="editor">
       <div class="item-cabeca"><span class="eyebrow">Editar comentário</span><span class="chip-tempo estatico">${quando(ed)}</span></div>
-      <textarea id="editor-texto" rows="3" placeholder="O que mudar aqui? (⌘V ou arraste para anexar print ou vídeo)">${esc(ed.texto || '')}</textarea>
+      <textarea id="editor-texto" rows="3" placeholder="O que mudar aqui? (⌘V ou arraste para anexar print ou vídeo; @ marca do banco)">${esc(ed.texto || '')}</textarea>
       ${this.htmlAnexos(ed.anexos, 'editor')}
       <div class="editor-acoes">${clipe('editor')}<span class="dica">Enter salva · Shift+Enter quebra a linha · Esc cancela</span>
         <button class="botao pequeno" data-acao="cancelar">Cancelar</button>

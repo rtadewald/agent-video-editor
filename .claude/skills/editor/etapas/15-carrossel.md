@@ -115,7 +115,7 @@ uv run ferramentas/carrossel.py ler <slug> [vN]       # cada comentário com o s
 uv run ferramentas/carrossel.py responder <slug> <vN> <id> --status aplicado|respondido|nao_aplicado --resposta "…"
 ```
 
-Aplique os comentários numa versão nova (`versao`) e responda cada um numa frase curta (o que mudou). O ponto marcado
+Aplique os comentários numa versão nova (`versao`) e responda cada um numa frase curta (o que mudou). Um `@BAN-111` / `@MOT-07` no comentário é a mídia ou o motion que ele marcou no banco: `codigo.py <código>`. O ponto marcado
 (x, y em % do slide) diz onde ele olhou. O criador também edita o texto, o destaque e as margens direto no app, na própria vN (o
 `ler` diz em quais slides): a versão nova parte de `versoes/vN.json`, não do seu JSON antigo, e mantém o que ele
 escreveu.

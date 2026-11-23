@@ -151,6 +151,8 @@ let tagsConhecidas = [] // as tags do banco, para o autocompletar do modal da m�
 // (Aprovar / Recusar) vai para todos de uma vez. `ultimoMarcado`: o shift-clique marca o intervalo até ele
 let selecao = null
 let ultimoMarcado = null
+// o @ de um comentário (escolherDoBanco): a mesma grade, sempre no modo Selecionar, sem editar nada; null = a página normal
+let escolhendo = null
 const buscas = { inserts: preferencia('banco.busca', ''), motions: preferencia('motions.busca', '') } // a busca de cada página (guardada: voltar à aba devolve)
 
 // o que o Banco e os Motions leram por último (por aba): voltar à aba mostra isso na hora e confere por trás
@@ -261,7 +263,8 @@ async function bancoInserts(el, tipo = 'inserts', modo = 'novo') {
       ${Object.entries(FILTROS_BANCO).filter(([k]) => k === 'todos' || conta(k)).map(([k, [n, ic]]) => chip(k === filtro, `${icone(ic)}${n} <span class="conta">${conta(k)}</span>`, `data-filtro-banco="${k}"`)).join('')}
       <span class="barra-banco-acoes"><span class="ordens">${Object.entries(ORDENS_BANCO).map(([k, nome]) => chip(k === ordem, nome, `data-ordem-banco="${k}" title="${k === 'usados' ? 'Os que mais entraram em vídeos aprovados primeiro' : 'Os que entraram no banco por último primeiro'}"`)).join('')}</span>
         <input class="busca" type="search" data-busca placeholder="Buscar (nome, descrição, código, #tag)" value="${esc(buscas[tipo])}">
-        ${tipo === 'motions' ? '' : `<label class="botao pequeno botao-subir" title="Vídeos e imagens, vários de uma vez (ou arraste para esta página): entram Aprovados e a IA descreve">${ICONE.subir} Subir mídia<input type="file" multiple accept="video/mp4,video/quicktime,video/webm,image/png,image/jpeg,image/webp" hidden data-subir></label>`}
+        ${escolhendo ? `<span class="barra-selecao"><b data-sel-conta>${selecao.size}</b> <span data-sel-rotulo>${selecao.size === 1 ? 'selecionada' : 'selecionadas'}</span>
+        <button class="botao pequeno" data-sel-todas title="Marca tudo o que está na tela (com este filtro, a tag e a busca)">Todas visíveis</button></span>` : `${tipo === 'motions' ? '' : `<label class="botao pequeno botao-subir" title="Vídeos e imagens, vários de uma vez (ou arraste para esta página): entram Aprovados e a IA descreve">${ICONE.subir} Subir mídia<input type="file" multiple accept="video/mp4,video/quicktime,video/webm,image/png,image/jpeg,image/webp" hidden data-subir></label>`}
         ${selecao
     ? `<span class="barra-selecao"><b data-sel-conta>${selecao.size}</b> <span data-sel-rotulo>${selecao.size === 1 ? 'selecionada' : 'selecionadas'}</span>
         <button class="botao pequeno" data-sel-todas title="Marca tudo o que está na tela (com este filtro, a tag e a busca)">Todas visíveis</button>
@@ -271,8 +274,8 @@ async function bancoInserts(el, tipo = 'inserts', modo = 'novo') {
     : `<button class="botao pequeno" data-selecionar title="Marque vários ${tipo === 'motions' ? 'motions' : 'itens'} (clique; shift-clique marca um intervalo) e aprove ou recuse todos de uma vez">Selecionar</button>`}
         ${nRecusados && tipo !== 'motions' ? `<button class="botao pequeno botao-perigo-contorno" data-limpar-recusados title="Manda os recusados para a Lixeira (de onde dá para restaurar)">${ICONE.lixo} Limpar recusados (${nRecusados})</button>` : ''}
         ${nRecusados && tipo === 'motions' ? `<button class="botao pequeno botao-perigo-contorno" data-limpar-motions title="Tira da biblioteca os motions recusados (vão para o registro que o Claude lê para não repetir)">${ICONE.lixo} Limpar recusados (${nRecusados})</button>` : ''}
-        ${ajuda(tipo === 'motions' ? 'Os presets de motion. Usado em vídeo: entrou num vídeo aprovado (o chip abre o plano). A revisar: o Claude escreveu e você ainda não aprovou. Aprovado: bom, mesmo sem uso. Recusado: você recusou, ou foi escrito para um vídeo já aprovado e ficou de fora (o Limpar recusados tira da biblioteca). Passe o mouse para tocar; Selecionar aprova ou recusa vários de uma vez.' : 'Os inserts (vídeos e imagens). Usado em vídeo: entrou num vídeo aprovado (o chip abre o plano). Aprovado: bom, mesmo sem uso. Recusado: ficou de fora de um vídeo aprovado (o Limpar recusados manda para a Lixeira). Passe o mouse para tocar; clique num insert para editar, marcar trechos ou mudar o selo.')}</span></div>` +
-    `${datalistTags('tags-conhecidas-card', conhecidas)}<div class="banco-com-tags">${barraDeTags(doTipo.map((it) => ({ chave: it.id, tags: it.tags })), tagAtiva, pref)}<div class="banco-grade">` +
+        ${ajuda(tipo === 'motions' ? 'Os presets de motion. Usado em vídeo: entrou num vídeo aprovado (o chip abre o plano). A revisar: o Claude escreveu e você ainda não aprovou. Aprovado: bom, mesmo sem uso. Recusado: você recusou, ou foi escrito para um vídeo já aprovado e ficou de fora (o Limpar recusados tira da biblioteca). Passe o mouse para tocar; Selecionar aprova ou recusa vários de uma vez.' : 'Os inserts (vídeos e imagens). Usado em vídeo: entrou num vídeo aprovado (o chip abre o plano). Aprovado: bom, mesmo sem uso. Recusado: ficou de fora de um vídeo aprovado (o Limpar recusados manda para a Lixeira). Passe o mouse para tocar; clique num insert para editar, marcar trechos ou mudar o selo.')}`}</span></div>` +
+    `${datalistTags('tags-conhecidas-card', conhecidas)}<div class="banco-com-tags">${barraDeTags(doTipo.map((it) => ({ chave: it.id, tags: it.tags })), tagAtiva, pref, { editar: !escolhendo })}<div class="banco-grade">` +
     (cards.length ? `<div class="grade grade-banco">${cards.join('')}</div><p class="vazio" data-sem-busca hidden>Nada com essa busca.</p>` : '<p class="vazio">Nada com esses filtros.</p>') +
     '</div></div>'
   const subir = async (arquivos) => {
@@ -310,7 +313,7 @@ async function bancoInserts(el, tipo = 'inserts', modo = 'novo') {
     buscar()
   })
   buscar()
-  if (!el.dataset.arrastar) {  // arrastar arquivos para a página (uma vez por página)
+  if (!el.dataset.arrastar && !escolhendo) {  // arrastar arquivos para a página (uma vez por página)
     el.dataset.arrastar = '1'
     el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('soltando') })
     el.addEventListener('dragleave', (e) => !el.contains(e.relatedTarget) && el.classList.remove('soltando'))
@@ -350,6 +353,7 @@ async function bancoInserts(el, tipo = 'inserts', modo = 'novo') {
     if (c) c.textContent = n
     const r = $('[data-sel-rotulo]', el)
     if (r) r.textContent = n === 1 ? 'selecionada' : 'selecionadas'
+    escolhendo?.aoMudar()
   }
   $('[data-selecionar]', el)?.addEventListener('click', () => {
     selecao = new Set()
@@ -1569,4 +1573,75 @@ async function trilhas(el) {
       audio.play().catch(() => {})
     })
   return () => audio.pause()
+}
+
+/** O @ de um comentário: a grade do Banco (e a dos Motions, na outra aba) num modal, sempre no modo Selecionar, sem
+ *  editar nada. Devolve os códigos marcados (["BAN-111", "MOT-07"]) ou null (cancelou). */
+export function escolherDoBanco() {
+  return new Promise((resolve) => {
+    const daPagina = [selecao, ultimoMarcado] // a seleção da página do Banco, se houver, volta ao fechar
+    selecao = new Set()
+    ultimoMarcado = null
+    let aba = preferencia('escolher.aba', 'inserts') === 'motions' ? 'motions' : 'inserts'
+    let marcados = null
+    const abas = () => [['inserts', 'Banco'], ['motions', 'Motions']].map(([k, n]) => chip(k === aba, n, `data-aba-escolher="${k}"`)).join('')
+    const { el, fechar } = janela(`<header class="janela-cabeca"><h2>Marcar do banco</h2><span class="ordens" data-abas-escolher>${abas()}</span>
+        <span class="escolher-acoes"><button class="botao pequeno" data-fechar>Cancelar</button>
+        <button class="botao pequeno botao-verde" data-marcar-escolha disabled>Marcar</button></span></header>
+      <div class="escolher-corpo"></div>`, {
+      classe: 'janela-cheia janela-escolher',
+      aoFechar: () => {
+        ;[selecao, ultimoMarcado] = daPagina
+        escolhendo = null
+        resolve(marcados)
+      },
+    })
+    const corpo = $('.escolher-corpo', el)
+    const botao = $('[data-marcar-escolha]', el)
+    const contar = () => {
+      const n = selecao.size
+      botao.disabled = !n
+      botao.textContent = n ? `Marcar ${n}` : 'Marcar'
+    }
+    escolhendo = { aoMudar: contar }
+    const desenhar = () => bancoInserts(corpo, aba, 'cache').then(contar)
+    $('[data-abas-escolher]', el).addEventListener('click', (e) => {
+      const b = e.target.closest('[data-aba-escolher]')
+      if (!b || b.dataset.abaEscolher === aba) return
+      aba = preferencia('escolher.aba', 'inserts', b.dataset.abaEscolher)
+      $('[data-abas-escolher]', el).innerHTML = abas()
+      corpo.scrollTop = 0
+      desenhar()
+    })
+    botao.addEventListener('click', async () => {
+      const cods = await codigos()
+      marcados = [...selecao].map((k) => (k.startsWith('m:') ? cods.motion?.[k.slice(2)] || k.slice(2) : cods.midia?.[k] || k))
+      fechar()
+    })
+    desenhar()
+  })
+}
+
+/** Liga o @ nos campos de comentário (`seletor`): digitar @ (no começo ou depois de um espaço) abre o escolherDoBanco,
+ *  e os marcados entram no lugar do @ ("@BAN-111 @MOT-07 "). Um ouvinte só por seletor. */
+const arrobasLigadas = new Set()
+export function ligarArroba(seletor) {
+  if (arrobasLigadas.has(seletor)) return
+  arrobasLigadas.add(seletor)
+  document.addEventListener('input', async (e) => {
+    const ta = e.target
+    if (!ta.matches?.(seletor) || !e.inputType?.startsWith('insert') || !e.data?.endsWith('@')) return
+    const p = ta.selectionStart
+    if (ta.value[p - 1] !== '@' || (p > 1 && !/[\s(]/.test(ta.value[p - 2]))) return // um e-mail, não uma marcação
+    const l = await escolherDoBanco()
+    if (!ta.isConnected) return
+    ta.focus()
+    if (!l?.length) return ta.setSelectionRange(p, p)
+    const v = ta.value
+    const i = v[p - 1] === '@' ? p - 1 : v.lastIndexOf('@', p - 1)
+    const novo = `${l.map((c) => `@${c}`).join(' ')} `
+    ta.value = v.slice(0, i) + novo + v.slice(i + 1)
+    ta.setSelectionRange(i + novo.length, i + novo.length)
+    ta.dispatchEvent(new Event('input', { bubbles: true }))
+  })
 }

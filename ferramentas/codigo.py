@@ -233,7 +233,7 @@ def presets_do_plano(ref: str, ini: float, fim: float) -> str:
 
 
 def resolver(texto: str) -> None:
-    m = CODIGO.match(texto.strip().replace(' · ', '·'))
+    m = CODIGO.match(texto.strip().lstrip('@').replace(' · ', '·'))  # o @ do comentário (a marcação do app)
     if not m:
         raise SystemExit(f'{texto}: não é um código (ex.: PRE-07, BAN-012.2, REF-03·p7, PRJ-02·v3).')
     prefixo, n, trecho, letra, k = m.group(1).upper(), int(m.group(2)), m.group(3), (m.group(4) or '').lower(), m.group(5)

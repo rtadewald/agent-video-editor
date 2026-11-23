@@ -1578,3 +1578,16 @@ button.tag:hover { background: rgba(185, 166, 242, 0.26); }
 .editor-texto mark { padding: 0 2px; border-radius: 3px; background: var(--color-yellow); color: var(--color-ink); }
 .editor-texto ::selection { background: rgba(244, 125, 95, 0.5); color: inherit; }
 .editor-acoes { justify-content: space-between; align-items: center; }
+
+/* ---------- o @ de um comentário: o Banco e os Motions num modal, para marcar vários ---------- */
+.janela-escolher .janela-cabeca { padding-bottom: 12px; border-bottom: 1px solid var(--color-line-dark); }
+.janela-escolher .escolher-acoes { display: flex; gap: 8px; margin-left: auto; }
+.janela-escolher .escolher-corpo { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 20px 24px; }
+.janela-escolher .tags-banco { top: 0; max-height: calc(100vh - 170px); }
+.janela-escolher .tag-mais, .janela-escolher .tag-tirar { display: none; }
+.janela-escolher .card-banco { cursor: pointer; }
+.marca-banco { display: inline-flex; align-items: center; gap: 5px; margin: 1px 2px; padding: 1px 7px 1px 2px; border-radius: 6px; vertical-align: middle;
+  background: rgba(250, 247, 238, 0.1); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.marca-banco img { width: 34px; height: 20px; object-fit: cover; border-radius: 4px; }
+.marca-motion { padding-left: 7px; }
+.marca-motion b { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }

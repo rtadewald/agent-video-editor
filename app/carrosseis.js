@@ -2,7 +2,8 @@
 // vivo, o preset e o destaque, o texto do slide editável, os comentários por slide e o aprovar). Os slides são a página
 // render/carrossel.html num iframe; trocar o preset, ou editar o texto, avisa os iframes (postMessage) e grava. O Claude
 // escreve os slides (carrossel.py).
-import { $, $$, ICONE, abrirAba, agora, aviso, confirmar, copiar, enviar, esc, fecharAba, janela, json, preferencia, quandoCurto } from './comum.js'
+import { $, $$, ICONE, abrirAba, agora, aviso, codigos, comMarcas, confirmar, copiar, enviar, esc, fecharAba, janela, json, preferencia, quandoCurto } from './comum.js'
+import { ligarArroba } from './biblioteca.js'
 
 const ESTADOS = { novo: ['Aguardando o Claude', 'selo-amarelo'], em_revisao: ['Em revisão', 'selo-coral'], aprovado: ['Aprovado', 'selo-menta'] }
 const TIPOS = { cru: 'Cru', derivado: 'Derivado' }
@@ -182,6 +183,8 @@ export async function abrirCarrossel(tela, slug, pedida) {
     return
   }
   abrirAba(slug, c.nome, false, true) // a aba de cima, ao lado dos projetos abertos
+  const cods = await codigos() // as marcações do @ nos comentários (chips com a miniatura)
+  ligarArroba('.novo-comentario textarea')
   const v = c.versoes.includes(pedida) ? pedida : c.ultima
   if (!v) {
     tela.innerHTML = `<div class="cabeca-secao cabeca-carrossel"><a class="botao pequeno" href="#/carrosseis">${ICONE.voltar} Carrosséis</a><h2 class="nome-carrossel">${esc(c.nome)}</h2></div>
@@ -210,7 +213,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
   }
   const doSlide = (i) => rev.comentarios.filter((x) => x.slide === i && (x.texto || '').trim())
   const comentario = (x) => `<li class="comentario-carrossel" data-id="${esc(x.id)}">
-      ${x.x != null ? `<span class="pino-n" title="O ponto marcado no slide">●</span>` : ''}<p>${esc(x.texto)}</p>
+      ${x.x != null ? `<span class="pino-n" title="O ponto marcado no slide">●</span>` : ''}<p>${comMarcas(esc(x.texto), cods)}</p>
       <span class="sub">${quandoCurto(x.criado_em)}${x.status && x.status !== 'pendente' ? ` · <b class="t-aplicado">${esc(x.status.replace('_', ' '))}</b>` : ''}</span>
       ${x.resposta ? `<p class="resposta-claude">${esc(x.resposta)}</p>` : ''}
       ${!rev.aprovado ? `<button class="botao-icone pequeno" data-tirar title="Apagar o comentário" aria-label="Apagar">${ICONE.lixo}</button>` : ''}</li>`
@@ -273,7 +276,7 @@ export async function abrirCarrossel(tela, slug, pedida) {
       ${editavel() ? margensHtml(s) : ''}
       <span class="eyebrow">Comentários</span>
       ${doSlide(atual).length ? `<ul class="comentarios-carrossel">${doSlide(atual).map(comentario).join('')}</ul>` : ''}
-      ${!rev.aprovado ? `<form class="campo novo-comentario" data-comentar><textarea rows="2" placeholder="${ponto ? 'No ponto marcado…' : 'Sobre este slide (clique nele para marcar um ponto)…'}"></textarea>
+      ${!rev.aprovado ? `<form class="campo novo-comentario" data-comentar><textarea rows="2" placeholder="${ponto ? 'No ponto marcado…' : 'Sobre este slide (clique nele para marcar um ponto; @ marca do banco)…'}"></textarea>
         <div class="acoes-linha">${ponto ? '<button type="button" class="link" data-sem-ponto>Tirar o ponto</button>' : ''}<button class="botao pequeno botao-coral">Comentar</button></div></form>` : ''}
       ${gerais.length ? `<span class="eyebrow">Gerais</span><ul class="comentarios-carrossel">${gerais.map(comentario).join('')}</ul>` : ''}`
   }

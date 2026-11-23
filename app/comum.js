@@ -390,3 +390,24 @@ export const barraDaLinha = (atalhos) => `<div class="linha-barra"><span class="
     <button class="botao-icone pequeno" data-acao="zoom-" title="Afastar">${ICONE.menos}</button>
     <button class="botao-icone pequeno" data-acao="zoom+" title="Aproximar (⌘ + rolagem)">${ICONE.mais}</button>
     <button class="botao pequeno botao-ajustar" data-acao="ajustar" title="O vídeo inteiro na largura">${ICONE.expandir} Ajustar</button></div>`
+
+/** As marcações do @ (`@BAN-111`, `@BAN-099.1`, `@MOT-07`) num texto já escapado viram chips: a miniatura da mídia, ou
+ *  o "Motion", e o código (o Claude resolve com codigo.py). `cods`: o /api/codigos. */
+const inversos = new WeakMap()
+export function comMarcas(html, cods) {
+  if (!cods || !html.includes('@')) return html
+  let inv = inversos.get(cods)
+  if (!inv) {
+    inv = {}
+    for (const [id, c] of Object.entries(cods.midia || {})) inv[c] = ['midia', id]
+    for (const [id, c] of Object.entries(cods.motion || {})) inv[c] = ['motion', id]
+    inversos.set(cods, inv)
+  }
+  return html.replace(/@((?:BAN-\d+(?:\.\d+)?)|(?:MOT-\d+))\b/g, (m, c) => {
+    const [tipo, id] = inv[c] || []
+    if (!tipo) return m
+    return tipo === 'midia'
+      ? `<span class="marca-banco" title="${esc(c)} · do banco"><img src="/biblioteca/banco/${esc(id)}/miniatura.jpg" alt="" loading="lazy">${esc(c)}</span>`
+      : `<span class="marca-banco marca-motion" title="${esc(c)} · motion ${esc(id)}"><b>Motion</b>${esc(c)}</span>`
+  })
+}

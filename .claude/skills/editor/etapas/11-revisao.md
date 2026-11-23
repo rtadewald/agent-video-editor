@@ -63,8 +63,10 @@ em que algo mudou, e sai em ~1 min. Por isso:
 0. **Abra os anexos**: cada comentário com `↳ print:` / `↳ anexo: projetos/<slug>/revisoes/anexos/…` (também no
    `revisao.py ler`) tem imagens ou vídeos do criador; abra cada imagem com a ferramenta Read (ela mostra a imagem) e,
    num vídeo, tire alguns quadros com o ffmpeg e leia-os, antes de aplicar.
-   **Códigos citados** (`BAN-074`, `PRE-04`, `TRA-02`…: o criador copia do chip no app): resolva cada um
+   **Códigos citados** (`BAN-074`, `PRE-04`, `TRA-02`…: o criador copia do chip no app) e **marcados com @**
+   (`@BAN-111 @MOT-07`: ele digita @ no comentário e escolhe no Banco e nos Motions, um ou vários): resolva cada um
    com `codigo.py <código>` — é a mídia, o preset, a transição, o motion, a trilha ou o som exato que ele quer.
+   Vários marcados num comentário são as opções que ele aponta para aquele ponto (use as que couberem; na dúvida, pergunte).
 1. **Classifique** cada comentário pela etapa que ele toca e leia o `.md` dessa etapa:
    - fala (corta/volta palavra, repetição) → `02-cortes.md` (edite a `selecao.json` e `cortes.py aplicar`);
    - plano, tipo, o que aparece, lettering, elementos → `03-direcao.md` (edite o `roteiro.md` e `direcao.py aplicar`:
