@@ -9,7 +9,7 @@ criador dirige. Não mexe em mídia: só a "partitura visual". Inserts, motions,
 
 Leia o guia (`guias/padrao.md`) e pense o vídeo inteiro antes de dividir em planos: o que prova cada frase, onde o
 material é real e onde é conceito (motion), onde ele fala direto com a câmera, qual o ritmo. Os vídeos aprovados da
-categoria ficam na Calibragem (`calibragem.py exemplos <slug>` dá a pasta: `regras.md`, `favoritos.md`, `roteiros/`):
+categoria ficam na Calibragem (`calibragem.py exemplos <slug>` dá a pasta: `favoritos.md` e `roteiros/`):
 consulte quando quiser ver como um momento parecido foi resolvido, sem obrigação de copiar.
 
 ## Rodar

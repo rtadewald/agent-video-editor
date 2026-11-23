@@ -81,6 +81,13 @@ ele numa janela larga embaixo, com a cabeça saindo por cima, "meio recortado").
 (o `metade` antigo) só se o criador pedir. Precisa do recorte da silhueta: rode uma vez por projeto, em segundo plano,
 `uv run ferramentas/recorte.py <slug>`. _impeccable v4 c1 · 2026-11-23 (o criador: "esse deve ser o padrão a partir de agora")_
 
+**O ator recortado no canto** (só o torso, por cima da mídia, numa recapitulação de CTA, por exemplo): o plano é Tela
+dividida · insert (num Insert tela cheia a divisão `atras` é ignorada e o ator some), `divisao: "atras"` e
+`ator: {"modo": "recortado", "x": 0.78, "y": 0.886, "escala": 0.95}` (colado no canto de baixo à direita, o quadro
+passando da borda de baixo; nunca flutuando), com o `recorte.py` rodado. O braço que sai do 9:16 do bruto corta seco na
+borda de dentro: esmaeça só essa lateral da máscara (`-vf "geq=lum='p(X,Y)*min(1,(W-1-X)/(W*0.09))'"` para o ator à
+esquerda).
+
 ## Full ator
 
 Em `inserts.ator_planos[<plano>]`: `zoom_lento` (+3 %/s, até +15 %, nunca para) ou `zoom_seco` (+18 % de uma vez, até o

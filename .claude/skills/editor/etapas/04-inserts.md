@@ -28,11 +28,17 @@ uv run ferramentas/inserts.py ligar <slug> <plano> <ids…> # liga as mídias es
      com a conversa **real** (as mensagens e os comandos de uma sessão de verdade), tocada por `gravar.py quadro` com a
      ação `tempo`. Diga ao criador que é a sessão real redesenhada.
    - Esconda banners de cookies e borre link privado (a ação `js` antes de gravar).
+   - O app do Claude desktop de verdade: uma sessão de demo no projeto de teste, aberta na janela principal (larga,
+     ≥ 1200 px, sem o painel de tarefas), achada com o Quartz (`CGWindowListCopyWindowInfo`) e gravada com
+     `screencapture -x -V <s> -R x,y,w,h` (nunca interrompa no meio: o arquivo se perde).
+   - O hub e as aulas da Asimov: no navegador do criador (Claude in Chrome), logado; as aulas pelo player Bunny com
+     `uvx yt-dlp --referer https://hub.asimov.academy/ <url>`, em 1080p, com o professor ao lado.
 3. **Vídeos oficiais e da comunidade**: o produto, o X, Instagram, TikTok, YouTube
    (`uvx --from "yt-dlp[default]@latest" yt-dlp -f "bv*[height<=2160]" <url>`; recorte com `banco.py recortar`).
    Registre a URL na descrição.
 4. **Captura de site** (`captura.py <url> --proporcao 9:16 --duracao <s> --projeto <slug>`), ou `gravar.py` quando a
-   página precisa de ação. Sites que bloqueiam (Cloudflare): a doc ou o blog oficial.
+   página precisa de ação. Sites que bloqueiam (Cloudflare): a doc ou o blog oficial. Site 3D/WebGL pesado sai no loader ou
+   preto: espere carregar (ou corte o começo) e confira o 1º quadro.
 5. **Animar uma imagem** com um modelo de vídeo (OpenRouter, `/api/v1/videos`: Veo, Kling, Seedance…), só para um
    conceito ou quando o criador pede.
 

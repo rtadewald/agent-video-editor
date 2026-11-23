@@ -57,3 +57,12 @@ cada versão (`versoes/vN/audio.json`):
 O log mostra o que foi casado (`voz do CTA +x dB, timbre … → sobra …`). Sobra acima de ~2 dB numa faixa, ou um CTA
 gravado em outro lugar (outra sala, outro microfone): avise o criador na entrega — o equalizador iguala o timbre, não o
 ambiente.
+
+## Os níveis e o timbre
+
+- Música e sons de apoio baixos, a voz na frente: `audio.niveis` com `fundo: -5`, `presets: -3`, `transicoes: -3` (dB em
+  volta do padrão) quando o vídeo pede mais espaço para a voz.
+- **Outro microfone ou outra pessoa**: compare o espectro da voz, por faixa (60–120 Hz, 120–250, 250–500, 500–1k,
+  1–2k, 2–4k, 4–8k, 8–12k, só nas janelas com fala), com o de um vídeo aprovado, e ajuste o timbre até ficar a ~2 dB
+  dele; mande ao criador duas amostras de 30 s do mesmo trecho, no mesmo volume, antes de exportar. O padrão
+  (DeepFilterNet leve + `encorpada`) foi escolhido por ele entre 5 tratamentos: não teste outros sem pedido.

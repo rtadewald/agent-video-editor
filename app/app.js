@@ -6,7 +6,7 @@ import { $, $$, ICONE, abasAbertas, abrirAba, aviso, preferencia, chipCodigo, co
 import { abrirRevisao } from './revisao.js'
 import { abrirBiblioteca, PAGINAS_BIBLIOTECA, preCarregarBanco } from './biblioteca.js'
 import { abrirCalibragem, abrirRevisaoReferencia } from './calibragem.js'
-import { abrirAprendizados, abrirHeuristica, abrirReferencias, abrirSkill } from './referencias.js'
+import { abrirReferencias, abrirSkill } from './referencias.js'
 import { abrirLixeira } from './lixeira.js'
 import { abrirCarrossel, abrirCarrosseis } from './carrosseis.js'
 import { abrirAnimacao, abrirAnimacoes } from './animacoes.js'
@@ -368,8 +368,7 @@ async function rotear() {
   else if (partes[0] === 'calibragem') s = await (partes[1] ? abrirRevisaoReferencia(tela, partes[1]) : abrirCalibragem(tela))
   else if (partes[0] === 'referencias') s = await abrirReferencias(tela)
   else if (partes[0] === 'skill') s = await abrirSkill(tela, partes.slice(1).join('/'))
-  else if (partes[0] === 'heuristica') s = await abrirHeuristica(tela)
-  else if (partes[0] === 'aprendizados') s = await abrirAprendizados(tela, partes[1])
+  else if (partes[0] === 'heuristica' || partes[0] === 'aprendizados') { location.replace('#/skill'); return } // as páginas antigas viraram a Skill
   else if (partes[0] === 'lixeira') s = await abrirLixeira(tela)
   else if (partes[0] === 'carrosseis') s = await abrirCarrosseis(tela)
   else if (partes[0] === 'animacoes') s = await abrirAnimacoes(tela)

@@ -19,9 +19,9 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
   usa (`motion/`: runtime, GSAP e fontes; `fundos/`; `avatares/`); `claude-desktop.html`: o Claude desktop desenhado no
   tempo, para gravar uma conversa real.
 - `app/`: o app de revisão. `uv run ferramentas/servidor.py` → http://localhost:8719/app/
-- `biblioteca/` (fora do git; copia-se entre máquinas, por cima): `exemplos/` (criador.md e, por categoria de vídeo, as
-  regras e os roteiros dirigidos, gerados pela Calibragem, para consulta), `aprendizados/` (as correções antigas por área,
-  destiladas no guia de estilo em 2026-11-23; só o `carrossel.md` ainda é lido), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
+- `biblioteca/` (fora do git; copia-se entre máquinas, por cima): `exemplos/` (criador.md e, por categoria de vídeo, os
+  favoritos e os roteiros dirigidos, gerados pela Calibragem, para consulta), `aprendizados/carrossel.md` (o gosto dos
+  carrosséis; os aprendizados por área e as regras por categoria viraram o guia de estilo em 2026-11-23 e estão na Lixeira), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
   `lixeira/` (o que se apaga no app: `base.para_lixeira`; restaurar ou apagar de vez pela página Lixeira).
 - `projetos/<slug>/` (fora do git): um vídeo por pasta.
 - `animacoes/<slug>/animacao.json` (fora do git): uma animação por pasta, as cenas na ordem (presets de

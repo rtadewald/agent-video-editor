@@ -41,6 +41,8 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
   dele na tela dividida, nunca zoom dentro de um card. Uma gravação que já anda sozinha (cursor, clique, rolagem, o app
   respondendo) não precisa de zoom. Um print parado ganha um movimento leve até o corte.
 - **Tudo vivo e suave**: curvas com ease, nunca lineares; nada congela.
+- **O ator**: imagem clara e nítida (o look padrão, sem LUT, vinheta e nitidez leves). Nos trechos só com ele em tela
+  cheia, alterne de tempos em tempos um zoom seco e um zoom lento, leves.
 
 ## O material
 
@@ -69,7 +71,8 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
 - **No palco do vídeo.** Entre telas com o ator na janela, o motion usa o mesmo ator e o mesmo fundo, sem emenda. Vídeo
   real pode tocar dentro da cena (como textura) para provar o conceito.
 - **Imitar um app usa o app de verdade** (fontes, cores, janela inteira); a ferramenta que a fala diz que usou aparece de
-  verdade, com o texto real.
+  verdade, com o texto real. "Mudei o prompt": a mesma janela, com o mesmo texto, e só o acréscimo anima.
+- **Cards seguidos** ("Claude, GPT e Gemini") trocam em corte seco, cada um na sua palavra, sem subir nem dar pop a cada um.
 - **Ideias que se acumulam ficam num motion só**; motions seguidos da mesma história continuam um do outro.
 - **Pedido por referência copia a referência**: olhe os quadros dela (ritmo, troca, tamanho, curva, material).
 - Algo já na tela no 1º quadro; cada elemento entra na palavra que o nomeia.
@@ -78,7 +81,7 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
 
 - **Som preso ao que acontece**: o clique quando há clique, a digitação enquanto as letras aparecem, um pop quando algo
   surge. Nenhum som sem movimento visível; nada que entra muda sem som. Nunca whoosh nem riser.
-- Trilha só instrumental, baixa; a voz na frente, com o timbre `encorpada`.
+- Trilha só instrumental; música e sons de apoio baixos, a voz na frente, com o timbre `encorpada`.
 
 ## Fala, cortes e texto na tela
 
@@ -90,9 +93,12 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
 
 ## Por formato (só o que muda)
 
-- **CTA**: continua o que o corpo acabou de mostrar; cada insert é um projeto forte do criador ou uma aula com o
-  professor; fecha no ator em tela cheia ("é só clicar no link"); a trilha continua a do corpo.
-- **VSL**: mais longa, o mesmo gosto; cursos citados entram na `trilha-formacao`.
+- **CTA**: continua o que o corpo acabou de mostrar (a abertura recapitula as peças dele); cada insert é um projeto
+  forte do criador ou uma aula com o professor; ideias da oferta com os motions já aprovados ("do básico ao avançado" →
+  `subida-etapas`; "a escola tem de tudo" → `catalogo-3d`, `cards-trilhas-ref`); fecha no ator em tela cheia ("é só
+  clicar no link"); a trilha continua a do corpo, sem fade nem susto na emenda.
+- **VSL**: mais longa, o mesmo gosto; cursos citados entram na `trilha-formacao`; sites bonitos vêm da galeria
+  ds.asimov.academy, gravados em pé.
 - **Pico, "sim sim sim"**: a pergunta com material forte em cima; o "Sim" num zoom seco no ator, rápido; música baixa.
 - **Vídeo de dúvida** (ele lê uma pergunta): abre com o comentário sobre um insert, ele embaixo respondendo.
 

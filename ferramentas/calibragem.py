@@ -1510,9 +1510,9 @@ def main() -> None:
         except FileNotFoundError as e:
             raise SystemExit(str(e)) from None
         print(f'Categoria do projeto: {cat} · {n} vídeo(s) em uso na Calibragem')
-        print(f'  {pasta.relative_to(RAIZ)}/  (regras.md, favoritos.md, roteiros/: leia tudo)')
+        print(f'  {pasta.relative_to(RAIZ)}/  (favoritos.md, roteiros/: exemplos para consultar; o gosto está no guia de estilo da skill)')
         if not n:
-            print(f'Nenhum vídeo de {cat} em uso: dirija pelas regras da categoria e avise o criador na entrega.')
+            print(f'Nenhum vídeo de {cat} em uso: dirija pelo guia de estilo.')
     elif a.comando == 'de-projeto':
         try:
             id = de_projeto(a.slug, a.versao)

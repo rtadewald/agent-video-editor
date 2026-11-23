@@ -40,6 +40,10 @@ corrija o que não estiver bom antes de entregar. Nenhum script substitui isso.
 5. **Corrija e renderize de novo** o que não passou — é a versão seguinte (nunca apague `versoes/vN`) — e revise de novo
    o que mudou. Só entregue quando você mesmo aprovaria. O que é gosto em aberto vai na entrega, como pergunta.
 
+Nunca rode o render (ou um script que importe o `render.py`, ou qualquer coisa com multiprocessing) por `python -`
+(stdin): cada processo-filho roda o script de novo e a máquina trava sem erro. Use um arquivo com
+`if __name__ == '__main__'`.
+
 ## Entregar
 
 ```bash
