@@ -25,6 +25,10 @@ inserts ligados, os presets e o zoom deles e o pré-render em segundo plano (`05
    as **★ usado em vídeo aprovado** e as **✓ aprovado**; evite as **✗ recusado**.
 3. **Captura do site real** (`captura.py <url> --proporcao <16:9|9:16> --duracao <s> --projeto <slug>`), quando a fala
    cita um site, ferramenta, produto ou repositório. Num vídeo **deitado** (16:9), tudo em 16:9.
+   Print ou gravação de uma página (a captura, um teste local, o Playwright): espere as animações de entrada terminarem
+   antes de fotografar (`document.getAnimations().forEach(a => a.finish())` e ~3 s de espera); no meio da entrada a
+   página sai apagada, meio transparente. Página deitada num plano em tela cheia 9:16: grave numa janela mais alta
+   (ex.: 1280×1600), que ocupa mais a tela sem cortar nada. _impeccable v9 c1, c2 · 2026-11-23_
 4. **Web, fontes oficiais**: o site, o blog, o changelog, o X ou o YouTube **do próprio produto** (vídeo:
    `uvx --from "yt-dlp[default]@latest" yt-dlp -f "bv*[height<=2160]" --download-sections "*<ini>-<fim>" <url>`, nunca
    360p; imagem: o arquivo original). Nunca o rosto ou o vídeo de outro criador de conteúdo. Registre a URL.
