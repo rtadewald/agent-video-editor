@@ -131,8 +131,10 @@ def ler_roteiro(texto: str) -> list[dict]:
     return [b for b in blocos if b['marcacao']]
 
 
-# `<lettering>palavras</lettering>` ou `<lettering texto="o que aparece">palavras faladas</lettering>`, dentro da fala
-LETTERING = re.compile(r'<lettering(?:\s+texto\s*=\s*["“]([^"”]*)["”])?\s*>(.*?)</lettering\s*>', re.I | re.S)
+# `<lettering>palavras</lettering>` ou `<lettering texto="o que aparece">palavras faladas</lettering>`, dentro da fala;
+# `estilo="elegante"`: o texto pequeno no alto, à esquerda, em duas fontes (render/src/elementos.ts)
+LETTERING = re.compile(r'<lettering((?:\s+\w+\s*=\s*["“][^"”]*["”])*)\s*>(.*?)</lettering\s*>', re.I | re.S)
+ATRIBUTO = re.compile(r'(\w+)\s*=\s*["“]([^"”]*)["”]')
 TAG_SOLTA = re.compile(r'</?lettering[^>]*>', re.I)
 
 
@@ -146,7 +148,9 @@ def _tokens(blocos: list[dict]):
     for b, bloco in enumerate(blocos):
         fala, pos, partes = bloco['fala'], 0, []
         for m in LETTERING.finditer(fala):
-            letterings.append({'texto': ' '.join((m.group(1) or '').split()) or None, 'falado': sem_tags(m.group(2))})
+            attrs = {k.lower(): v for k, v in ATRIBUTO.findall(m.group(1) or '')}
+            letterings.append({'texto': ' '.join(attrs.get('texto', '').split()) or None, 'falado': sem_tags(m.group(2)),
+                               **({'estilo': attrs['estilo']} if attrs.get('estilo') else {})})
             partes += [(fala[pos:m.start()], None), (m.group(2), len(letterings) - 1)]
             pos = m.end()
         partes.append((fala[pos:], None))
@@ -295,7 +299,8 @@ def montar(resp: dict, saida: list[dict]) -> list[dict]:
         itens.append({'id': f'e{n + 1}', 'camada': 'elemento', 'tipo': e['tipo'], 'conteudo': None,
                       'palavra_ini': saida[a]['id'], 'palavra_fim': saida[b]['id'],
                       'off_ini': -_folga(saida, a, True, 0.05), 'off_fim': _folga(saida, b, False, 0.15),
-                      'texto': e.get('texto') or None, 'descricao': (e.get('descricao') or '').strip()})
+                      'texto': e.get('texto') or None, 'descricao': (e.get('descricao') or '').strip(),
+                      **({'estilo': e['estilo']} if e.get('estilo') else {})})
     return itens
 
 
@@ -327,7 +332,8 @@ def estruturar(roteiro: str, saida: list[dict]) -> tuple[list[dict], int, list[s
             else:
                 resp['elementos'].append({**e, 'palavra_ini': saida[ini]['id'], 'palavra_fim': saida[fim]['id']})
     resp['elementos'] += [{'tipo': 'lettering', 'palavra_ini': saida[l['ini']]['id'], 'palavra_fim': saida[l['fim']]['id'],
-                           'texto': l['texto'] or l['falado'].rstrip(',;:.'), 'descricao': ''} for l in letterings]
+                           'texto': l['texto'] or l['falado'].rstrip(',;:.'), 'descricao': '',
+                           **({'estilo': l['estilo']} if l.get('estilo') else {})} for l in letterings]
     return montar(resp, saida), casadas, avisos
 
 

@@ -20,7 +20,7 @@ export type Lugar = { modo: 'ator' | 'cheia' | 'metade' | 'atras'; f: number; ro
 export type Coluna = { x: number; area: number }
 /** Um elemento no tempo do vídeo final (o plano Full ator com lettering entra como um, com o tipo do plano). `banco`: no
  *  print sobreposto, a mídia do banco (imagem ou vídeo) que vai no card; sem ela, uma etiqueta com o texto. */
-export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; largura?: number; y?: number; entrada?: 'seco'; lugar: Lugar }
+export type Elemento = { id: string; tipo: string; inicio: number; fim: number; texto: string | null; descricao: string; banco: string | null; largura?: number; y?: number; entrada?: 'seco'; estilo?: string; lugar: Lugar }
 
 /** O queixo e os olhos do ator (fração da altura): pela caixa do rosto medido (os olhos como em `ator.enquadrar`); sem
  *  medida, os das referências. */
@@ -168,6 +168,36 @@ function letteringNoInsert(e: Elemento, rel: number): V {
       },
       { chave: 'texto', classe: 'absolute', estilo: { ...centrado(y, rel), ...estiloLettering(tam) }, texto },
     ],
+  }
+}
+
+/** O lettering elegante (\`estilo="elegante"\`, como o «2M views» da referência do criador, impeccable v4 c9): pequeno, no
+ *  alto à esquerda da área, sem desfocar o que está atrás; a 1ª palavra em negrito e o resto em itálico fino, cada linha
+ *  subindo devagar, nítida a partir de um leve desfoque, a 2ª um pouco depois da 1ª. */
+const ELEGANTE = { tam: 4.6 / MAIUSCULA, x: 0.075, y: 0.115, dur: 0.7, atraso: 0.14, sobe: 0.6 }
+function letteringElegante(e: Elemento, rel: number): V {
+  const { modo, f } = e.lugar
+  const y = modo === 'metade' ? f * 0.18 : modo === 'atras' ? Math.min(f, 0.72) * 0.22 : (e.y ?? ELEGANTE.y)
+  const [primeira, ...resto] = (e.texto ?? '').trim().split(/\s+/)
+  const linhas = [{ txt: primeira, peso: 700, italico: false }, ...(resto.length ? [{ txt: resto.join(' '), peso: 300, italico: true }] : [])]
+  return {
+    chave: e.id,
+    classe: 'absolute',
+    estilo: { left: `${ELEGANTE.x * 100}%`, top: `${y * 100}%` },
+    filhos: linhas.map((l, i) => {
+      const p = bezier(0.16, 1, 0.3, 1)(limite01((rel - i * ELEGANTE.atraso) / ELEGANTE.dur))
+      return {
+        chave: `l${i}`,
+        classe: 'block',
+        estilo: {
+          fontFamily: FONTE, fontWeight: l.peso, fontStyle: l.italico ? 'italic' : 'normal', color: '#fff', whiteSpace: 'nowrap',
+          fontSize: `${ELEGANTE.tam}cqh`, lineHeight: 1, letterSpacing: l.italico ? '-0.01em' : '-0.02em',
+          textShadow: '0 0.04em 0.3em rgba(0,0,0,0.45)', opacity: p,
+          transform: `translateY(${((1 - p) * ELEGANTE.sobe).toFixed(3)}em)`, filter: `blur(${((1 - p) * 0.08).toFixed(3)}em)`,
+        },
+        texto: l.txt,
+      }
+    }),
   }
 }
 
@@ -352,8 +382,9 @@ export function desenharElementos(t: number, elementos: Elemento[], banco: Map<s
   const filhos = agora.map((e) => {
     const rel = t - e.inicio
     const d = e.tipo === 'palavra_manychat' ? digitacao(e) : null
-    if (e.tipo !== 'tarja' && rel < (d ? d.ini + d.dur + DIGITAR.toque : POP.dur)) parado = false
+    if (e.tipo !== 'tarja' && rel < (d ? d.ini + d.dur + DIGITAR.toque : e.estilo === 'elegante' ? ELEGANTE.dur + ELEGANTE.atraso : POP.dur)) parado = false
     if (e.tipo === 'full_ator_lettering' || (e.tipo === 'lettering' && e.lugar.modo === 'ator')) return letteringNoAtor(e, rel)
+    if (e.tipo === 'lettering' && e.estilo === 'elegante') return letteringElegante(e, rel)
     if (e.tipo === 'lettering') return letteringNoInsert(e, rel)
     if (e.tipo === 'palavra_manychat') return manychat(e, rel)
     if (e.tipo === 'caixinha_perguntas') return caixinha(e, rel)

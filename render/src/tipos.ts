@@ -28,6 +28,8 @@ export type ItemDirecaoProjeto = {
   y?: number
   /** No print sobreposto: 'seco' entra em corte seco (sem o pop). */
   entrada?: 'seco'
+  /** No lettering: 'elegante' é o texto pequeno no alto à esquerda, em duas fontes (`elementos.ts`). */
+  estilo?: string
 }
 export type ItemRef = {
   id: string

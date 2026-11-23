@@ -1679,6 +1679,40 @@ ${b}` };
       ]
     };
   }
+  var ELEGANTE = { tam: 4.6 / MAIUSCULA, x: 0.075, y: 0.115, dur: 0.7, atraso: 0.14, sobe: 0.6 };
+  function letteringElegante(e, rel) {
+    const { modo, f } = e.lugar;
+    const y = modo === "metade" ? f * 0.18 : modo === "atras" ? Math.min(f, 0.72) * 0.22 : e.y ?? ELEGANTE.y;
+    const [primeira, ...resto] = (e.texto ?? "").trim().split(/\s+/);
+    const linhas = [{ txt: primeira, peso: 700, italico: false }, ...resto.length ? [{ txt: resto.join(" "), peso: 300, italico: true }] : []];
+    return {
+      chave: e.id,
+      classe: "absolute",
+      estilo: { left: `${ELEGANTE.x * 100}%`, top: `${y * 100}%` },
+      filhos: linhas.map((l, i) => {
+        const p = bezier(0.16, 1, 0.3, 1)(limite01((rel - i * ELEGANTE.atraso) / ELEGANTE.dur));
+        return {
+          chave: `l${i}`,
+          classe: "block",
+          estilo: {
+            fontFamily: FONTE,
+            fontWeight: l.peso,
+            fontStyle: l.italico ? "italic" : "normal",
+            color: "#fff",
+            whiteSpace: "nowrap",
+            fontSize: `${ELEGANTE.tam}cqh`,
+            lineHeight: 1,
+            letterSpacing: l.italico ? "-0.01em" : "-0.02em",
+            textShadow: "0 0.04em 0.3em rgba(0,0,0,0.45)",
+            opacity: p,
+            transform: `translateY(${((1 - p) * ELEGANTE.sobe).toFixed(3)}em)`,
+            filter: `blur(${((1 - p) * 0.08).toFixed(3)}em)`
+          },
+          texto: l.txt
+        };
+      })
+    };
+  }
   var estiloLettering = (tam) => ({
     fontFamily: FONTE,
     fontWeight: 700,
@@ -1840,8 +1874,9 @@ ${b}`, tam, n: 2, sobra };
     const filhos = agora.map((e) => {
       const rel = t - e.inicio;
       const d = e.tipo === "palavra_manychat" ? digitacao(e) : null;
-      if (e.tipo !== "tarja" && rel < (d ? d.ini + d.dur + DIGITAR.toque : POP.dur)) parado = false;
+      if (e.tipo !== "tarja" && rel < (d ? d.ini + d.dur + DIGITAR.toque : e.estilo === "elegante" ? ELEGANTE.dur + ELEGANTE.atraso : POP.dur)) parado = false;
       if (e.tipo === "full_ator_lettering" || e.tipo === "lettering" && e.lugar.modo === "ator") return letteringNoAtor(e, rel);
+      if (e.tipo === "lettering" && e.estilo === "elegante") return letteringElegante(e, rel);
       if (e.tipo === "lettering") return letteringNoInsert(e, rel);
       if (e.tipo === "palavra_manychat") return manychat(e, rel);
       if (e.tipo === "caixinha_perguntas") return caixinha(e, rel);
@@ -1968,7 +2003,7 @@ ${b}`, tam, n: 2, sobra };
       return m.length === ls.length ? m.reduce((a, b) => b.f < a.f ? b : a) : lugarEm(ini, fim);
     };
     const originais = new Map((edicao.direcao?.itens ?? []).map((i) => [i.id, i]));
-    const desenhaveis = [...planos.filter((p) => p.tipo === "full_ator_lettering"), ...elementos].sort((a, b) => a.inicio - b.inicio).map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === "tarja" && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, largura: originais.get(e.id)?.largura, y: originais.get(e.id)?.y, entrada: originais.get(e.id)?.entrada, lugar: e.tipo === "caixinha_perguntas" ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }));
+    const desenhaveis = [...planos.filter((p) => p.tipo === "full_ator_lettering"), ...elementos].sort((a, b) => a.inicio - b.inicio).map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === "tarja" && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, largura: originais.get(e.id)?.largura, y: originais.get(e.id)?.y, entrada: originais.get(e.id)?.entrada, estilo: originais.get(e.id)?.estilo, lugar: e.tipo === "caixinha_perguntas" ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }));
     lista2.forEach((x, i) => {
       if (x.tipo === "comentario_insert_ator" || desenhaveis.some((e) => e.inicio < x.t.fim && e.fim > x.t.inicio)) return;
       trechos[i].geometria = geometriaDoInsert(x, banco, receitaDoInsert(x, banco, presets), divisaoDe(x, banco, presets), fundoInserts);
@@ -2020,7 +2055,7 @@ ${b}`, tam, n: 2, sobra };
         })
       );
       const elems = await Promise.all(
-        desenhaveis.filter((e) => cai(e.inicio, e.fim)).map(async (e) => ({ t: [rel(e.inicio), rel(e.fim)], tipo: e.tipo, texto: e.texto, lugar: e.lugar, largura: e.largura ?? null, y: e.y ?? null, entrada: e.entrada ?? null, midia: await midiaDe(e.banco) }))
+        desenhaveis.filter((e) => cai(e.inicio, e.fim)).map(async (e) => ({ t: [rel(e.inicio), rel(e.fim)], tipo: e.tipo, texto: e.texto, lugar: e.lugar, largura: e.largura ?? null, y: e.y ?? null, entrada: e.entrada ?? null, estilo: e.estilo ?? null, midia: await midiaDe(e.banco) }))
       );
       const fundo2 = daqui.length ? fundoInserts : null;
       return JSON.stringify({

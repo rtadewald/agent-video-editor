@@ -79,9 +79,13 @@ Edite `inserts.pedidos[i].enriquecimento` no `edicao.json`:
 Ex.: um print com texto pequeno pede `"zoom": "Mais"` e `"zona"` no ponto do texto; uma sequência rápida de 3 mídias
 num insert curto pede `"entrada": "Rápida"`.
 
-**Ator embaixo** (`enriquecimento.divisao: "atras"`, o ator numa janela embaixo, com a cabeça saindo por cima;
-`enriquecimento.ator.escala` muda o tamanho, padrão 0,55): precisa do recorte da silhueta, senão a janela mostra só o
-peito. Rode uma vez por projeto, em segundo plano: `uv run ferramentas/recorte.py <slug>`.
+**A tela dividida padrão é o "ator embaixo" na janela** (o layout do Claude Code Apps: o insert ou o motion em cima,
+ele numa janela larga embaixo, com a cabeça saindo por cima, "meio recortado"). Todo insert de tela dividida leva
+`enriquecimento.divisao: "atras"` e `enriquecimento.ator: {"modo": "janela", "escala": 0.75, "y": 1.0125, "topo": 0.103}`
+(o `presets.py escolher` já põe); todo motion de tela dividida vai em `formato: "vertical"` com o mesmo `ator` e
+`legenda_y: 0.87`, e a cena dele fica no espaço de cima (13–68% da altura). A metade de cima com ele cortado embaixo
+(o `metade` antigo) só se o criador pedir. Precisa do recorte da silhueta: rode uma vez por projeto, em segundo plano,
+`uv run ferramentas/recorte.py <slug>`. _impeccable v4 c1 · 2026-11-23 (o criador: "esse deve ser o padrão a partir de agora")_
 
 ## Full ator
 

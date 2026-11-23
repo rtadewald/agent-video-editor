@@ -168,7 +168,7 @@ async function iniciar() {
   const desenhaveis: Elemento[] = [...planos.filter((p) => p.tipo === 'full_ator_lettering'), ...elementos]
     .sort((a, b) => a.inicio - b.inicio)
     // a tarja do começo já está na tela no 1º quadro (o criador: "presente desde o primeiro instante")
-    .map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === 'tarja' && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, largura: originais.get(e.id)?.largura, y: originais.get(e.id)?.y, entrada: originais.get(e.id)?.entrada, lugar: e.tipo === 'caixinha_perguntas' ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }))
+    .map((e) => ({ id: e.id, tipo: e.tipo, inicio: e.tipo === 'tarja' && e.inicio < 1 ? 0 : e.inicio, fim: e.fim, texto: e.texto, descricao: e.descricao, banco: originais.get(e.id)?.banco ?? null, largura: originais.get(e.id)?.largura, y: originais.get(e.id)?.y, entrada: originais.get(e.id)?.entrada, estilo: originais.get(e.id)?.estilo, lugar: e.tipo === 'caixinha_perguntas' ? caixinhaEm(e.inicio, e.fim) : lugarEm(e.inicio, e.fim) }))
   // os pedaços deles fora dos inserts e motions entram para o render fotografar (os de dentro já saem na foto do trecho)
   // os inserts parados, sem elemento nem comentário por cima: o ffmpeg desenha (a geometria vai no lugar da foto)
   lista.forEach((x, i) => {
@@ -212,7 +212,7 @@ async function iniciar() {
       }),
     )
     const elems = await Promise.all(
-      desenhaveis.filter((e) => cai(e.inicio, e.fim)).map(async (e) => ({ t: [rel(e.inicio), rel(e.fim)], tipo: e.tipo, texto: e.texto, lugar: e.lugar, largura: e.largura ?? null, y: e.y ?? null, entrada: e.entrada ?? null, midia: await midiaDe(e.banco) })),
+      desenhaveis.filter((e) => cai(e.inicio, e.fim)).map(async (e) => ({ t: [rel(e.inicio), rel(e.fim)], tipo: e.tipo, texto: e.texto, lugar: e.lugar, largura: e.largura ?? null, y: e.y ?? null, entrada: e.entrada ?? null, estilo: e.estilo ?? null, midia: await midiaDe(e.banco) })),
     )
     const fundo = daqui.length ? fundoInserts : null
     return JSON.stringify({

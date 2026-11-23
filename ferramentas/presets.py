@@ -152,6 +152,10 @@ def listar() -> None:
             print(f"   ★ {', '.join(fav)}")
 
 
+# a tela dividida padrão (impeccable v4 c1): o ator numa janela embaixo, como no Claude Code Apps
+ATOR_JANELA = {'modo': 'janela', 'escala': 0.75, 'y': 1.0125, 'topo': 0.103}
+
+
 def escolher(slug: str) -> None:
     edicao = ler(slug)
     lista, o = biblioteca(), ordem()
@@ -162,6 +166,11 @@ def escolher(slug: str) -> None:
         if not x.get('midias'):
             print(f'{rotulo}: sem mídia, fica sem preset')
             continue
+        if x['formato'] == 'dividida' and not e.get('divisao'):
+            # a tela dividida padrão: o ator na janela embaixo, a cabeça saindo por cima (05-enriquecimento.md)
+            e = {**e, 'divisao': 'atras', 'ator': dict(ATOR_JANELA)}
+            x['enriquecimento'] = e
+            mudou = True
         if e.get('preset'):
             p = next((p for p in lista if p['id'] == e['preset']), None)
             print(f"{rotulo}: já tem {e['preset']} ({p['nome'] if p else 'apagado da biblioteca'})")
