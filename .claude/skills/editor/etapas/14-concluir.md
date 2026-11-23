@@ -105,17 +105,20 @@ gostos daquele formato). As etapas leem os dois.
    - `asimov/`: aulas, cursos, formacoes, hub, site, design-systems (a galeria ds.asimov), autoridade (eventos, equipe,
      podcasts, seguidores), asimov-skills, prisma, ofertas (preços, planos, checkout);
    - `bf26`: a campanha da Black (a live, a arte, as VSLs dela);
-   - `projeto/` (o que o criador fez e gravou): neo-stitch, interfaces (rodando no monitor), neo-obsidian, editor,
-     agentes, skills (as dele), testes (os testes e demos que ele rodou);
+   - `projeto/` (projetos feitos com IA: os do criador e os de fora que mostram o que dá para construir): neo-stitch,
+     interfaces (rodando no monitor), neo-obsidian, editor, agentes (os dele e os exemplos: Jarvis, Ultron, n8n
+     montando o fluxo, Claude Max 3 AM), skills (as dele), testes (os testes e demos que ele rodou);
    - `sites/` (de fora): 3d, referencias, ai-slop;
    - `ferramentas/` (produtos de terceiros, a tela ou o anúncio oficial): claude, openai, google, agentes, skills, voz,
      dev, redes (YouTube, Instagram, TikTok, Hacker News);
    - `noticias` e `broll`.
 4. **A tag do vídeo aprovado** (o projeto: `tags` no `edicao.json`, ou o "+ tag" no card da página Projetos): todo vídeo
    aprovado sai com tag, como as mídias, sempre das que já existem (a barra de tags da página Projetos). O padrão é
-   `<produto>/<destino>`: o produto (`fia`, `fid`, `bf26`) e, quando o vídeo leva a algum lugar, o destino (`lp`, `vsl`,
-   `isca`, `lembrete`); um orgânico sem CTA leva só o produto. O formato que tem barra própria (`manychat`, `stories`)
-   é a tag dele. Os CTAs e as saídas ganham a tag do destino deles. Tag nova, pergunte ao criador.
+   `<produto>/<destino>`, o mesmo das copies no vault sem o emoji (🤖fia/reels → `fia/reels`): o produto (`fia`, `fid`,
+   `bf26`) e o destino: `reels` (o orgânico), `lp`, `vsl`, `isca` e, na Black, `captura`, `carrinho`, `lembrete` (os
+   anúncios da Black sem destino único ficam em `bf26`). Um CTA leva a tag do destino dele (o CTA da Black de carrinho
+   é `bf26/carrinho`, mesmo vindo de um vídeo da FID). O formato com barra própria (`manychat`, `stories`) é a tag
+   dele. Na dúvida do produto, a tag da copy no vault decide. Tag nova, pergunte ao criador.
 
 ## 3. Consolidar (a cada 5 vídeos aprovados)
 
