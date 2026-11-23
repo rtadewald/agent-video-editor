@@ -47,7 +47,10 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
   Cada slide fecha abrindo o próximo: uma pergunta que fica, um "só que…", um "mas o que mudou mesmo foi…", a resposta
   que vem depois. Ninguém deve conseguir parar no meio. Feche o loop do gancho só perto do fim.
 - **Mídia só quando prova** o que o texto acabou de dizer (o print, o antes e depois, a tela em uso), como nos inserts;
-  um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. Uma sessão com IA é print real do app
+  um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. **Exceção: carrossel de uma skill,
+  ferramenta ou hack que vem de um Reels (a demo é o conteúdo): todo slide tem mídia de apoio**, a prova do que o texto
+  diz (os motions e inserts do vídeo ou da VSL do mesmo tema, o banco, o antes e depois); a capa leva a melhor delas,
+  a que mostra o benefício. _img-2-html v3 · 2026-11-23_ Uma sessão com IA é print real do app
   claro do Claude, nunca uma simulação nem o terminal preto. A pergunta de um seguidor que abre o carrossel é um
   comentário do Instagram como aparece na lista, em card branco: foto e usuário borrados, o usuário na mesma linha do
   texto, o coração à direita e "5 d · 1 curtida · Responder · •••" embaixo. Nunca a caixinha de pergunta dos Stories. _wordpress-em-2026 v5 · 2026-11-03_
