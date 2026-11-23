@@ -39,15 +39,16 @@ legenda desce para baixo dela (`motions[p].legenda_y`). _design-por-imagem v11 c
 ### O motion contínuo (um palco o vídeo inteiro, ele pequeno embaixo)
 
 Quando o criador pede **uma tela fixa com um motion só o vídeo inteiro e ele pequeno embaixo**, o modelo é o Reel de
-referência que ele mandou (instagram.com/reel/DVhNGTAjPwu): o preset `vitrine`, um palco de três andares sobre fundo
-quase preto com uma grade leve. Em cima (14–46% da altura), o **resultado** de ponta a ponta da tela; no meio (47–73%),
-um **cartão cinza-escuro** de cantos redondos com o **app ou o processo** (uma mídia ou uma grade, `cols`) e, no alto do
-cartão, um título curto com emoji só quando muda o assunto; embaixo, ele numa **janela larga com a cabeça saindo por
-cima**. O conteúdo troca em **corte seco** a cada frase; os vídeos seguem tocando, com um zoom lento por dentro.
+referência que ele mandou (instagram.com/reel/DVhNGTAjPwu): o preset `vitrine`, fundo quase preto com uma grade leve,
+ele embaixo numa **janela larga com a cabeça saindo por cima** (o criador aprovou: "eu apareci bem") e, no canvas de
+cima, **um insert por vez**, o melhor para a frase: deitado vai de ponta a ponta da tela (`forma: "faixa"`), quadrado ou
+em pé vai num cartão de cantos redondos (`"cartao"`). Dois andares de cards ao mesmo tempo ficaram "muito sujo, muita
+informação". O **título de apoio (curto, com emoji) só no começo**. Troca em **corte seco** a cada frase; os vídeos
+seguem tocando, com um zoom lento por dentro.
 Um plano `tela_dividida_motion` do começo ao fim, com `formato: "vertical"`, `ator: {modo: "janela", escala: 0.75, y:
 1.0125, topo: 0.103}` (no bruto de mesa: a janela começa a ~71% e só a cabeça sai por cima) e `legenda_y: 0.87`.
-`valores.cenas` (JSON): `[{em: "as palavras onde começa", titulo, topo: {m: [id], foco: [x,y], zoom, revela: 0.36},
-meio: {m: [ids], cols, foco, zoom}}]`; `valores.midias`: todos os ids. A mesma mídia no mesmo lugar continua tocando.
+`valores.cenas` (JSON): `[{em: "as palavras onde começa", m: id, forma, asp, foco: [x,y], zoom, revela: 0.36, titulo}]`;
+`valores.midias`: todos os ids. A mesma mídia em cenas seguidas continua tocando.
 **Cada fala provada com material real e escolhido para ela**, nunca os inserts da versão anterior por inércia: os apps
 do criador gravados de verdade, os vídeos de outras pessoas e a prova com número (ex.: o gráfico do star-history.com
 para "começou nos últimos meses"); nada de imagem gerada fingindo ser app. Trecho de gravação com o player piscando
