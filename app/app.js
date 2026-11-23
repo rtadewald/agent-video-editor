@@ -6,7 +6,7 @@ import { $, $$, ICONE, abasAbertas, abrirAba, aviso, preferencia, chipCodigo, co
 import { abrirRevisao } from './revisao.js'
 import { abrirBiblioteca, PAGINAS_BIBLIOTECA, preCarregarBanco } from './biblioteca.js'
 import { abrirCalibragem, abrirRevisaoReferencia } from './calibragem.js'
-import { abrirAprendizados, abrirHeuristica, abrirReferencias } from './referencias.js'
+import { abrirAprendizados, abrirHeuristica, abrirReferencias, abrirSkill } from './referencias.js'
 import { abrirLixeira } from './lixeira.js'
 import { abrirCarrossel, abrirCarrosseis } from './carrosseis.js'
 import { abrirAnimacao, abrirAnimacoes } from './animacoes.js'
@@ -367,6 +367,7 @@ async function rotear() {
   if (partes[0] === 'p' && partes[1]) s = await abrirRevisao(tela, partes[1], partes[2] ? parseInt(partes[2].replace(/^v/, ''), 10) : null)
   else if (partes[0] === 'calibragem') s = await (partes[1] ? abrirRevisaoReferencia(tela, partes[1]) : abrirCalibragem(tela))
   else if (partes[0] === 'referencias') s = await abrirReferencias(tela)
+  else if (partes[0] === 'skill') s = await abrirSkill(tela, partes.slice(1).join('/'))
   else if (partes[0] === 'heuristica') s = await abrirHeuristica(tela)
   else if (partes[0] === 'aprendizados') s = await abrirAprendizados(tela, partes[1])
   else if (partes[0] === 'lixeira') s = await abrirLixeira(tela)

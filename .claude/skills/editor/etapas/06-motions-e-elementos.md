@@ -45,6 +45,8 @@ por cima e o insert por trás de tudo, em 9:16 (`forma: "tela"`). Pode ser um pl
 só, as mídias trocando presas às palavras).
 - O plano: `tela_dividida_motion`, com `motions[p]` = preset `vitrine`, `formato: "vertical"`, `ator: {modo: "janela",
   escala: 0.75, y: 1.0125, topo: 0.103}` (no bruto de mesa) e `legenda_y: 0.87`.
+  A cabeça só sai por cima da janela com a máscara da silhueta: rode `recorte.py <slug>` antes (~10 min, em segundo
+  plano); sem ela, a janela mostra só o peito.
 - `valores.cenas` (JSON), uma por troca: `{em: "as palavras onde começa", m: <id do banco>, forma: "tela", zoom: 1}`;
   opcionais: `pontos: [[x, y, zoom, t]…]` (a câmera vai com calma de um destaque ao outro; t em s desde o começo da
   cena), `sons: [["clique", t], ["digitar", t, dur], ["pop", t]]`, `clique: true` (um clique na troca), `forma: "faixa"

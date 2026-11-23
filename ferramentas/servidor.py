@@ -954,6 +954,62 @@ def _salvar_aprendizado(h, q, area):
     return {'ok': True, 'criador': _conta_criador(area)}
 
 
+# ---- a skill do editor: o guia, o SKILL.md e as etapas, lidos e editados ao vivo na página Skill do app
+
+SKILL = RAIZ / '.claude' / 'skills' / 'editor'
+
+
+def _grupo_skill(rel: str) -> str:
+    if rel.startswith('guias/'):
+        return 'Guia de estilo'
+    if rel in ('SKILL.md', 'edicao.md'):
+        return 'A skill'
+    if 'brief' in rel:
+        return 'Briefs dos subagentes'
+    return 'Etapas'
+
+
+def arquivo_skill(rel: str) -> Path:
+    """Um .md da skill pelo caminho relativo (nada fora da pasta dela)."""
+    arq = (SKILL / rel).resolve()
+    if arq.suffix != '.md' or SKILL.resolve() not in arq.parents:
+        raise Erro('Arquivo fora da skill.', 404)
+    return arq
+
+
+@rota('GET', '/api/skill')
+def _skill(h, q):
+    """Os .md da skill, na ordem de leitura: o guia, a skill, as etapas, os briefs. `mtime` para a página ver mudanças."""
+    ordem = {'Guia de estilo': 0, 'A skill': 1, 'Etapas': 2, 'Briefs dos subagentes': 3}
+    out = []
+    for arq in SKILL.rglob('*.md'):
+        rel = arq.relative_to(SKILL).as_posix()
+        primeira = next((l for l in arq.read_text(encoding='utf-8').splitlines() if l.startswith('# ')), '')
+        titulo = primeira[2:].strip() or rel
+        if rel == 'SKILL.md':
+            titulo = 'SKILL.md · o passo a passo'
+        out.append({'arquivo': rel, 'titulo': titulo, 'grupo': _grupo_skill(rel), 'mtime': arq.stat().st_mtime})
+    return sorted(out, key=lambda x: (ordem[x['grupo']], x['arquivo'] != 'SKILL.md', x['arquivo']))
+
+
+@rota('GET', r'/api/skill/(.+\.md)')
+def _skill_arquivo(h, q, rel):
+    arq = arquivo_skill(rel)
+    if not arq.is_file():
+        raise Erro('Arquivo não encontrado.', 404)
+    return {'arquivo': rel, 'texto': arq.read_text(encoding='utf-8'), 'mtime': arq.stat().st_mtime}
+
+
+@rota('PUT', r'/api/skill/(.+\.md)')
+def _salvar_skill(h, q, rel):
+    arq = arquivo_skill(rel)
+    texto = h.corpo().get('texto')
+    if not isinstance(texto, str) or not texto.strip():
+        raise Erro('O arquivo não pode ficar vazio.', 422)
+    arq.write_text(texto.rstrip() + '\n', encoding='utf-8')
+    return {'ok': True, 'mtime': arq.stat().st_mtime}
+
+
 # ---- presets, transições, banco e motions
 
 def gravar_ordem(arq: Path, chave: str, ids, favoritos, campo: str, maximo: int) -> dict:

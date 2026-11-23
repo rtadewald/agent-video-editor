@@ -113,10 +113,13 @@ os comentários do Final na revisão do corpo (é onde eles estão), como os de 
 
 ## Ler tudo, pensar no todo
 
-- **Leia todos os pendentes antes de mexer em qualquer coisa**: uns valem para o vídeo inteiro ("menos de 90 s", "o
-  zoom está estranho", "ocupa a tela") e mudam o que os outros pedem. Aplique primeiro os que valem para o todo.
-- **Um comentário sobre um tipo de erro é sobre o vídeo inteiro**: corrija o ponto e procure o mesmo erro em todas as
-  outras cenas. "Mesma coisa aqui… mesma coisa aqui" é sinal de que isso faltou.
+1. **Leia todos os pendentes antes de mexer em qualquer coisa** (com os anexos): uns valem para o vídeo inteiro ("menos
+   de 90 s", "o zoom está estranho", "ocupa a tela") e mudam o que os outros pedem.
+2. **Faça um plano de ação que leve todos em conta**, antes de aplicar o primeiro: o que muda no vídeo todo (cortes,
+   formato, estilo), o que cada comentário pede, onde mais o mesmo pedido se aplica (um comentário sobre um tipo de
+   erro é sobre todas as cenas com esse erro: "mesma coisa aqui… mesma coisa aqui" é sinal de que isso faltou), a ordem
+   (o que muda os tempos primeiro) e o que precisa de material novo. Escreva o plano (curto) antes de começar.
+3. **Só então aplique**, seguindo o plano.
 - O guia (`guias/padrao.md`) costuma já ter a resposta; a correção não pode criar outro erro que ele já descreve.
 - Quando o criador diz que algo vale para sempre ("sempre", "nunca mais", "regra geral"), confirme com ele o texto e
   ponha no guia já. O resto espera a conclusão (`14-concluir.md`), que lê as respostas de todas as revisões.

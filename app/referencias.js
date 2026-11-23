@@ -565,3 +565,87 @@ export async function abrirAprendizados(tela, area) {
   })
   desenhar()
 }
+
+// ---------- Skill: o que o Claude lê para editar, ao vivo ----------
+// O guia de estilo, o SKILL.md, as etapas e os briefs (`.claude/skills/editor/`), lidos e editados aqui. A página olha o
+// disco a cada 2 s: quando o Claude reescreve um arquivo, ele muda na tela sem recarregar.
+
+let modoSkill = 'ler'
+export async function abrirSkill(tela, rel) {
+  tela.className = 'pagina pagina-aprendizados pagina-skill'
+  let lista, atual
+  try {
+    lista = await enviar('GET', '/api/skill')
+    rel = rel && lista.some((x) => x.arquivo === rel) ? rel : lista[0].arquivo
+    atual = await enviar('GET', `/api/skill/${rel}`)
+  } catch (e) {
+    tela.innerHTML = `<p class="vazio">${esc(e.message)}</p>`
+    return null
+  }
+  let mudouNoDisco = false
+  const titulo = () => lista.find((x) => x.arquivo === atual.arquivo)?.titulo || atual.arquivo
+  const desenhar = () => {
+    const grupos = [...new Set(lista.map((x) => x.grupo))]
+    const lado = `<aside class="lado-pares">${grupos.map((g) => `<span class="eyebrow">${esc(g)}</span>
+      ${lista.filter((x) => x.grupo === g).map((x) => `<a class="par-link${x.arquivo === atual.arquivo ? ' ativo' : ''}" href="#/skill/${x.arquivo}" title="${esc(x.arquivo)}"><span>${esc(x.titulo)}</span></a>`).join('')}`).join('')}</aside>`
+    const corpo = modoSkill === 'ler'
+      ? `<div class="markdown">${markdown(atual.texto)}</div>`
+      : `<textarea class="editor-regras editor-skill" spellcheck="false">${esc(atual.texto)}</textarea>`
+    tela.innerHTML = `<div class="com-lado">${lado}<div class="lado-conteudo bloco-heuristica">
+      <div class="cabeca-secao"><span class="eyebrow">Skill · ${esc(titulo())}</span>${ajuda('O que o Claude lê para editar, ao vivo: o guia de estilo (o seu gosto), o passo a passo (SKILL.md), as etapas (o como de cada ferramenta) e os briefs dos subagentes. Quando ele reescreve um arquivo, a página atualiza sozinha. Você também pode editar aqui.')}
+        <div class="alternar">${['ler', 'editar'].map((m) => `<button class="pilula pequena${modoSkill === m ? ' ativa' : ''}" data-modo="${m}">${m === 'ler' ? 'Ler' : 'Editar'}</button>`).join('')}</div>
+        ${modoSkill === 'editar' ? '<span class="dica">Grava ao sair da caixa.</span>' : ''}<span class="salvo" id="salvo-s">${mudouNoDisco ? 'Mudou no disco: saia da caixa para recarregar' : ''}</span>
+        <span class="dica" title="${esc(atual.arquivo)}">.claude/skills/editor/${esc(atual.arquivo)}</span></div>
+      ${corpo}</div></div>`
+  }
+  const salvo = (texto, erro = false) => {
+    const el = $('#salvo-s', tela)
+    if (!el) return
+    el.className = `salvo${erro ? ' salvo-erro' : ''}`
+    el.innerHTML = texto
+    if (!erro) setTimeout(() => el.textContent === 'Salvo' && (el.innerHTML = ''), 1800)
+  }
+  tela.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-modo]')
+    if (!m) return
+    modoSkill = m.dataset.modo
+    desenhar()
+    if (modoSkill === 'editar') $('.editor-skill', tela).focus()
+  })
+  tela.addEventListener('focusout', async (e) => {
+    if (!e.target.matches('.editor-skill')) return
+    const texto = e.target.value
+    if (texto.trim() === atual.texto.trim()) {
+      if (mudouNoDisco) { mudouNoDisco = false; atual = await enviar('GET', `/api/skill/${atual.arquivo}`); desenhar() }
+      return
+    }
+    salvo('Salvando…')
+    try {
+      const r = await enviar('PUT', `/api/skill/${atual.arquivo}`, { texto })
+      atual = { ...atual, texto: texto.trimEnd() + '\n', mtime: r.mtime }
+      mudouNoDisco = false
+      salvo('Salvo')
+    } catch (x) {
+      salvo(esc(x.message), true)
+    }
+  })
+  // ao vivo: o disco a cada 2 s (a lista, para arquivos novos, e o arquivo aberto)
+  const olhar = setInterval(async () => {
+    try {
+      const nova = await enviar('GET', '/api/skill')
+      const meu = nova.find((x) => x.arquivo === atual.arquivo)
+      const listaMudou = nova.length !== lista.length || nova.some((x, i) => x.arquivo !== lista[i]?.arquivo || x.titulo !== lista[i]?.titulo)
+      lista = nova
+      if (meu && meu.mtime > atual.mtime + 0.001) {
+        const editando = modoSkill === 'editar' && document.activeElement?.matches('.editor-skill')
+        if (editando) { mudouNoDisco = true; salvo('Mudou no disco: saia da caixa para recarregar') ; return }
+        const rolagem = scrollY
+        atual = await enviar('GET', `/api/skill/${atual.arquivo}`)
+        desenhar()
+        scrollTo(0, rolagem)
+      } else if (listaMudou && !(modoSkill === 'editar' && document.activeElement?.matches('.editor-skill'))) desenhar()
+    } catch { /* o servidor reiniciando: tenta de novo no próximo */ }
+  }, 2000)
+  desenhar()
+  return () => clearInterval(olhar)
+}
