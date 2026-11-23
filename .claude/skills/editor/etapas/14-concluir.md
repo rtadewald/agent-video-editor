@@ -1,6 +1,6 @@
-# 14 · Concluir um vídeo: aprendizados, faxina do banco e encerramento
+# 14 · Concluir um vídeo: aprendizados, tags e faxina do banco, e encerramento
 
-Depois do vídeo aprovado e exportado (`12-final.md`), feche o ciclo: aprendizados, faxina do banco e, quando o criador
+Depois do vídeo aprovado e exportado (`12-final.md`), feche o ciclo: aprendizados, tags e faxina do banco e, quando o criador
 disser que acabou, o encerramento (o passo 4). É aqui que a skill aprende: o que o
 criador corrigiu num vídeo não pode se repetir no próximo.
 
@@ -86,7 +86,7 @@ gostos daquele formato). As etapas leem os dois.
 | Legenda | `biblioteca/aprendizados/legenda.md` | `09-legenda.md` |
 | Render e autorrevisão | `biblioteca/aprendizados/render.md` | `10-render.md` |
 
-## 2. Faxina do banco
+## 2. Tags e faxina do banco
 
 1. Liste o que entrou no banco por causa deste vídeo: `uv run ferramentas/banco.py listar` (cada item mostra o projeto
    de origem e onde é usado).
@@ -111,6 +111,11 @@ gostos daquele formato). As etapas leem os dois.
    - `ferramentas/` (produtos de terceiros, a tela ou o anúncio oficial): claude, openai, google, agentes, skills, voz,
      dev, redes (YouTube, Instagram, TikTok, Hacker News);
    - `noticias` e `broll`.
+4. **A tag do vídeo aprovado** (o projeto: `tags` no `edicao.json`, ou o "+ tag" no card da página Projetos): todo vídeo
+   aprovado sai com tag, como as mídias, sempre das que já existem (a barra de tags da página Projetos). O padrão é
+   `<produto>/<destino>`: o produto (`fia`, `fid`, `bf26`) e, quando o vídeo leva a algum lugar, o destino (`lp`, `vsl`,
+   `isca`, `lembrete`); um orgânico sem CTA leva só o produto. O formato que tem barra própria (`manychat`, `stories`)
+   é a tag dele. Os CTAs e as saídas ganham a tag do destino deles. Tag nova, pergunte ao criador.
 
 ## 3. Consolidar (a cada 5 vídeos aprovados)
 

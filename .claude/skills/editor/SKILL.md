@@ -56,7 +56,7 @@ frase curta (a resposta diz o que mudou: é o registro de onde saem os aprendiza
 Leia `etapas/12-final.md` e, **quando ele pedir**, exporte o final em 4K; um **CTA** aprovado é pré-exportado logo, sem perguntar (as saídas plugam esse final pronto) (num projeto com saídas, cada saída aprovada vira o seu arquivo em
 `final/`, ao lado do `.md`); a versão aprovada vai para a Calibragem. Depois **conclua o vídeo**
 (`etapas/14-concluir.md`): junte os aprendizados das revisões por área, mostre ao criador e grave só o que ele
-confirmar; faça a faxina do banco (apague o que você baixou e não foi usado, melhore a descrição do resto) e, quando
+confirmar; ponha as tags (no vídeo aprovado e nas mídias) e faça a faxina do banco (apague o que você baixou e não foi usado, melhore a descrição do resto) e, quando
 ele disser que acabou (sugira), encerre o projeto: fica só a última versão (`revisao.py encerrar`).
 
 ## Fluxo 4 — Biblioteca
