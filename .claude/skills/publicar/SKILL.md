@@ -78,7 +78,7 @@ ainda não é venda); **ISCA** atrai para uma isca digital.
 ## 4. Notion
 
 Base "Edição e Publicação - 2026", data source `3063ee05-7ee5-8134-a30f-000bbc36e56c` (título = chave `""`). Pelo MCP do
-Notion (ou pelo navegador do criador, se algum campo não aceitar). Em todos: **Responsável pela gravação, Copywriter e
+Notion (ou pelo navegador do criador, se algum campo não aceitar). Em todos: **Responsável (antes "Responsável pela gravação"), Copywriter e
 Editor = Rodrigo Tadewald** (`8147cc82-d2ee-4a16-ab14-0fec77b9f1a5`), **Prazo = hoje**, **Status = ✔️ Aguardando
 Publicação**, **Formato = 📽️ Vídeo**, **Perfil = Rodrigo**, **Link da Pasta = a pasta do Drive**. Antes de criar, procure
 o card pelo nome: se o criador já criou, preencha esse.
@@ -89,7 +89,7 @@ o card pelo nome: se o criador já criou, preencha esse.
   do Reels) e a **descrição** proposta com a skill `roteiro-to-descricao` (vault: `~/Obsidian Notes/3 Skills/`).
 - **Perpétuo** (template Criativo `3063ee05-7ee5-816f-b147-f12935ee6519`), um card por funil: título `[FUNIL]_NNN_Nome`
   (ex.: `[VSL]_1085_3 Níveis de IA`), ícone 💰; Produto (ex.: 🤖 FIA), Mídia 💰 Criativo, Etapa do Funil Topo;
-  **LP: Responsável pela gravação = Renata Lopes** (`90d28337-53cb-489e-8b69-6859640dede5`), sempre (Copywriter e
+  **LP: Responsável = Renata Lopes** (`90d28337-53cb-489e-8b69-6859640dede5`), sempre (Copywriter e
   Editor seguem Rodrigo). **Campanha**: LP em branco · VSL `[COD_PROD]_VSL_Nome_do_ad` · ISCA `[COD_PROD]_ISC_NNN_Nome_do_ad` (ex.:
   `[FIA]_ISC_932_5_plugins_Claude`); **Landing Page em branco** (o criador preenche).
   **VSL: uma campanha por ad**, `[COD_PROD]_VSL_Nome_do_ad` (ex.: `[FIA]_VSL_Strix_2`), e a **Landing Page da VSL da FIA
