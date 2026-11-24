@@ -989,7 +989,7 @@ def _skill(h, q):
         if rel == 'SKILL.md':
             titulo = 'SKILL.md · o passo a passo'
         out.append({'arquivo': rel, 'titulo': titulo, 'grupo': _grupo_skill(rel), 'mtime': arq.stat().st_mtime})
-    return sorted(out, key=lambda x: (ordem[x['grupo']], x['arquivo'] != 'SKILL.md', x['arquivo']))
+    return sorted(out, key=lambda x: (ordem[x['grupo']], x['arquivo'] not in ('SKILL.md', 'guias/padrao.md'), x['arquivo']))
 
 
 @rota('GET', r'/api/skill/(.+\.md)')

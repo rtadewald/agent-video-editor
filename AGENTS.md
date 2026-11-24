@@ -9,8 +9,8 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
 
 ## Estrutura
 
-- `.claude/skills/editor/`: `SKILL.md` (o passo a passo, curto), `guias/padrao.md` (o guia de estilo: o gosto do
-  criador, o único lugar dele; reescrito ao fim de cada vídeo), `etapas/` (o como de cada ferramenta, lido na hora),
+- `.claude/skills/editor/`: `SKILL.md` (o passo a passo, curto), `guias/` (os guias de estilo: o gosto do
+  criador, o único lugar dele; `padrao.md` para os vídeos, `carrossel.md` para os carrosséis; reescritos ao fim de cada um), `etapas/` (o como de cada ferramenta, lido na hora),
   `edicao.md` (o contrato do `edicao.json`).
 - `ferramentas/`: um script por etapa, `uv run ferramentas/<script>.py` (dependências no próprio arquivo, PEP 723).
   `base.py` (os caminhos) e `servidor.py` são o comum; `gravar.py` grava páginas e apps para os inserts (quadro a quadro
@@ -20,8 +20,8 @@ Responda em PT-BR, direto. Separe o que existe do que é plano.
   tempo, para gravar uma conversa real.
 - `app/`: o app de revisão. `uv run ferramentas/servidor.py` → http://localhost:8719/app/
 - `biblioteca/` (fora do git; copia-se entre máquinas, por cima): `exemplos/` (criador.md e, por categoria de vídeo, os
-  favoritos e os roteiros dirigidos, gerados pela Calibragem, para consulta), `aprendizados/carrossel.md` (o gosto dos
-  carrosséis; os aprendizados por área e as regras por categoria viraram o guia de estilo em 2026-11-23 e estão na Lixeira), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
+  favoritos e os roteiros dirigidos, gerados pela Calibragem, para consulta), (os aprendizados antigos e as regras por categoria viraram os guias
+  de estilo em 2026-11-23 e estão na Lixeira), presets, transições, sons, trilhas, LUTs, motions, banco de inserts, referências, códigos (os CTAs são projetos da categoria CTA) e
   `lixeira/` (o que se apaga no app: `base.para_lixeira`; restaurar ou apagar de vez pela página Lixeira).
 - `projetos/<slug>/` (fora do git): um vídeo por pasta.
 - `animacoes/<slug>/animacao.json` (fora do git): uma animação por pasta, as cenas na ordem (presets de

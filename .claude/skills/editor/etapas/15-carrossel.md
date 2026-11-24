@@ -5,8 +5,7 @@ o tipo de cada slide e a mídia. O criador só escolhe o **preset** e o **destaq
 versão nova) e comenta por slide. Mora em `carrosseis/<slug>/`: `carrossel.json` (nome, tipo, origem, pedido, preset, destaque), `entrada/` (os
 arquivos que ele subiu), `midia/`, `versoes/vN.json` (os slides), `revisoes/vN.json` e `final/` (o export).
 
-> **Antes de começar, leia `biblioteca/aprendizados/carrossel.md`** (se existir): as correções do criador em carrosséis
-> anteriores.
+> **O gosto está em `guias/carrossel.md`** (leia antes de começar). Aqui fica só o como.
 
 ## Começo ("Carrossel novo · <slug>")
 
@@ -21,42 +20,17 @@ uv run ferramentas/carrossel.py ver <slug>     # o pedido, a origem, os arquivos
   página deles (`/render/motion.html?preset=<id>&formato=…&valores=…`, com os valores do `edicao.json`) num instante,
   como o render faz, e ponha a foto com `midia`. Um vídeo que chegou já editado (bruto com legenda): recorte acima dela.
 - **Cru**: o pedido (briefing, copy, nota do Obsidian) e os arquivos de `entrada/`. Quando o pedido vier de uma skill de
-  copy de carrossel, siga a copy dela. A mídia que faltar, busque como num insert (`etapas/04-inserts.md`: banco,
-  captura do site, fontes oficiais), nunca inventada.
+  copy de carrossel, siga a copy dela. A mídia que faltar, busque com as ferramentas dos inserts (`etapas/04-inserts.md`: o banco,
+  `gravar.py`, a captura do site, as fontes oficiais), mas no formato do slide: a área da mídia, não o 9:16.
 - **De uma referência da Calibragem** (um Reels antigo, sem projeto): é um cru com o pedido apontando a referência
   (`biblioteca/referencias/<id>/`). O roteiro está em `palavras.json`; o que cada plano mostra está em `analise.json`
-  e `quadros/`. Dela só existe o vídeo editado (720p, legenda queimada): capture de novo o site, o GitHub e o print
-  (`etapas/04-inserts.md`), e recorte o `proxy.mp4` acima da legenda só quando não houver outro jeito. Números do vídeo
+  e `quadros/`. Dela só existe o vídeo editado (720p, legenda queimada): capture de novo o site, o GitHub e o print, e recorte o `proxy.mp4` acima da legenda só quando não houver outro jeito. Números do vídeo
   (estrelas, preços) podem ter mudado: confira e diga quando mudou.
 
 ## Escrever
 
-O carrossel é uma **conversa**, não um slide de apresentação: eu contando a história ou explicando o conceito inteiro,
-como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem por slide (o carrossel padrão): só
-**texto**, com **destaque**.
-
-- **Sem título.** Cada slide é um ou dois parágrafos corridos, na mesma letra; o que precisa saltar vai em
-  `**destaque**` (uma ou duas expressões por slide: a palavra, o número, a virada). São 4 presets (Notas, Grafite,
-  Código, Etiqueta), cada um com 5 destaques que o criador escolhe. No Notas ele também escolhe a cor do destaque (`cores`
-  no `carrossel.json`; a padrão de todos em `biblioteca/carrosseis.json`): não mexa.
-- **Em 1ª pessoa**: é o criador falando ("testei", "eu uso", "o meu processo"), na voz dele (`biblioteca/exemplos/
-  criador.md`), como no vídeo; nunca o narrador de fora ("ele testou", "o criador mostra").
-- **Explique de verdade**: o porquê, o como, o exemplo, o que deu errado. É mais texto que no Reels, não menos: de 3 a 6
-  frases por slide (o texto encolhe até 60% para caber; encolheu muito, divida em dois slides).
-- **Loops abertos**: o slide 1 é o gancho (uma promessa, uma pergunta, um resultado estranho) e não entrega tudo.
-  Cada slide fecha abrindo o próximo: uma pergunta que fica, um "só que…", um "mas o que mudou mesmo foi…", a resposta
-  que vem depois. Ninguém deve conseguir parar no meio. Feche o loop do gancho só perto do fim.
-- **Mídia só quando prova** o que o texto acabou de dizer (o print, o antes e depois, a tela em uso), como nos inserts;
-  um slide sem mídia é o normal, não a exceção. Nunca imagem para enfeitar. **Exceção: carrossel de uma skill,
-  ferramenta ou hack que vem de um Reels (a demo é o conteúdo): todo slide tem mídia de apoio**, a prova do que o texto
-  diz (os motions e inserts do vídeo ou da VSL do mesmo tema, o banco, o antes e depois); a capa leva a melhor delas,
-  a que mostra o benefício. Nele o texto é curto (2 ou 3 frases, cortadas da copy) para a mídia ficar grande, e a mídia
-  é a mais bonita que houver (os projetos top do Neo-Stitch, não um exemplo qualquer). _img-2-html v3–v4 · 2026-11-23_ Uma sessão com IA é print real do app
-  claro do Claude, nunca uma simulação nem o terminal preto. A pergunta de um seguidor que abre o carrossel é um
-  comentário do Instagram como aparece na lista, em card branco: foto e usuário borrados, o usuário na mesma linha do
-  texto, o coração à direita e "5 d · 1 curtida · Responder · •••" embaixo. Nunca a caixinha de pergunta dos Stories. _wordpress-em-2026 v5 · 2026-11-03_
-- O último fecha a conversa (a conclusão e o CTA, quando houver, com `acao`).
-- A **legenda** do post vai junto (no derivado, adapte a do vídeo).
+Escreva a conversa e a legenda do post seguindo o guia (`guias/carrossel.md`). No Notas o criador também escolhe a cor
+do destaque (`cores` no `carrossel.json`; a padrão de todos em `biblioteca/carrosseis.json`): não mexa.
 
 ## Os slides (`versoes/vN.json`)
 
@@ -86,7 +60,7 @@ como se estivesse falando com uma pessoa. Nada de título, frase solta e imagem 
 
 - `ajuste`: `cobrir` (padrão; corta para preencher) ou `conter` (inteira, sem moldura, do tamanho da mídia e com o bloco mídia + texto centralizado no slide: prints, gráficos e recortes).
   Imagem recortada (card, selo, elemento) é PNG com fundo transparente e `conter`: nunca uma caixa ou borda quadrada em
-  volta dela. _wordpress-em-2026 v5 · 2026-11-03_
+  volta dela (`guias/carrossel.md`).
 - `som`: o vídeo leva o áudio dele. Ligue quando a fala do trecho importa; gravação de tela e demonstração vão mudas.
 - `porque`: o porquê do slide (para você; o app não mostra).
 - `margens`: `{topo, lados, base}` em px do slide, as que o criador ajustou no app; sem elas, vale o padrão do carrossel
@@ -115,16 +89,23 @@ uv run ferramentas/carrossel.py ler <slug> [vN]       # cada comentário com o s
 uv run ferramentas/carrossel.py responder <slug> <vN> <id> --status aplicado|respondido|nao_aplicado --resposta "…"
 ```
 
-Aplique os comentários numa versão nova (`versao`) e responda cada um numa frase curta (o que mudou). Um `@BAN-111` / `@MOT-07` no comentário é a mídia ou o motion que ele marcou no banco: `codigo.py <código>`. O ponto marcado
+Leia todos os comentários antes de mexer e faça um plano que leve todos em conta (um comentário sobre um slide
+costuma valer para outros; como no `11-revisao.md`); o que ele disser que vale para sempre vai já para o guia, com o
+texto confirmado. Aplique numa versão nova (`versao`) e responda cada um numa frase curta (o que mudou). Um `@BAN-111` / `@MOT-07` no comentário é a mídia ou o motion que ele marcou no banco: `codigo.py <código>`. O ponto marcado
 (x, y em % do slide) diz onde ele olhou. O criador também edita o texto, o destaque e as margens direto no app, na própria vN (o
 `ler` diz em quais slides): a versão nova parte de `versoes/vN.json`, não do seu JSON antigo, e mantém o que ele
 escreveu.
 
 ## Aprovado
 
-O app exporta sozinho ao aprovar (e de novo se o preset ou o destaque mudar depois): `final/01.png`, `02.mp4`… na ordem de postar,
-a `legenda.txt` e a `copy.md` (o texto de cada slide, **c1**, **c2**…, com `[mídia]` onde ela entra). Depois, como no vídeo (`etapas/14-concluir.md`): junte as correções que valem para outros carrosséis,
-mostre ao criador e grave só o que ele confirmar. Separe as de copy das de edição:
-- **Copy** (o que o texto diz, argumento, tom, ordem): na skill de copy de carrossel do vault,
-  `~/Obsidian Notes/3 Skills/carrossel-builder/SKILL.md`, onde também entra o carrossel aprovado como exemplo.
-- **Edição** (mídia, prova visual, layout, cards, motions): em `biblioteca/aprendizados/carrossel.md`.
+O app exporta sozinho ao aprovar (e de novo se o preset ou o destaque mudar depois): `final/01.png`, `02.mp4`… na ordem
+de postar, a `legenda.txt` e a `copy.md` (o texto de cada slide, **c1**, **c2**…, com `[mídia]` onde ela entra).
+
+Depois, **reescreva o guia com o que o carrossel ensinou** (o mesmo espírito do `14-concluir.md`, seção 1): leia os
+comentários de todas as versões (`carrossel.py ler`) e o que ele disse no chat, ache a causa de cada correção e proponha
+a mudança no princípio, não o caso; tire o que não serve mais. Mostre ao criador o antes e o depois e grave só o que ele
+aprovar, separando:
+- **Copy** (o que o texto diz, argumento, tom, ordem): na skill do vault, `~/Obsidian Notes/3 Skills/carrossel-builder/SKILL.md`,
+  onde também entra o carrossel aprovado como exemplo;
+- **o resto** (escrita como conversa, mídia, prova visual, recortes): em `guias/carrossel.md`; um aprovado que serve de
+  modelo entra nas Referências dele.

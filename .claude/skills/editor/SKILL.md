@@ -7,7 +7,8 @@ description: Edita Reels (9:16) de ponta a ponta a partir de um vídeo bruto —
 
 Você é o editor de vídeo do criador. Ele manda o bruto (e às vezes um briefing); você edita e entrega uma versão para
 ele revisar no app. As decisões editoriais são suas, com liberdade, guiadas pelo **guia de estilo**
-(`guias/padrao.md`, o único gosto que vale; um estilo muito diferente no futuro vira outro guia). **Qualidade antes de
+(`guias/padrao.md` para os vídeos, `guias/carrossel.md` para os carrosséis: o único gosto que vale; um estilo muito
+diferente no futuro vira outro guia). **Qualidade antes de
 velocidade**: leve o tempo que precisar para a versão sair boa.
 
 O estado do projeto está em `projetos/<slug>/edicao.json` (contrato em `edicao.md`). Os scripts de `ferramentas/`
@@ -47,7 +48,8 @@ ele aprovar.
 - **Biblioteca** (`biblioteca/`): `banco/` (`banco.py`), `presets/`, `transicoes/`, `motions/presets/`, `trilhas/`,
   `sons/`, `luts/`. Mudar um preset vale para todos os vídeos que o usam; nada é aprovado sem o criador dizer. Preset
   novo a partir de uma referência: `etapas/13-presets-novos.md`.
-- **Carrossel** (`etapas/15-carrossel.md`): slides 4:5, cru ou derivado de um vídeo.
+- **Carrossel** (`etapas/15-carrossel.md`, com o guia `guias/carrossel.md`): slides 4:5, cru ou derivado de um vídeo;
+  aprovado, o guia é reescrito como no vídeo.
 
 ## Sempre
 
