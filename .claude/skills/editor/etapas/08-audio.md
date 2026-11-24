@@ -8,20 +8,11 @@ fala, em laço com crossfade e fade no fim). No final, −14 LUFS (o padrão do 
 
 ## O que você decide (em `edicao.audio`)
 
-- **`fundo`**: o id de uma trilha de `biblioteca/trilhas/catalogo.json`, pelo clima do vídeo (ou `null` = sem fundo):
-
-| id | clima · BPM |
-|---|---|
-| `lofi-piano` | calmo, focado · 86 · **tem voz** (0:15–0:19): evite |
-| `arpejo-suave` | leve, inspirador · 103 |
-| `pads-ambiente` | flutuante, reflexivo · 108 |
-| `chillhop` | descontraído · 92 · **tem voz** (0:05 e 1:49): evite |
-| `cinematico` | pensativo, com tensão leve · 86 |
-| `grave-tech` | focado, escuro · 103 |
-| `piano-pulsante` | energia · 152 |
-| `sneaky-snitch` | engraçadinho, malandro (pizzicato) · 2:16 · Kevin MacLeod, CC BY 4.0: **crédito na descrição** |
-| `fluffing-a-duck` | engraçadinho, bobo (sopros) · 1:07 · Kevin MacLeod, CC BY 4.0: **crédito na descrição** |
-
+- **`fundo`**: o id de uma trilha de `biblioteca/trilhas/catalogo.json` (ou `null` = sem fundo). São 39: as 9 primeiras
+  geradas (Lyria) e 30 do Pixabay (2026-11-23, licença livre, sem crédito, sem Content ID), cada uma com `clima`,
+  `energia` e `bpm`. Evite a `lofi-piano` e a `chillhop` (têm voz) e a `pads-ambiente` (o criador achou tosca); a
+  `sneaky-snitch` e a `fluffing-a-duck` pedem crédito na descrição (Kevin MacLeod, CC BY 4.0). Seis das do Pixabay
+  passaram em 2 de 3 checagens de voz (`sem_voz` no catálogo): ouça o trecho que vai entrar antes de usar.
   **Escolha uma trilha para cada vídeo**, pelo clima dele (o assunto, o ritmo da fala, a energia da abertura), ouvindo
   as candidatas, nunca a mesma por hábito: confira as dos últimos projetos (`grep -h '"fundo"' projetos/*/edicao.json`)
   e não repita nenhuma das 3 últimas. Na entrega, diga qual entrou e por quê, numa linha (ele troca no botão Música).
