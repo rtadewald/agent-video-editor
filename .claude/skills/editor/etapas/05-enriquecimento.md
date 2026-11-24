@@ -29,19 +29,10 @@ uv run ferramentas/render.py <slug> --camadas     # em segundo plano (run_in_bac
 `escolher` usa as favoritas que o criador marcou por **situação** (modo de tela × nº de mídias × proporção, em
 `biblioteca/presets/ordem.json`). Ele imprime a escolha de cada insert e o motivo.
 
-**Depois, modele cada insert pelas refs do plano** (`refs` no pedido, vindas da linha `refs:` da direção). O
-`escolher` só olha a situação (modo de tela × nº de mídias × proporção), não o que o momento pede: foi assim que entraram
-presets sem sentido. Para cada insert com refs:
-1. Abra cada ref: `uv run ferramentas/codigo.py REF-12·p4` dá o vídeo, o intervalo, a marcação e, se houver, o preset
-   que **nasceu daquele trecho** (`virou preset: PRE-17 …`). Olhe o trecho de verdade (4 a 6 quadros com o ffmpeg), não
-   só a descrição.
-2. **Se uma ref virou preset, use esse preset.** Senão, use o preset aprovado cujo efeito **reproduz o que a ref mostra**
-   (como a mídia entra, se fica parada ou tem zoom, como sai; `presets.py listar`), e afine com os `ajustes` (abaixo).
-3. **Se nenhum reproduz, fique no simples** (a mídia na área, sem efeito: "Corte seco") — nunca um preset vistoso que a
-   ref não pede. Anote no `porque` do plano a ref que modelou e o preset (ex.: `como REF-12·p4; PRE-17`), e diga na
-   entrega os inserts que ficaram simples por falta de preset (são candidatos a preset novo, `13-presets-novos.md`).
-
-Os inserts sem refs ficam com a escolha do `escolher` (o favorito da situação).
+O `escolher` só olha a situação (modo de tela × nº de mídias × proporção), não o que o momento pede: confira cada
+escolha contra o guia e troque o que não serve. Um plano com `refs` pode usar o preset que nasceu daquela ref
+(`codigo.py REF-…` diz `virou preset: PRE-…`). Sem preset que sirva, fique no simples ("Corte seco"), nunca num efeito
+vistoso que o momento não pede.
 
 ## O zoom
 
@@ -73,11 +64,12 @@ Edite `inserts.pedidos[i].enriquecimento` no `edicao.json`:
 Ex.: um print com texto pequeno pede `"zoom": "Mais"` e `"zona"` no ponto do texto; uma sequência rápida de 3 mídias
 num insert curto pede `"entrada": "Rápida"`.
 
-**A tela dividida padrão é o "ator embaixo" na janela** (o layout do Claude Code Apps: o insert ou o motion em cima,
-ele numa janela larga embaixo, com a cabeça saindo por cima, "meio recortado"). Todo insert de tela dividida leva
+**A tela dividida é a do Claude Code Apps 2** (o guia): ele numa janela larga embaixo, recortado, com a cabeça saindo
+por cima, e o insert por trás. Num insert, é assim: todo insert de tela dividida leva
 `enriquecimento.divisao: "atras"` e `enriquecimento.ator: {"modo": "janela", "escala": 0.75, "y": 1.0125, "topo": 0.103}`
 (o `presets.py escolher` já põe); todo motion de tela dividida vai em `formato: "vertical"` com o mesmo `ator` e
-`legenda_y: 0.87`, e a cena dele fica no espaço de cima (13–68% da altura). A metade de cima com ele cortado embaixo
+`legenda_y: 0.87`, e a cena dele fica no espaço de cima (13–68% da altura); no palco contínuo, o preset `vitrine`
+(`06-…`). É o mesmo visual nos três casos. A metade de cima com ele cortado embaixo
 (o `metade` antigo) só se o criador pedir. Precisa do recorte da silhueta: rode uma vez por projeto, em segundo plano,
 `uv run ferramentas/recorte.py <slug>`. _impeccable v4 c1 · 2026-11-23 (o criador: "esse deve ser o padrão a partir de agora")_
 

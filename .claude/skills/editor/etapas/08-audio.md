@@ -22,10 +22,9 @@ fala, em laço com crossfade e fade no fim). No final, −14 LUFS (o padrão do 
 | `sneaky-snitch` | engraçadinho, malandro (pizzicato) · 2:16 · Kevin MacLeod, CC BY 4.0: **crédito na descrição** |
 | `fluffing-a-duck` | engraçadinho, bobo (sopros) · 1:07 · Kevin MacLeod, CC BY 4.0: **crédito na descrição** |
 
-  Tutorial/ferramenta → `arpejo-suave`; notícia/novidade de IA → `arpejo-suave`, `piano-pulsante` ou
-  `grave-tech` (o criador achou a `pads-ambiente` tosca); opinião forte/polêmica → `cinematico`. Isso é ponto de partida, não regra fixa: **varie entre vídeos seguidos**.
-  Antes de escolher, veja a trilha dos últimos projetos (`grep -h '"fundo"' projetos/*/edicao.json` pelos mais
-  recentes) e não repita nenhuma das 3 últimas; o criador perguntou por que era sempre a mesma. _impeccable v9 c1 · 2026-11-23_
+  **Escolha uma trilha para cada vídeo**, pelo clima dele (o assunto, o ritmo da fala, a energia da abertura), ouvindo
+  as candidatas, nunca a mesma por hábito: confira as dos últimos projetos (`grep -h '"fundo"' projetos/*/edicao.json`)
+  e não repita nenhuma das 3 últimas. Na entrega, diga qual entrou e por quê, numa linha (ele troca no botão Música).
 - **A música do criador é travada.** Na revisão, ele escolhe a faixa e o volume no botão Música (ouve ao vivo; ao salvar,
   o app grava `audio.fundo`, `audio.niveis.fundo` e `audio.fundo_do_criador: true` no edicao.json e põe a música no
   proxy da versão: `render.py remixar`). Com `fundo_do_criador`, não mexa na faixa nem no `niveis.fundo` em nenhuma

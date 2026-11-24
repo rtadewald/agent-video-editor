@@ -8,8 +8,6 @@ backend/app/inserts.py `definir_midias` e motions.py `usar`). Os pedidos saem da
     uv run ferramentas/inserts.py listar <slug>
     uv run ferramentas/inserts.py ligar <slug> <plano> <banco_id> [<banco_id>…]     (até 12, na ordem)
     uv run ferramentas/inserts.py juntar <slug>        liga o que cada subagente achou (projetos/<slug>/inserts/<plano>.json)
-    uv run ferramentas/inserts.py briefs <slug> [--grupo 3] [--contexto "…"] [--todos]
-                                                       os briefs dos subagentes de inserts, em grupos (etapas/04-brief-inserts.md)
     uv run ferramentas/inserts.py motion-brief <slug> <plano> --preset <id-novo> [--duracao s] [--pedido "…"]
                                                        o brief do subagente de um motion novo (etapas/06-brief-motion.md)
     uv run ferramentas/inserts.py brief <slug> <nome> --tarefa "<texto ou arquivo>" [--areas inserts,motions|todas]
@@ -274,43 +272,6 @@ def _contexto(slug: str, extra: str | None) -> str:
     return ' '.join(partes)
 
 
-def briefs(slug: str, grupo: int, contexto: str | None, todos: bool) -> None:
-    """Um arquivo por grupo de `grupo` pedidos (sem mídia, ou `todos`), em ordem: o prompt de cada subagente é só
-    "Leia <caminho> e siga." Imprime os caminhos."""
-    edicao = ler(slug)
-    itens = (edicao.get('direcao') or {}).get('itens') or []
-    saida = saida_do(slug, edicao)
-    t = tempos(itens, saida)
-    planos = {i['id']: i for i in itens if i['camada'] == 'plano'}
-    pedidos = [x for x in (edicao.get('inserts') or {}).get('pedidos') or [] if x.get('plano') in planos and (todos or not x.get('midias'))]
-    pedidos.sort(key=lambda x: t[x['plano']][0])
-    if not pedidos:
-        print('nenhum insert sem mídia')
-        return
-    modelo = (ETAPAS / '04-brief-inserts.md').read_text(encoding='utf-8')
-    texto_contexto = _contexto(slug, contexto)
-    destino = _briefs(slug)
-    for velho in destino.glob('inserts-*.md'):
-        velho.unlink()
-    for n, g in enumerate((pedidos[k:k + grupo] for k in range(0, len(pedidos), grupo)), 1):
-        blocos = []
-        for x in g:
-            pl = planos[x['plano']]
-            a, b = t[x['plano']]
-            prop = '9:16' if x.get('formato') == 'vertical' and not _deitado(edicao) else '16:9'
-            blocos.append(f'- {x["plano"]} · {PLANOS.get(pl["tipo"], pl["tipo"])} · proporção {prop} · {num(b - a, 1)} s\n'
-                          f'  Fala: "{x.get("fala", "")}"\n  Mostrar: {pl.get("descricao") or "—"}'
-                          + (f' «{pl["texto"]}»' if pl.get('texto') else '')
-                          + (f'\n  Modelar como: {", ".join(pl["refs"])} (abra cada uma com `uv run ferramentas/codigo.py <ref>`: o trecho do vídeo de referência; '
-                             'procure um material que permita fazer na linha dela)' if pl.get('refs') else '')
-                          + (f'\n  (já tem: {", ".join(m["banco"] for m in x["midias"])})' if x.get('midias') else ''))
-        arq = destino / f'inserts-{n}.md'
-        arq.write_text(modelo.format(n=len(g), raiz=RAIZ, slug=slug, contexto=texto_contexto, pedidos='\n'.join(blocos),
-                                     categoria=_categoria(edicao), aprendizados=_aprendizados(edicao, ['inserts'])),
-                       encoding='utf-8')
-        print(f'{arq}  ({", ".join(x["plano"] for x in g)})')
-
-
 def motion_brief(slug: str, plano: str, preset: str, duracao: float | None, pedido_extra: str | None) -> None:
     """O brief do subagente que escreve um preset de motion novo para o plano. Imprime o caminho."""
     if not re.fullmatch(r'[a-z0-9-]{2,40}', preset):
@@ -375,11 +336,6 @@ if __name__ == '__main__':
     li.add_argument('plano')
     li.add_argument('ids', nargs='+')
     sub.add_parser('juntar').add_argument('slug')
-    br = sub.add_parser('briefs')
-    br.add_argument('slug')
-    br.add_argument('--grupo', type=int, default=3, help='pedidos por subagente')
-    br.add_argument('--contexto', help='uma frase sobre o vídeo, para os subagentes')
-    br.add_argument('--todos', action='store_true', help='também os que já têm mídia')
     mb = sub.add_parser('motion-brief')
     mb.add_argument('slug')
     mb.add_argument('plano')
@@ -405,8 +361,6 @@ if __name__ == '__main__':
         ligar(a.slug, a.plano, a.ids)
     elif a.cmd == 'juntar':
         juntar(a.slug)
-    elif a.cmd == 'briefs':
-        briefs(a.slug, max(1, a.grupo), a.contexto, a.todos)
     elif a.cmd == 'motion-brief':
         motion_brief(a.slug, a.plano, a.preset, a.duracao, a.pedido)
     elif a.cmd == 'brief':

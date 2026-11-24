@@ -18,7 +18,7 @@ menor que ~28 px no palco de 1080). Algo já na tela no 1º quadro: nunca o fund
 Nunca zoom na mídia dentro de um card ou quadro (ela fica parada, preenchendo-o); a aproximação, se houver, é no card
 inteiro ou na cena. Cada movimento visível tem o som certo e nenhum som fica sem movimento: motion.som(m, t) põe o PICO
 do som (o "ataque" do catálogo) em t; motion.som(m, t, dur) começa o som em t e corta em dur. Pop ou clique no instante
-em que o elemento aparece; whoosh no meio do deslocamento; desenho de linha com dur do traço; nunca um som de ataque
+em que o elemento aparece; whoosh baixo no meio de um deslocamento grande (não em todos); desenho de linha com dur do traço; nunca um som de ataque
 longo (> 0,5 s) sem dur. No teste, fotografe o instante de cada som e confira o movimento ali. No formato vertical, a cena ocupa a tela, centrada: nunca a metade de baixo (ou de cima)
 vazia. A legenda vai onde sobrar espaço (diga em que altura, em fração, para o plano receber `legenda_y`).
 Teste: abra render/motion.html?preset={preset}&formato={formato}&duracao={duracao}&tocar=1 com o servidor

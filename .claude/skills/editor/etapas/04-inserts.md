@@ -38,7 +38,11 @@ uv run ferramentas/inserts.py ligar <slug> <plano> <ids…> # liga as mídias es
    Registre a URL na descrição.
 4. **Captura de site** (`captura.py <url> --proporcao 9:16 --duracao <s> --projeto <slug>`), ou `gravar.py` quando a
    página precisa de ação. Sites que bloqueiam (Cloudflare): a doc ou o blog oficial. Site 3D/WebGL pesado sai no loader ou
-   preto: espere carregar (ou corte o começo) e confira o 1º quadro.
+   preto: espere carregar (ou corte o começo) e confira o 1º quadro. Print ou gravação de qualquer página (a captura, um
+   teste local, o Playwright): espere as animações de entrada terminarem (`document.getAnimations().forEach(a =>
+   a.finish())` e ~3 s) antes de fotografar; no meio da entrada a página sai apagada, meio transparente. Página deitada
+   que vai ocupar a tela: grave numa janela alta (ex.: 1280×1600, em 1,5x), que enche mais o 9:16 sem cortar nada.
+   _impeccable v9 c1 · 2026-11-23_
 5. **Animar uma imagem** com um modelo de vídeo (OpenRouter, `/api/v1/videos`: Veo, Kling, Seedance…), só para um
    conceito ou quando o criador pede.
 

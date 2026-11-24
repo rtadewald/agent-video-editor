@@ -43,7 +43,7 @@ uv run ferramentas/preparar.py "<caminho do bruto>" --nome "<nome curto do víde
 - Rosto do ator (MediaPipe) → `midia/rosto/f1.json` (enquadra o ator na tela dividida e centra o zoom do Full ator).
 - Voz limpa Leve (DeepFilterNet) → `midia/voz/f1_leve.wav`; nível da voz (`nivel_voz`, regula os sons).
 - `edicao.json` inicial com os padrões: look sem LUT, vinheta Leve, nitidez Leve, velocidade 1×, legenda palavra a palavra,
-  limpeza Leve, timbre Natural, sem trilha (você escolhe no Áudio).
+  limpeza Leve, timbre `encorpada`, sem trilha (você escolhe no Áudio).
 
 ## Vídeo já editado (só para plugar CTAs)
 

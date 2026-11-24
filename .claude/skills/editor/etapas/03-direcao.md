@@ -48,12 +48,8 @@ refs: REF-12·p4, REF-07·p31
   cada uma e diga quando troca. **Seja concreto:** quando já sabe, diga o material exato (a URL, o id do banco, o
   arquivo do apoio, o instante do vídeo, a região que importa: "o recorte do nome do repositório", "a linha 10 do
   SKILL.md"). Marcação vaga ("uma notícia sobre…") vira busca no escuro e insert fraco.
-- **`refs:` (opcional) as refs para modelar o plano**, quando um plano aprovado da Calibragem mostra bem o que você quer. Cada corte dos roteiros de exemplo e dos favoritos traz a `ref:` dele (`REF-12·p4`: o plano da
-  Calibragem, que o criador aprovou). Para cada plano seu, escolha **1 a 3 refs** dos exemplos cuja **fala** e **tipo**
-  mais se parecem com os dele: os favoritos primeiro, depois os vídeos "(revisado)". É por essas refs que a execução
-  (inserts, enriquecimento, motions) vai modelar o plano, em vez de escolher um preset ao acaso: escolha as que mostram
-  o que este momento pede, não só o mesmo tipo de plano. Sem nenhuma parecida, deixe sem a linha (a execução escolhe
-  livre). O `aplicar` confere se cada ref existe e avisa as que não.
+- **`refs:` (opcional)**: um plano aprovado da Calibragem que mostra bem o que você quer neste momento (`REF-12·p4`, de
+  `favoritos.md` e `roteiros/`). É consulta, não obrigação; o `aplicar` confere se a ref existe.
 - **Planos** (use estes nomes): Full ator · Full ator com lettering «texto» · Insert tela cheia · Motion tela cheia ·
   Tela dividida · insert · Tela dividida · motion · Comentário + insert + ator «comentário».
 - **Elementos** (na marcação, com "+"): + palavra manychat «PALAVRA» · + caixinha de perguntas «pergunta» ·

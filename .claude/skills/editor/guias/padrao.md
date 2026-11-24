@@ -26,10 +26,11 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
 
 ## A tela: o 9:16 inteiro
 
-- **O insert ocupa a tela.** O padrão é a mídia em 9:16 ocupando a tela toda. Na tela dividida, o padrão é o modelo do
-  Claude Code Apps 2 (aprovado em 2026-11-23): o insert em 9:16 por trás de tudo e o ator embaixo, numa janela larga com
-  a cabeça saindo por cima (`ator: {modo: "janela", escala: 0.75, y: 1.0125, topo: 0.103}`, `legenda_y: 0.87`,
-  preset `vitrine` com `forma: "tela"`). O que importa fica nos ~65% de cima; a janela dele cobre o resto.
+- **O insert ocupa a tela.** O padrão é a mídia em 9:16 ocupando a tela toda.
+- **A tela dividida é a do Claude Code Apps 2** (aprovada em 2026-11-23): o insert por trás de tudo e ele embaixo, numa
+  janela larga, recortado, com a cabeça saindo por cima. O que importa fica nos ~65% de cima; a janela cobre o resto.
+  É a única tela dividida (a meio a meio antiga, só se ele pedir); como montar: `05-enriquecimento.md` (um insert) e
+  `06-motions-e-elementos.md` (motion e palco contínuo).
 - **Nada de espaço vazio que não precisava**: faixa 16:9 ou cartão 1:1 boiando no meio do preto é o erro clássico. Se a
   mídia é deitada, grave de novo em pé, ou recorte em 9:16 (em 2x, nítido) a área que importa. Horizontal nunca vira
   9:16 cortado no meio do conteúdo.
@@ -80,15 +81,19 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
 ## Som
 
 - **Som preso ao que acontece**: o clique quando há clique, a digitação enquanto as letras aparecem, um pop quando algo
-  surge. Nenhum som sem movimento visível; nada que entra muda sem som. Nunca whoosh nem riser.
-- Trilha só instrumental; música e sons de apoio baixos, a voz na frente, com o timbre `encorpada`.
+  surge. Nenhum som sem movimento visível; nada que entra muda sem som. Whoosh e riser podem, baixos e de vez em
+  quando, nunca em toda troca.
+- Trilha só instrumental, escolhida para o clima de cada vídeo (nunca a mesma por hábito); música e sons de apoio
+  baixos, a voz na frente, com o timbre `encorpada`.
 
 ## Fala, cortes e texto na tela
 
 - A fala nunca é reescrita. Cortes colados na voz, sem pausa (exceção: ênfase na frase final); a última tentativa
   válida de cada trecho; repetição só se for ênfase.
-- Card, lettering, preço, nome: entram na palavra falada. Lettering grande só para a palavra do ManyChat; sobre o ator
-  ou um insert real, nunca sobre um motion com texto.
+- Card, lettering, preço, nome: entram na palavra falada. Lettering grande para a palavra do ManyChat; o lettering
+  `elegante` (a 1ª palavra em negrito e o resto em itálico fino, subindo devagar no canto de cima, como o "2M views" da
+  referência) para o termo-chave do vídeo, com estratégia: uma ou duas vezes por vídeo. Sobre o ator ou um insert real,
+  nunca sobre um motion com texto.
 - A legenda nunca cobre o conteúdo; some sob um lettering ou um motion com texto no meio. "Claude", não "Cloud".
 
 ## Por formato (só o que muda)
@@ -115,5 +120,5 @@ Qualidade vem antes da velocidade. Nenhuma versão sai sem você ter assistido a
 
 Janelas do Mac com zoom nas caixas · tela dividida 70/30 · estúdio branco em 3D · vários cards na tela ao mesmo tempo ·
 "passeio de câmera" 3D num app · zoom no rosto na tela dividida · zoom sem detalhe a mostrar · entradas deslizando ·
-whoosh e riser · trilha com voz · o terminal preto como "Claude Code" · caixa de prompt genérica · imagem gerada fingindo
+whoosh e riser altos ou em toda troca · trilha com voz · o terminal preto como "Claude Code" · caixa de prompt genérica · imagem gerada fingindo
 produto · câmera lenta esticada · página poluída ou rolando rápido · sites demais trocando rápido.

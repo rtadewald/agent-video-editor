@@ -19,6 +19,20 @@ o apaga sozinho. Se terminar sem render novo (só respostas), rode `revisao.py p
 Aplique só os `pendente`: os já respondidos são de rodadas anteriores. Se ele citou um bloco ("no B3"), leia com
 `--bloco B3`, mas os pendentes de outros blocos também valem (ele comentou e avisou); na dúvida, pergunte.
 
+## Primeiro: ler tudo e planejar
+
+1. **Leia todos os pendentes antes de mexer em qualquer coisa** (com os anexos): uns valem para o vídeo inteiro ("menos
+   de 90 s", "o zoom está estranho", "ocupa a tela") e mudam o que os outros pedem.
+2. **Faça um plano de ação que leve todos em conta**, antes de aplicar o primeiro: o que muda no vídeo todo (cortes,
+   formato, estilo), o que cada comentário pede, onde mais o mesmo pedido se aplica (um comentário sobre um tipo de
+   erro é sobre todas as cenas com esse erro: "mesma coisa aqui… mesma coisa aqui" é sinal de que isso faltou), a ordem
+   (o que muda os tempos primeiro) e o que precisa de material novo. Escreva o plano (curto) antes de começar.
+3. **Só então aplique**, seguindo o plano e no ritmo de um bloco por render (abaixo).
+- O guia (`guias/padrao.md`) costuma já ter a resposta; a correção não pode criar outro erro que ele já descreve.
+- Quando o criador diz que algo vale para sempre ("sempre", "nunca mais", "regra geral"), confirme com ele o texto e
+  ponha no guia já. O resto espera a conclusão (`14-concluir.md`), que lê as respostas de todas as revisões.
+- Depois de aplicar, revise a versão nova com olho crítico (`10-render.md`), não só os pontos comentados.
+
 ## Blocos
 
 O app divide o corpo de todo vídeo em blocos de ~30 s (B1, B2…; nenhum abaixo de 15 s, um vídeo curto é um só), cada um começando numa palavra: o mesmo bloco continua o mesmo
@@ -39,7 +53,7 @@ Blocos: B1 0:00,0–0:31,3 ✓ finalizado, B2 0:31,3–1:00,4, B3 1:00,4–1:30,
 O render monta o vídeo em trechos de ~20 s guardados no cache (`10-render.md`): uma versão nova só remonta os trechos
 em que algo mudou, e sai em ~1 min. Por isso:
 
-- **Renderize logo depois de aplicar os comentários de cada bloco**, sem juntar vários blocos num render só no fim: o
+- **Com o plano feito, renderize logo depois de aplicar os comentários de cada bloco**, sem juntar vários blocos num render só no fim: o
   criador revisa o bloco pronto enquanto você faz o próximo. Avisou "obs no B10"? Aplique o B10, renderize, responda,
   e só então passe ao próximo bloco que ele comentou.
 - **Vários projetos comentados** (os CTAs, os Reels de um bloco só): o mesmo ritmo **por projeto**, um de cada vez (na
@@ -110,20 +124,6 @@ num CTA à parte, N é a versão do projeto do CTA que aquela prévia plugou (Fi
 sobe quando a fala dele muda. Por isso, depois de renderizar o CTA, **renderize o corpo de novo** (a versão nova só
 remonta as saídas, em segundos): sem isso a prévia continua com o CTA anterior e o criador não vê a correção. Responda
 os comentários do Final na revisão do corpo (é onde eles estão), como os de qualquer bloco. _design-por-imagem v27 · 2026-10-28_
-
-## Ler tudo, pensar no todo
-
-1. **Leia todos os pendentes antes de mexer em qualquer coisa** (com os anexos): uns valem para o vídeo inteiro ("menos
-   de 90 s", "o zoom está estranho", "ocupa a tela") e mudam o que os outros pedem.
-2. **Faça um plano de ação que leve todos em conta**, antes de aplicar o primeiro: o que muda no vídeo todo (cortes,
-   formato, estilo), o que cada comentário pede, onde mais o mesmo pedido se aplica (um comentário sobre um tipo de
-   erro é sobre todas as cenas com esse erro: "mesma coisa aqui… mesma coisa aqui" é sinal de que isso faltou), a ordem
-   (o que muda os tempos primeiro) e o que precisa de material novo. Escreva o plano (curto) antes de começar.
-3. **Só então aplique**, seguindo o plano.
-- O guia (`guias/padrao.md`) costuma já ter a resposta; a correção não pode criar outro erro que ele já descreve.
-- Quando o criador diz que algo vale para sempre ("sempre", "nunca mais", "regra geral"), confirme com ele o texto e
-  ponha no guia já. O resto espera a conclusão (`14-concluir.md`), que lê as respostas de todas as revisões.
-- Depois de aplicar, revise a versão nova com olho crítico (`10-render.md`), não só os pontos comentados.
 
 **O look é do criador.** Na revisão, o botão **Look** do app prova LUT, intensidade e vinheta em 3 s do bruto e, ao
 aplicar, grava `edicao.look` e renderiza uma versão nova sozinho (sem comentários). Não mude o look de volta: se uma

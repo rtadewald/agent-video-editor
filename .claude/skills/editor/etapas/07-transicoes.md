@@ -31,7 +31,9 @@ Sem escolha, o corte usa a 1ª favorita do par. `variar` dá variedade sem sair 
 
 Em `edicao.transicoes["<plano que entra>"] = {"id": "<transição>", "par": "<tipo_de>><tipo_para>"}` (o par com os tipos
 exatos dos dois planos; `transicoes.py variar` mostra). Use para dar peso a um momento (virada do vídeo → `brilho-branco`
-ou `zoom-desfoque`) ou para limpar excesso (três efeitos seguidos cansam: troque o do meio por `corte-seco`). Para voltar
+ou `zoom-desfoque`) ou para limpar excesso (três efeitos seguidos cansam: troque o do meio por `corte-seco`). Whoosh e
+riser podem, baixos e de vez em quando: depois do `variar`, confira que não caíram em trocas seguidas
+(`niveis.transicoes` abaixo de 0 se soarem altos). Para voltar
 ao padrão, apague a chave.
 
 ## Som em toda entrada

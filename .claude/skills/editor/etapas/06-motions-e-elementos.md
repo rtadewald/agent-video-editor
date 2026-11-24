@@ -22,10 +22,11 @@ para os novos. Os campos de cada um estão no JSON do topo do `.html`. Alguns do
 
 | id | nome | campos | fundo sugerido |
 |---|---|---|---|
-| `claude-code` | Janela do Claude Code | `prompt` (o que é digitado) | `verde_claro` |
+| `claude-desktop` | O app desktop do Claude (claro): a janela abre e dá oi, ou o prompt é digitado e enviado | `fase` (abre · digita), `saudacao`, `prompt` | — |
 | `lettering` | Lettering com destaque | `texto`, `destaque` (a última palavra, em destaque) | `chuva` |
-| `prompt` | Caixa de prompt | `prompt` | `verde_claro` |
 | `site` | Barra de busca | `url` | `nevoa` |
+
+(O `claude-code`, terminal, e o `prompt`, caixa genérica, estão nos recusados do guia: não use.)
 
 ```bash
 uv run ferramentas/inserts.py motion <slug> <plano> <preset> --valores '{"prompt": "…"}' [--fundo verde_claro]
@@ -84,7 +85,9 @@ renderer com `preserveDrawingBuffer: true`. O `EffectComposer` recebe um alvo co
 o `antialias` do renderer e as arestas finas saem serrilhadas (o criador reclamou na onda 1 dos motions em 3D,
 2026-11-17). O pixel ratio é `MOTION.pr || Math.min(2, devicePixelRatio)`: na galeria do app o `motion.html` passa
 o `pr` do tamanho em que o palco aparece (sem ele, o modal desenhava 2160×3840 a cada quadro e travava); no render vale o
-do navegador. Texto em HTML por cima, projetado da cena depois de
+do navegador. Card que surge com opacidade (transparente no começo) não grava profundidade até ficar opaco
+(`material.depthWrite = opacidade > 0.98`): senão, no quadro em que surge, ele tapa o que está atrás com um buraco
+preto (a grade do impeccable, 2026-11-23). Texto em HTML por cima, projetado da cena depois de
 `cam.updateMatrixWorld()`. O enquadramento é calculado pela largura do grupo e pelo fov, e a névoa acompanha a
 distância da câmera.
 Depois ligue com `inserts.py motion`. Animação mais elaborada que isso: troque o plano (insert real ou Full ator) e
