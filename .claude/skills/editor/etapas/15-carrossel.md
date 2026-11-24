@@ -36,6 +36,11 @@ isso. É esta parte que se reescreve a cada carrossel aprovado ("Aprovado", abai
 
 - **Mídia prova o que o texto acabou de dizer** (o print, o antes e depois, a tela em uso). Um slide só de texto é o
   normal; nunca imagem para enfeitar.
+- **Mídia grande, sem moldura.** Quando entra, ela ocupa a largura do slide, direto no fundo, sem card de vidro, caixa ou
+  borda em volta; o texto encolhe para ela crescer. Mídia pequena num slide cheio de texto não prova nada no celular.
+- **A mídia mostra exatamente a frase.** O vício citado é o site com aquele vício; a ferramenta citada é ela em uso.
+  Transformação ou comparação mostra os dois lados na mesma mídia (a imagem e o wireframe gerado dela; a referência ao
+  lado do resultado). _img-2-html · 2026-11-23_
 - **Carrossel de skill, ferramenta ou hack que vem de um Reels** (a demo é o conteúdo): todo slide tem mídia, a prova do
   que ele diz, e o texto é curto (2 ou 3 frases) para ela ficar grande. A capa leva a melhor, a que mostra o benefício.
   A mídia é a mais bonita que houver (os projetos top do criador, não um exemplo qualquer).
